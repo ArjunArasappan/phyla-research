@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phyla-flomo"
+version = "0.1.1"
+description = "Compact FloMo research implementation with CPU smoke and optional Wan/LTX/ManiSkill backends"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24,<2", "torch>=2.2", "PyYAML>=6", "h5py>=3.8"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+wan = ["diffusers>=0.33", "transformers>=4.45", "safetensors>=0.4", "accelerate>=0.30", "sentencepiece", "ftfy", "easydict"]
+sim = ["mani-skill>=3.0.0b20", "gymnasium", "imageio[ffmpeg]"]
+video = ["imageio[ffmpeg]"]
+ltx = ["diffusers==0.33.1", "transformers==4.49.0", "safetensors>=0.4", "accelerate>=0.30,<2", "sentencepiece", "ftfy"]
+
+[project.scripts]
+flomo = "flomo.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["flomo*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

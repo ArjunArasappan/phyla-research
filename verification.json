@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-08",
+  "source_files": {
+    "pyproject.toml": "0a0bcf08b07198d94dc3d377bde3f30a3431c74210983c192f15877a62fda41e",
+    ".gitignore": "4c5a04b9807e155e2b984951ddc1853466d99294e8026614a55905611a10f5df",
+    "README.md": "68c03029f97d2d2b2251bd81eb2b2a8eeb8b45fd6a54e98c3bf9290a4a00af98",
+    "requirements-cpu.txt": "63381bc2ee8e00502a1681afe07303badcd3fba06cf71367e9ffa63f59c6a304",
+    "VERIFICATION.md": "2286364bb3ac868d0b067592abf08d05c12ab1f250fa4e8d1ab52a89f9ecfeda",
+    "flomo/__init__.py": "4d9ee52e0f13710e4b1b9fdf44d4075302e814538e4ff2e1d4881e8314a2d597",
+    "flomo/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "flomo/config.py": "ffd8735a42154d9de529ca26406d873ee28be78ee3551e19565a8bc9af837998",
+    "flomo/geometry.py": "4c2422896a9fb70b14f639f6e8c0a2cbdca6d17ff0d605e9eb60d052c563425f",
+    "flomo/data.py": "15d5b4ef957c5c5490a439700180e2f145ddbc4150c59c9749cab24441ecd202",
+    "flomo/model.py": "ac4e410fbcd2792109677ea30c9852185e104b05e0e2aaa47cce52778cabe317",
+    "flomo/train.py": "b4f5d98d647bcc9c641186e636162d345824759bab77d915250a1fdd696ed534",
+    "flomo/policy.py": "8bf0e2ccaac410e1372acb921f9777daa45330ebb7792f5818607ee74a8618da",
+    "flomo/sim.py": "f09a1e6597e8fe312579dd9840ca9816c440edca399d707677030777824293cc",
+    "flomo/cli.py": "761980954fa71474e8b64d20e73d20dd282664ff5ea24c9ef8713e12ce8cf4d5",
+    "configs/smoke.yaml": "ca060c066213af164d47239513b64ddb1ffe86e9f3a284b75331b1fd0735424b",
+    "configs/midtrain.yaml": "46afab83e79cc5f0de9107555f8845b0ec8e889b04730949f1a9c78139c98d91",
+    "configs/sft.yaml": "6bbfcc57251cc012062527262705ef450d043ac969df3cd6784ab1f15e9a8bf9",
+    "configs/bc.yaml": "d75c86f6f49af98bb1d377ead503de355f724a0c84568cfaeddd791ba436e7a2",
+    "configs/ltx_midtrain.yaml": "ab4c8e280c2aefb171313262a6ae1407a1a9aacfd132eb124fcf59d415874280",
+    "configs/ltx_sft.yaml": "86aeb7774405fd968568aaad49d8c2ed61e3a1275f1cbeff03d9b33b02004e52",
+    "tests/conftest.py": "50e6fdcf7dc1d8a1774ffce9353bdba37f6bcdaf0ad9f4e2b3e0e2d443b192d2",
+    "tests/test_geometry.py": "12b076cc6f210c944c14169382ba14abbd9aca8baac451f1eb9638ba09bbd3ef",
+    "tests/test_model.py": "2a50603f5bcfecaaed7e8d1a4ea5513a1aa9ab8431b6f7391b3e46f7eb3fe2e3",
+    "tests/test_pipeline.py": "02742cc7803d2e769052dae6ba1195b03b5cee880960034848b1d3eb238bed17",
+    "tests/test_ltx.py": "f35abb2952183d32acb883e75145e306dfa4e0b1271d0fb2ac2dc750e2d99099",
+    "tests/fixtures/ltx_096_shapes.json": "188665ca16407dd5ff4e6de361e34b75427b92d8aa5078dbd524d41ae2c5526c",
+    "tests/fixtures/ltx_095_transformer.json": "ce265f6df6494b12121082ce148b2c580f8840921614768fdc1fc921a29685a2",
+    "tests/fixtures/ltx_095_vae.json": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb"
+  },
+  "source_mirror_exact_match": true,
+  "pytest": {
+    "passed": 48,
+    "seconds": 20.6,
+    "network": "offline"
+  },
+  "ltx_tests": 18,
+  "checkpoint_header": {
+    "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+    "bytes": 144648,
+    "tensor_schemas": 944,
+    "strict_meta_conversion": "passed"
+  },
+  "wheel": "dist/phyla_flomo-0.1.1-py3-none-any.whl",
+  "wheel_sha256": "bff4a489cc787a4f7a437dc8000b9e55cb054cb4c523a71d074243a131ea8215",
+  "gpu_unverified": [
+    "full numeric Wan/LTX checkpoint conversion and loading",
+    "CUDA training and memory/throughput",
+    "SpatialTracker CUDA prediction",
+    "ManiSkill robot rollouts and control"
+  ],
+  "previous_verification": {
+    "date": "2026-10-07",
+    "source_files": {
+      "pyproject.toml": "54b451ece1ebd8e19949688575d1dd447eb0770452633911d8635c1a1b85c531",
+      ".gitignore": "4c5a04b9807e155e2b984951ddc1853466d99294e8026614a55905611a10f5df",
+      "README.md": "1f8b0f145a767debfbfa82386053dfe1fe3a25aa10cb6501ba5e26fae06ab289",
+      "requirements-cpu.txt": "63381bc2ee8e00502a1681afe07303badcd3fba06cf71367e9ffa63f59c6a304",
+      "flomo/__init__.py": "4d9ee52e0f13710e4b1b9fdf44d4075302e814538e4ff2e1d4881e8314a2d597",
+      "flomo/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "flomo/config.py": "33df6af39b8e2eb5a9cce91427d41092b57d5cb7e225caf830f48909935f18ce",
+      "flomo/geometry.py": "4c2422896a9fb70b14f639f6e8c0a2cbdca6d17ff0d605e9eb60d052c563425f",
+      "flomo/data.py": "aa1b19b1c78139cb6cf33d712f32a6beab4233f6f1badda75eb5ffe7c29bc910",
+      "flomo/model.py": "15a9570ef465c974329044f19c3cdb7b27e1016f98051431c2134c6034ab9bf6",
+      "flomo/train.py": "24c1c66e6935483d1eb1ad5c70dc3d79fc793f3bfe4efbab2b3a429825327707",
+      "flomo/policy.py": "a00a7fef8ea82f6481d453319e6ce8e6a8f1a781a5ac260a876c19bd6b0b7f8f",
+      "flomo/sim.py": "f09a1e6597e8fe312579dd9840ca9816c440edca399d707677030777824293cc",
+      "flomo/cli.py": "10d01fe1c974d5f79bd311612412d7b6adde545d18c53a004b2b94552c580da3",
+      "configs/smoke.yaml": "ca060c066213af164d47239513b64ddb1ffe86e9f3a284b75331b1fd0735424b",
+      "configs/midtrain.yaml": "46afab83e79cc5f0de9107555f8845b0ec8e889b04730949f1a9c78139c98d91",
+      "configs/sft.yaml": "6bbfcc57251cc012062527262705ef450d043ac969df3cd6784ab1f15e9a8bf9",
+      "configs/bc.yaml": "d75c86f6f49af98bb1d377ead503de355f724a0c84568cfaeddd791ba436e7a2",
+      "tests/conftest.py": "50e6fdcf7dc1d8a1774ffce9353bdba37f6bcdaf0ad9f4e2b3e0e2d443b192d2",
+      "tests/test_geometry.py": "12b076cc6f210c944c14169382ba14abbd9aca8baac451f1eb9638ba09bbd3ef",
+      "tests/test_model.py": "2a50603f5bcfecaaed7e8d1a4ea5513a1aa9ab8431b6f7391b3e46f7eb3fe2e3",
+      "tests/test_pipeline.py": "02742cc7803d2e769052dae6ba1195b03b5cee880960034848b1d3eb238bed17"
+    },
+    "source_mirror_exact_match": true,
+    "pytest": {
+      "passed": 30,
+      "seconds": 4.74
+    },
+    "smoke_report": "runs/cpu_smoke_final/report.json",
+    "ddp_checkpoint": "runs/cpu_ddp_final/step_000003.pt",
+    "attention": "runs/cpu_smoke_final/attention.json",
+    "wheel": "dist/phyla_flomo-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "98efadffcedb7ed1494f25b8bd2eddc8e5996ab8a53352592870330a505e86b7",
+    "unverified": [
+      "real Wan checkpoint loading and CUDA training",
+      "SpatialTracker CUDA prediction",
+      "ManiSkill sensor/body frame alignment and native robot execution",
+      "large-scale transfer and paper performance"
+    ]
+  },
+  "legacy_tiny_bundle_reload_and_predict": "passed"
+}

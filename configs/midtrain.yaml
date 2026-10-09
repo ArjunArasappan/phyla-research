@@ -1,0 +1,64 @@
+# GPU template. Pin revisions and paths before running; no weights auto-download.
+model:
+  backend: wan
+  checkpoint: weights/Wan2.2-TI2V-5B
+  upstream: third_party/Wan2.2
+  upstream_commit: ""
+  checkpoint_revision: ""
+  image_size: 256
+  latent_channels: 48
+  spatial_stride: 16
+  text_dim: 4096
+  text_length: 512
+  width: 3072
+  layers: 30
+  heads: 24
+  horizon: 16
+  action_dim: 7
+  views: 1
+  targets: [flow, action]
+  lora_rank: 64
+  lora_alpha: 128
+  gradient_checkpointing: true
+data:
+  raw: data/maniskill/raw
+  prepared: data/maniskill/prepared
+  provider: tracker
+  tracker_upstream: third_party/SpaTrackerV2
+  tracker_revision: ""
+  tracker_mode: monocular
+  grid_size: 64
+  stride: 16
+  # Add actual source IDs with explicit weights, e.g. ego / panda_demos / panda_play.
+  source_weights: {}
+train:
+  stage: midtrain
+  device: cuda
+  precision: bf16
+  output: runs/midtrain
+  steps: 14000
+  batch_size: 2
+  accumulation: 32
+  lr: 0.00028
+  losses: {flow: 1.0, action: 0.1, video: 0.0}
+  save_every: 500
+  validate_every: 100
+eval:
+  backend: maniskill
+  embodiment: panda_native_ee_delta_pose
+  env_id: PickCube-v1
+  robot: panda
+  control_mode: pd_ee_delta_pose
+  control_hz: 20
+  camera_names: [base_camera]
+  device: cuda
+  sim_backend: physx_cuda
+  sampler: unipc
+  sampling_steps: 10
+  shift: 5.0
+  execute_steps: 16
+  episodes: 100
+  num_envs: 4
+  horizon: 200
+  instruction: pick up the cube
+  output: runs/eval_midtrain

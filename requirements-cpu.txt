@@ -1,0 +1,6 @@
+# Tested laptop environment (Python 3.10, Intel macOS); not a CUDA lockfile.
+torch==2.2.2
+numpy==1.26.4
+PyYAML==6.0.3
+h5py==3.16.0
+pytest==9.1.1

@@ -1,0 +1,22 @@
+# Direct chunk-MSE learnability baseline; reuse the deterministic toy prepared set.
+model:
+  backend: tiny
+  architecture: bc
+  targets: [action]
+data:
+  raw: data/toy/raw
+  prepared: data/toy/prepared
+train:
+  stage: sft
+  device: cpu
+  precision: fp32
+  output: runs/toy_bc
+  steps: 500
+  lr: 0.001
+  batch_size: 8
+  losses: {action: 1.0}
+eval:
+  backend: toy
+  embodiment: toy_point
+  camera_names: [front]
+  output: runs/toy_bc_eval
