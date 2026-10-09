@@ -1,0 +1,38 @@
+{
+  "total_scientific_file_bytes": 1257212968,
+  "groups": {
+    "simulator-pilot-v2/cotracker3_gt_geometry": {
+      "jobs": 24,
+      "bytes": 217146617
+    },
+    "simulator-pilot-v2/delta_gt_geometry": {
+      "jobs": 24,
+      "bytes": 214810891
+    },
+    "simulator-pilot-v2/gt": {
+      "jobs": 24,
+      "bytes": 67960645
+    },
+    "simulator-pilot-v2/gt_uv_gt_front_depth": {
+      "jobs": 24,
+      "bytes": 138339823
+    },
+    "simulator-pilot-v2/spatrackerv2_gt_geometry_bf16": {
+      "jobs": 24,
+      "bytes": 216181242
+    },
+    "simulator-pilot-v2/spatrackerv2_gt_geometry_fp32_math": {
+      "jobs": 24,
+      "bytes": 215008655
+    },
+    "simulator-pilot-v2/zero": {
+      "jobs": 24,
+      "bytes": 56301122
+    },
+    "simulator-context33-v1/gt": {
+      "jobs": 24,
+      "bytes": 131463973
+    }
+  },
+  "base_weights_included": false
+}
