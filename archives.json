@@ -1,0 +1,88 @@
+{
+  "archives": [
+    {
+      "name": "exp02-practical-increment.tar.gz",
+      "bytes": 411037555,
+      "sha256": "cb897c61fcf1fb9f8d3df456960f762c2c691a16e2a454db9b8c1373648ea1ee",
+      "chunks": [
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0000.part",
+          "bytes": 47185920,
+          "sha256": "2e1e89a84a9d3a079bbaf1664db7e503823081f8047e06f4e9895150644d2563"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0001.part",
+          "bytes": 47185920,
+          "sha256": "79fdabab7646e84ee9186c8d5604442e436e291ec27255b136c173bba49f337c"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0002.part",
+          "bytes": 47185920,
+          "sha256": "ea5377548c52edebe79c045edecbd179f9ab72a4bc3816b0786317bafdee8a01"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0003.part",
+          "bytes": 47185920,
+          "sha256": "196f6f36e0c0b1423d636820f79670abac9fbf6b2bfdc21fd8af4f3d83b0eb88"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0004.part",
+          "bytes": 47185920,
+          "sha256": "fea36450924188dad6b76878ab8dd438096b55a047abed04289e7052924b45a7"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0005.part",
+          "bytes": 47185920,
+          "sha256": "85c1df1351c1d234e75f4da58eab9ecd278fd75b84bc91700bd475a7003e6c1a"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0006.part",
+          "bytes": 47185920,
+          "sha256": "49dd73aad6f5d9c6688c03721337a3f123442ea39d1752b3a0bb537b53ab62de"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0007.part",
+          "bytes": 47185920,
+          "sha256": "9b2f9388fa6507574450a060d36041a8a79191e4e140f52c79db5a9850836d98"
+        },
+        {
+          "path": "chunks/exp02-practical-increment.tar.gz/0008.part",
+          "bytes": 33550195,
+          "sha256": "bfe16baef99f3baf62bb512ed1506872af825a980da209f1b8902436964c45ff"
+        }
+      ]
+    },
+    {
+      "name": "exp02-textured-increment.tar.gz",
+      "bytes": 201704175,
+      "sha256": "bef21b8cf34f0af69e5d483e880d7f433365c1923408801cd459831830b8361b",
+      "chunks": [
+        {
+          "path": "chunks/exp02-textured-increment.tar.gz/0000.part",
+          "bytes": 47185920,
+          "sha256": "b62b53ab711f9f83de33caf3b5684f11c5f5ac3b4030959a06cb09c279d68684"
+        },
+        {
+          "path": "chunks/exp02-textured-increment.tar.gz/0001.part",
+          "bytes": 47185920,
+          "sha256": "bc61b8e5df3efff9ee260275d287163d9c722f45c8fac47408d12dee50f6e8f6"
+        },
+        {
+          "path": "chunks/exp02-textured-increment.tar.gz/0002.part",
+          "bytes": 47185920,
+          "sha256": "072da5492c2a9eec0bb44697091822611644f51bd59a5a663fde5e7f5b2308de"
+        },
+        {
+          "path": "chunks/exp02-textured-increment.tar.gz/0003.part",
+          "bytes": 47185920,
+          "sha256": "a7fdc2960e32c3aae93bcce9c16a04b9adf084c3dc03da674a942d709b06963d"
+        },
+        {
+          "path": "chunks/exp02-textured-increment.tar.gz/0004.part",
+          "bytes": 12960495,
+          "sha256": "eb8859b82ff2316da5c93552b738754e6876a6e60f7c7405d747a6c9f82607a2"
+        }
+      ]
+    }
+  ]
+}
