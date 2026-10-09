@@ -82,9 +82,15 @@ class ManiSkillAdapter:
         if e.action_space!="native": raise ValueError("Only verified native ManiSkill action spaces are enabled")
         if collect_geometry and self.n!=1:
             raise ValueError("Oracle collection currently requires num_envs=1 to avoid unverified subscene frame conventions")
+        sensor_configs={"width":config.model.image_size,"height":config.model.image_size}
+        if e.ood_condition!="id" and e.env_id!="PushCube-v1": raise ValueError("Pilot OOD interventions are PushCube-only")
+        if e.ood_condition=="camera30":
+            from mani_skill.utils import sapien_utils
+            sensor_configs["base_camera"]={"pose":sapien_utils.look_at(eye=[-.1+.4*np.cos(np.pi/6),.4*np.sin(np.pi/6),.6],target=[-.1,0,.1])}
+        if e.ood_condition not in {"id","cube_color","camera30"}: raise ValueError("Unknown OOD intervention")
         self.env=gym.make(e.env_id,robot_uids=e.robot,num_envs=self.n,obs_mode="rgb+depth+segmentation" if collect_geometry else "rgb",
                           control_mode=e.control_mode,sim_backend=e.sim_backend,reconfiguration_freq=1,
-                          sensor_configs={"width":config.model.image_size,"height":config.model.image_size},max_episode_steps=e.horizon)
+                          sensor_configs=sensor_configs,max_episode_steps=e.horizon)
         space=self.env.unwrapped.single_action_space
         self.action_dim=space.shape[-1]; self.low=np.asarray(space.low); self.high=np.asarray(space.high)
         if self.action_dim!=config.model.action_dim: raise ValueError(f"Native action dimensions {self.action_dim} != model {config.model.action_dim}")
@@ -102,6 +108,15 @@ class ManiSkillAdapter:
 
     def reset(self,seeds):
         self.obs,_=self.env.reset(seed=list(seeds) if self.n>1 else int(seeds[0])); self.steps=0
+        if self.config.eval.ood_condition=="cube_color":
+            import sapien
+            for entity in self.env.unwrapped.obj._objs:
+                body=entity.find_component_by_type(sapien.render.RenderBodyComponent)
+                if body is None: raise ValueError("Cube lacks render geometry")
+                for shape in body.render_shapes:
+                    material=shape.material
+                    material.base_color=[1.,.75,0.,1.]
+            self.obs=self.env.unwrapped.get_obs()
         return self.observation()
 
     def step(self,action):
@@ -123,7 +138,11 @@ class ManiSkillAdapter:
             position=self.numpy(pose.p)[0]; q=self.numpy(pose.q)[0]
             transform=np.eye(4,dtype=np.float32); transform[:3,:3]=quaternion_matrix(q); transform[:3,3]=position
             poses.append(transform); ids.append(body_id)
-        cv_to_world=np.linalg.inv(self.numpy(params["extrinsic_cv"])[0])
+        world_to_cv=self.numpy(params["extrinsic_cv"])[0]
+        if world_to_cv.shape==(3,4):
+            world_to_cv=np.concatenate([world_to_cv,np.array([[0,0,0,1]],dtype=world_to_cv.dtype)])
+        if world_to_cv.shape!=(4,4): raise ValueError(f"Unsupported extrinsic shape {world_to_cv.shape}")
+        cv_to_world=np.linalg.inv(world_to_cv)
         return [{"depth":self.numpy(data["depth"])[0,...,0].astype(np.float32)/1000.,
                  "segmentation":self.numpy(data["segmentation"])[0,...,0],"intrinsics":self.numpy(params["intrinsic_cv"])[0],
                  "camera_to_world":cv_to_world,"body_poses":np.stack(poses),"body_ids":np.array(ids,dtype=np.int32)}]
@@ -196,13 +215,13 @@ def motion_consistency(predicted,encoders,stats,geometry,grid_size):
     return float(np.linalg.norm(recovered-actual,axis=-1)[valid].mean())
 
 
-def evaluate(config: Config,bundle=None,baseline=None):
-    config.validate(); policy=BundlePolicy(bundle,config.eval.device,config.eval.sampler,config.eval.sampling_steps,config.eval.shift) if bundle else None
+def evaluate(config: Config,bundle=None,baseline=None,policy_instance=None):
+    config.validate(); policy=policy_instance or (BundlePolicy(bundle,config.eval.device,config.eval.sampler,config.eval.sampling_steps,config.eval.shift) if bundle else None)
     if not policy and baseline not in {"random","expert"}: raise ValueError("Specify bundle or random/expert baseline")
     if baseline=="expert" and config.eval.backend!="toy": raise ValueError("Analytic expert is toy-only; supply a robot teacher bundle")
     if policy: policy.assert_compatible(config)
     flow_source=config.eval.flow_source
-    if policy and config.eval.record and config.data.provider=="oracle":
+    if policy and config.eval.record and config.eval.motion_diagnostics and config.data.provider=="oracle":
         if not flow_source and len(policy.stats["flow"])==1: flow_source=next(iter(policy.stats["flow"]))
         if flow_source not in policy.stats["flow"]:
             raise ValueError("Set eval.flow_source to the training source whose flow renderer applies to this simulator")
@@ -210,7 +229,7 @@ def evaluate(config: Config,bundle=None,baseline=None):
     if (output/"episodes.jsonl").exists(): raise FileExistsError("Evaluation run exists; choose another output")
     output.mkdir(parents=True,exist_ok=True)
     ledger=episode_ledger(config); write_jsonl(output/"ledger.jsonl",ledger)
-    atomic_json(output/"config.json",asdict(config)); env=make_adapter(config,geometry=config.eval.record and config.data.provider=="oracle")
+    atomic_json(output/"config.json",asdict(config)); env=make_adapter(config,geometry=config.eval.record and config.eval.motion_diagnostics and config.data.provider=="oracle")
     codec=NativeActionCodec(policy.stats["action"],env.action_dim,env.low,env.high) if policy else None
     rows=[]; generator=np.random.default_rng(config.eval.seed); start_all=time.monotonic()
     try:
@@ -221,7 +240,7 @@ def evaluate(config: Config,bundle=None,baseline=None):
             obs=env.reset([r["seed"] for r in padded]); executor=ChunkExecutor(config.eval.execute_steps); executor.reset(ids)
             if policy: policy.reset(ids)
             ever=np.zeros(env.n,bool); last=np.zeros(env.n,bool); first=np.full(env.n,-1,int); returns=np.zeros(env.n); latencies=[]; recorded=[]
-            active_geometry=[]; consistency=[]; active_flow=None
+            active_geometry=[]; consistency=[]; active_flow=None; recorded_actions=[]; object_positions=[]; tcp_positions=[]
             for step in range(config.eval.horizon):
                 if policy:
                     if executor.needs_chunk():
@@ -233,12 +252,24 @@ def evaluate(config: Config,bundle=None,baseline=None):
                         active_geometry=[]
                         begin=time.monotonic(); chunk=policy.predict(obs,[r["instruction"] for r in padded],ids,[step]*env.n,config.eval.seed+start*10000+step)
                         latencies.append(time.monotonic()-begin); executor.install(chunk,[step]*env.n)
+                        if config.eval.record and step==0:
+                            from .data import atomic_npz
+                            predicted={"actions_normalized":chunk.actions.numpy()}
+                            for modality in ("flow","video"):
+                                latent=getattr(chunk,modality,None)
+                                if latent is not None:
+                                    predicted[modality+"_latent"]=latent[0].float().cpu().numpy()
+                                    predicted[modality+"_decoded_rgb"]=policy.encoders.decode_video(latent[0],config.model.horizon).permute(0,2,3,1).cpu().numpy()
+                            atomic_npz(output/f"predicted_aux_{start:06d}.npz",predicted)
                         active_flow=chunk.flow[0] if chunk.flow is not None and env.n==1 and config.eval.record else None
                     action=codec.decode(executor.pop()).numpy()
                 else: action=env.expert_action() if baseline=="expert" else generator.uniform(env.low,env.high,(env.n,env.action_dim))
                 if config.eval.record:
-                    recorded.append(obs.copy())
-                    if config.data.provider=="oracle" and env.n==1: active_geometry.append(env.geometry()[0])
+                    recorded.append(obs.copy()); recorded_actions.append(np.asarray(action).copy())
+                    if config.eval.backend=="maniskill" and hasattr(env.env.unwrapped,"obj"):
+                        object_positions.append(env.numpy(env.env.unwrapped.obj.pose.p))
+                        tcp_positions.append(env.numpy(env.env.unwrapped.agent.tcp.pose.p))
+                    if config.eval.motion_diagnostics and config.data.provider=="oracle" and env.n==1: active_geometry.append(env.geometry()[0])
                 obs,info=env.step(action)
                 last=info["success"].astype(bool); first[(first<0)&last]=step+1; ever|=last; returns+=info["reward"]
             if active_flow is not None and active_geometry and flow_source:
@@ -251,7 +282,16 @@ def evaluate(config: Config,bundle=None,baseline=None):
                 with open(output/"episodes.jsonl","a") as f: f.write(json.dumps(record,allow_nan=False)+"\n")
             if recorded:
                 from .data import atomic_npz
-                atomic_npz(output/f"cohort_{start:06d}.npz",{"rgb":np.stack(recorded)})
+                recorded.append(obs.copy())
+                arrays={"rgb":np.stack(recorded),"actions_native":np.stack(recorded_actions)}
+                if object_positions:
+                    object_positions.append(env.numpy(env.env.unwrapped.obj.pose.p)); tcp_positions.append(env.numpy(env.env.unwrapped.agent.tcp.pose.p))
+                    arrays.update(object_positions_m=np.stack(object_positions),tcp_positions_m=np.stack(tcp_positions))
+                    if hasattr(env.env.unwrapped,"goal_region"): arrays["goal_positions_m"]=env.numpy(env.env.unwrapped.goal_region.pose.p)
+                atomic_npz(output/f"cohort_{start:06d}.npz",arrays)
+                if config.eval.backend=="maniskill":
+                    import imageio.v2 as imageio
+                    imageio.mimsave(output/f"cohort_{start:06d}.mp4",np.stack(recorded)[:,0,0],fps=config.eval.control_hz)
     finally: env.close()
     summary=aggregate(rows); summary.update(wall_seconds=time.monotonic()-start_all,protocol="synchronous_fixed_horizon",ledger_id=digest(ledger))
     atomic_json(output/"summary.json",summary)

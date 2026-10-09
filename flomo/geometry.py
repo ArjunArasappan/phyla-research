@@ -31,7 +31,7 @@ def query_grid(height, width, size):
     return np.stack([xx,yy],axis=-1).reshape(-1,2)
 
 
-def oracle_tracks(depth0, segmentation0, intrinsic, camera_to_world, body_poses, body_ids, grid_size):
+def oracle_tracks(depth0, segmentation0, intrinsic, camera_to_world, body_poses, body_ids, grid_size, pixel_center_offset=0.0):
     """Track initial rigid surface points via actor/link-local coordinates.
 
     depth in meters; CV camera axes; body_poses [T,K,4,4] maps body -> world.
@@ -42,7 +42,8 @@ def oracle_tracks(depth0, segmentation0, intrinsic, camera_to_world, body_poses,
     ix = np.rint(uv[:,0]).astype(int); iy = np.rint(uv[:,1]).astype(int)
     depth = depth0[iy,ix]
     valid = np.isfinite(depth) & (depth > 0)
-    rays = np.stack([uv[:,0],uv[:,1],np.ones(len(uv))],axis=-1) @ np.linalg.inv(intrinsic).T
+    # Depth/segmentation came from integer pixel centers; unproject that ray.
+    rays = np.stack([ix+pixel_center_offset,iy+pixel_center_offset,np.ones(len(uv))],axis=-1) @ np.linalg.inv(intrinsic).T
     points = transform_points(camera_to_world[:1],(rays*depth[:,None])[None])[0]
     ids = segmentation0[iy,ix]
     out = np.broadcast_to(points,(len(camera_to_world),*points.shape)).copy()

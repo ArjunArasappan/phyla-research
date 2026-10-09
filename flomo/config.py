@@ -36,6 +36,8 @@ class ModelConfig:
     lora_alpha: float = 128.0
     gradient_checkpointing: bool = False
     video_fps: float = 20.0
+    future_only: bool = False
+    auxiliary_null: bool = False
 
     @property
     def temporal_stride(self):
@@ -48,6 +50,7 @@ class DataConfig:
     prepared: str = "data/prepared"
     stride: int = 16
     grid_size: int = 8
+    pixel_center_offset: float = 0.0
     val_fraction: float = 0.2
     test_fraction: float = 0.1
     provider: str = "oracle"
@@ -108,10 +111,12 @@ class EvalConfig:
     output: str = "runs/eval"
     instruction: str = "move the point to the target"
     record: bool = False
+    motion_diagnostics: bool = True
     ledger: str = ""
     action_space: str = "native"
     flow_source: str = ""
     sim_backend: str = "physx_cpu"
+    ood_condition: str = "id"
 
 
 @dataclass
@@ -225,7 +230,9 @@ def encoder_signature(config: Config) -> str:
     m=asdict(config.model)
     keys=("backend","upstream_commit","checkpoint_revision","image_size","latent_channels",
           "spatial_stride","text_dim","text_length","horizon","action_dim","views")
-    return digest({k:m[k] for k in keys})
+    identity={k:m[k] for k in keys}
+    if config.model.future_only: identity["future_only"]=True
+    return digest(identity)
 
 
 def action_contract(config: Config) -> dict:

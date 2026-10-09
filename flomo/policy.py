@@ -19,6 +19,7 @@ class ActionChunk:
     observation_steps: list[int]
     bundle_id: str
     flow: torch.Tensor | None = None
+    video: torch.Tensor | None = None
 
 
 class NativeActionCodec:
@@ -87,7 +88,7 @@ class BundlePolicy:
         with autocast(self.device,precision):
             result=sample_joint(self.model,batch,self.steps,self.shift,self.sampler,seed)
         if "action" not in result: raise ValueError("Bundle does not predict executable actions")
-        return ActionChunk(result["action"].cpu(),list(episode_ids),list(observation_steps),self.bundle_id,result.get("flow"))
+        return ActionChunk(result["action"].cpu(),list(episode_ids),list(observation_steps),self.bundle_id,result.get("flow"),result.get("video"))
 
 
 class ChunkExecutor:

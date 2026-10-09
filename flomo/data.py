@@ -172,13 +172,13 @@ class SpatialTracker:
 
 
 def extract_flow(config, episode, window, tracker=None):
-    start=window["start"]; h=config.model.horizon; sl=slice(start,start+h)
+    start=window["start"]; h=config.model.horizon + int(config.model.future_only); sl=slice(start,start+h)
     grid=config.data.grid_size
     if config.data.provider=="oracle":
         required={"depth","segmentation","intrinsics","camera_to_world","body_poses","body_ids"}
         if required-set(episode.files): raise ValueError(f"Oracle data missing: {required-set(episode.files)}")
         points,valid=oracle_tracks(episode["depth"][start],episode["segmentation"][start],episode["intrinsics"][start],
-                                   episode["camera_to_world"][sl],episode["body_poses"][sl],episode["body_ids"],grid)
+                                   episode["camera_to_world"][sl],episode["body_poses"][sl],episode["body_ids"],grid,config.data.pixel_center_offset)
         return canonical_flow(points,episode["camera_to_world"][sl]),valid
     if config.data.provider=="tracker":
         return tracker(episode["rgb"][sl,0],episode,start,h,grid)
@@ -229,14 +229,16 @@ def prepare(config: Config, encoders):
     for window in accepted:
         with np.load(Path(config.data.raw)/window["path"],allow_pickle=False) as ep, np.load(out/"tracks"/f'{window["window_id"]}.npz',allow_pickle=False) as tracks:
             start=window["start"]; h=config.model.horizon; meta=episodes[window["episode_id"]]
-            rgb=ep["rgb"][start:start+h]
+            rgb=ep["rgb"][start:start+h+int(config.model.future_only)]
             stats_f=PercentileStats(**flow_stats[window["source"]])
-            rendered=render_flow(tracks["flow"],tracks["valid"],stats_f,config.data.grid_size,config.model.image_size)
+            flow_slice=slice(1,None) if config.model.future_only else slice(None)
+            rendered=render_flow(tracks["flow"][flow_slice],tracks["valid"][flow_slice],stats_f,config.data.grid_size,config.model.image_size)
             obs=encoders.encode_observations(rgb[0])
             # Future RGB excludes the current conditioning image. Repeat the
             # final valid future frame to retain the shared temporal grid.
             future=rgb[1:,0]
-            future=np.concatenate([future,future[-1:]],axis=0)
+            if not config.model.future_only:
+                future=np.concatenate([future,future[-1:]],axis=0)
             video=encoders.encode_video(torch.from_numpy(future.copy()).permute(0,3,1,2).float()/255)
             flow=encoders.encode_video(rendered)
             text,text_valid=encoders.encode_text(meta["instruction"])
@@ -257,7 +259,8 @@ def prepare(config: Config, encoders):
               "preprocess":asdict(config.data),"model":asdict(config.model),"episodes":list(episodes.values()),
               "manifest_hash":digest(accepted),"windows":len(accepted),"rejected":len(rejected),
               "augmentation":"deterministic_resize_no_random_crop","temporal_policy":f"repeat_last_to_1_mod_{config.model.temporal_stride}"}
-    metadata["video_window"]="frames_1_to_horizon_minus_1_then_repeat_last"
+    metadata["video_window"]="frames_1_to_horizon" if config.model.future_only else "frames_1_to_horizon_minus_1_then_repeat_last"
+    metadata["flow_window"]="frames_1_to_horizon_anchor_0" if config.model.future_only else "frames_0_to_horizon_minus_1"
     metadata["dataset_id"]=digest(metadata)
     atomic_json(out/"dataset.json",metadata)
     return metadata

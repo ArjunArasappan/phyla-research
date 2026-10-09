@@ -17,6 +17,7 @@ from torch.nn.parallel import DistributedDataParallel
 from .config import Config, atomic_json, digest, encoder_signature, file_hash, model_signature, action_contract, from_dict
 from .data import PreparedDataset, MixtureSampler, collate, read_jsonl, torch_load
 from .model import build_model, modality_loss, noisy_targets
+from .lora_audit import assert_lora_only, assert_base_unchanged
 
 
 def atomic_torch(path,value):
@@ -97,6 +98,7 @@ def train(config: Config):
     device=torch.device(f"cuda:{local}" if world>1 and config.train.device.startswith("cuda") else config.train.device)
     if device.type=="cuda":
         if not torch.cuda.is_available(): raise RuntimeError("CUDA unavailable; use configs/smoke.yaml on this laptop")
+        if device.index is None: device=torch.device("cuda:0")
         torch.cuda.set_device(device)
     if config.model.backend in {"wan","ltx"} and config.model.architecture=="joint" and device.type!="cuda":
         raise RuntimeError(f"{config.model.backend} training requires CUDA")
@@ -133,6 +135,7 @@ def train(config: Config):
             restore_rng(initial["rng_by_rank"][rank])
         else:
             torch.manual_seed(config.train.seed+rank*100003)
+        lora_audit=assert_lora_only(model,optimizer)
         wrapped=DistributedDataParallel(model,device_ids=[local] if device.type=="cuda" else None,find_unused_parameters=True) if world>1 else model
         sampler=MixtureSampler(dataset,config.data.source_weights,config.train.batch_size,config.train.seed,rank,world)
         val_rows=[r for r in read_jsonl(Path(config.data.prepared)/"windows.jsonl") if r["split"]=="val" and
@@ -144,6 +147,7 @@ def train(config: Config):
             if (output/"config.json").exists() and not config.train.resume:
                 raise FileExistsError("Run already exists; use resume or choose a new output")
             atomic_json(output/"config.json",asdict(config))
+            if lora_audit: atomic_json(output/"lora_audit.json",lora_audit)
             print(json.dumps({"parameters":model.parameter_counts(),"global_batch":world*config.train.batch_size*config.train.accumulation,"world_size":world,"dataset_id":dataset.metadata["dataset_id"]}),flush=True)
         model.train()
         for update in range(step,config.train.steps):
@@ -181,6 +185,8 @@ def train(config: Config):
                     path=output/f"step_{update+1:06d}.pt"
                     atomic_torch(path,payload); atomic_json(path.with_suffix(".json"),{"sha256":file_hash(path),"step":update+1})
                     atomic_json(output/"latest.json",{"checkpoint":path.name,"step":update+1})
+        assert_base_unchanged(model,lora_audit)
+        if rank==0 and lora_audit: atomic_json(output/"lora_audit.json",lora_audit)
         return str(output/f"step_{config.train.steps:06d}.pt")
     finally:
         if world>1 and dist.is_initialized(): dist.destroy_process_group()
