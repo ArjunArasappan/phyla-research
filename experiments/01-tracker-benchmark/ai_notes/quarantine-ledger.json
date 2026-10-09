@@ -1,0 +1,326 @@
+[
+  {
+    "directory": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure",
+    "reason": "INVALID: upstream FP32 flash-only attention silently caught unsupported kernel and used input features as output. Never use these data for scientific comparison.\n",
+    "READY_markers_removed": true,
+    "files": [
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/INVALID.md",
+        "bytes": 162,
+        "sha256": "96ee015191a4373406acb6e45786e7efbb3acb3954f9e18cf842ef605def4a21"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/articulated_links_fixed/metrics.json",
+        "bytes": 965,
+        "sha256": "5b59cacef7777b7a874c5376ec2ccf9fd9b12abfbf20dc68ced17d777d031ceb"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/articulated_links_fixed/raw.npz",
+        "bytes": 5004326,
+        "sha256": "9932872d378172782294e7b4acfaa88c88967023cc56f4485186bdb7a543901e"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/articulated_links_fixed/tracks.npz",
+        "bytes": 42860,
+        "sha256": "e863c14f0eb20a9cc3ba1e570efb1bd61aef0043e951af2422bbd50b980426b2"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/articulated_links_orbit/metrics.json",
+        "bytes": 963,
+        "sha256": "9877fe48d77e64cb94b180d1113854ecbc9e296925712e819c18a9b174dd98c0"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/articulated_links_orbit/raw.npz",
+        "bytes": 6338028,
+        "sha256": "1579b038307c34683fc8d8734970ef62f6df09cb7df332b95c46cbb2a2678b0c"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/articulated_links_orbit/tracks.npz",
+        "bytes": 43459,
+        "sha256": "4bcff1b30c31b9c2ee8fd14d3fccb1d7a77d39810266117eeff3fea94b09841e"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/depth_speed_out_of_view_stress_fixed/metrics.json",
+        "bytes": 940,
+        "sha256": "ef8b63dafbb1da9df8b29c303b7b9351ca7d5694b655c1b895075ad5df8a5ab7"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/depth_speed_out_of_view_stress_fixed/raw.npz",
+        "bytes": 4812089,
+        "sha256": "16ae97db42c8643c06e0ab3a580ce22c75efaba7990eef2a21d41bb3b262dc66"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/depth_speed_out_of_view_stress_fixed/tracks.npz",
+        "bytes": 45311,
+        "sha256": "ee94cdb3117140d1b20ec131f0f835d798e50d89da5385fc88b864afb689e5c1"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/depth_speed_out_of_view_stress_orbit/metrics.json",
+        "bytes": 938,
+        "sha256": "cdd389b679e0a2a014a21cfc07cf49a8b9948d83ec4c6feb57015a5094e3e93a"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/depth_speed_out_of_view_stress_orbit/raw.npz",
+        "bytes": 6322188,
+        "sha256": "71a9742e05ccf58c9b6a65da9fc6da1fc0e92c4c178c63d7c93e35a70eb8a125"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/depth_speed_out_of_view_stress_orbit/tracks.npz",
+        "bytes": 45928,
+        "sha256": "e9f13d6a82f95802930d42d02406a0465ae3ce3f798d2d26f45340394e8e3024"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/object_translation_fixed/metrics.json",
+        "bytes": 976,
+        "sha256": "81bc81f7e60fd532424dca2e2f7e4504cc8c5bbdbdd2866786121033dc9f9c38"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/object_translation_fixed/raw.npz",
+        "bytes": 4829076,
+        "sha256": "64ef3369ae1194a6b2580e2fc62f79fb67e4fb463a114b220020e86ad58feb8a"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/object_translation_fixed/tracks.npz",
+        "bytes": 44745,
+        "sha256": "c9e5e55bff6543189ca5a9860047da44e86f0d49004a7cb340d4d2dee2c74c12"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/object_translation_orbit/metrics.json",
+        "bytes": 957,
+        "sha256": "9df73c4e6cc6a3980ea7a6f5cd77de17ecb9c82ed4c714912259dfa6c1ccc384"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/object_translation_orbit/raw.npz",
+        "bytes": 6580941,
+        "sha256": "628694d046e2c62c173a320b1024a91327e2f2fbdc76732ae2dd82024ca0211b"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/object_translation_orbit/tracks.npz",
+        "bytes": 45576,
+        "sha256": "74dd48769ea5e5b06e27bbaba04adf651dd9587bcc8f9eb976af5dbfa05bbde3"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/occlusion_and_return_fixed/metrics.json",
+        "bytes": 975,
+        "sha256": "ed5b22b189eaec5aa1c997c3eb3a24837321c509438785d47351a7b62021d4e7"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/occlusion_and_return_fixed/raw.npz",
+        "bytes": 4788415,
+        "sha256": "3b39a1908f22ac19161cc509ca48daff119b33857afd8b158b732ca49c11d063"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/occlusion_and_return_fixed/tracks.npz",
+        "bytes": 43222,
+        "sha256": "e0857bc6e629bddd246f46cf1db32beebafbab57a829715a4db4abe881a5e96f"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/occlusion_and_return_orbit/metrics.json",
+        "bytes": 901,
+        "sha256": "e835fd785f1f7c1e6310341c825115fc987c673e7eab0428464851780cdfbe97"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/occlusion_and_return_orbit/raw.npz",
+        "bytes": 6576131,
+        "sha256": "0728da91abd48302074562fdb65a6411d7bd19edb4dbceb7d3f44bf47d9ff7e0"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/occlusion_and_return_orbit/tracks.npz",
+        "bytes": 44015,
+        "sha256": "511aef8e6f0c45191d329f03dfd3ab9067e34ea1fb50d30e4a4faeaa3cc90114"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/rigid_rotation_fixed/metrics.json",
+        "bytes": 962,
+        "sha256": "44228d00f38e55ecaeb7f50772a22407d02ebae909bac68a94ae7262b07974cb"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/rigid_rotation_fixed/raw.npz",
+        "bytes": 5154596,
+        "sha256": "9de908d6ac6587ac9a918953ea31ee882c694f3780d3cdbc8ad5467ea394d35d"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/rigid_rotation_fixed/tracks.npz",
+        "bytes": 45445,
+        "sha256": "c0ea478d325abae865903f60ff5a1027e1c21cfcc2fe0659b966eb397cd7e83e"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/rigid_rotation_orbit/metrics.json",
+        "bytes": 962,
+        "sha256": "1a50d48bc79677935a41709eac33afb25f76ab2d13a30ec588933b5de7eb9e0a"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/rigid_rotation_orbit/raw.npz",
+        "bytes": 6447429,
+        "sha256": "a1f935d50dea207341fca9f603a5bd1a176cb451ab69e5a117d13954a74d5d24"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/rigid_rotation_orbit/tracks.npz",
+        "bytes": 46331,
+        "sha256": "017c776dc4824155c3b45186e66a2e2a9ffbd70f6133e4560328534f74496f98"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/static_scene_fixed/metrics.json",
+        "bytes": 963,
+        "sha256": "3310f57e4ba31ebda5c0ccaad40bcf44153601ed44b206476948ecf4b04716c0"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/static_scene_fixed/raw.npz",
+        "bytes": 4784357,
+        "sha256": "c151bffe674d0102bc991f15beba16846319a447fa57e5bc8ecc6be3e4e17146"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/static_scene_fixed/tracks.npz",
+        "bytes": 42942,
+        "sha256": "bdbe2d824ac439f4a982f3775236d39ab20368f714d84f05d750496eb64cb706"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/static_scene_orbit/metrics.json",
+        "bytes": 959,
+        "sha256": "f01a9504a55beda5fbe648dbe3d73ef290d6d0b5d062be1b1b59c0870f2efa66"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/static_scene_orbit/raw.npz",
+        "bytes": 6466680,
+        "sha256": "4c465ae0c4a391c4b7615abbee30fc3a46659b286359455291a31a25c523bd90"
+      },
+      {
+        "relative_path": "QUARANTINED_spatrackerv2_fp32_silent_attention_failure/static_scene_orbit/tracks.npz",
+        "bytes": 45864,
+        "sha256": "64dfeb16bf2c7de19f5efc75b0e2d5d57ab69339b1437a296f2f59a62ca65aa0"
+      }
+    ]
+  },
+  {
+    "directory": "zero_motion",
+    "reason": "Legacy [T,Q,1] broadcast-zero schema; physical meaning zero vector but violates explicit [T,Q,3] handoff. Replaced by zero_motion_xyz; do not use for shape-sensitive consumers.\n",
+    "READY_markers_removed": true,
+    "files": [
+      {
+        "relative_path": "zero_motion/INVALID.md",
+        "bytes": 177,
+        "sha256": "f800133b47531f29e9c2a04581440c07d0b63638555559d4dfccc553caf24d37"
+      },
+      {
+        "relative_path": "zero_motion/articulated_links_fixed/metrics.json",
+        "bytes": 481,
+        "sha256": "aa57bececf33646586530aa06e996efdabe6f519bab19dc9e78cae1fc15e52a2"
+      },
+      {
+        "relative_path": "zero_motion/articulated_links_fixed/tracks.npz",
+        "bytes": 2331,
+        "sha256": "59a7c02765c5481f2480a7a494f07f80737a6e19a3c58feeb1e13a9252828d86"
+      },
+      {
+        "relative_path": "zero_motion/articulated_links_orbit/metrics.json",
+        "bytes": 497,
+        "sha256": "ffa8d6df2ebcb857f3e2a020882d19b801d606e7731836594cfa0f7e5c9eb2d8"
+      },
+      {
+        "relative_path": "zero_motion/articulated_links_orbit/tracks.npz",
+        "bytes": 2386,
+        "sha256": "eb406ff737b0174d443f1dbcd3d2eb05b5e15b2b8a15e7f93c407242d417e8bb"
+      },
+      {
+        "relative_path": "zero_motion/depth_speed_out_of_view_stress_fixed/metrics.json",
+        "bytes": 465,
+        "sha256": "ed1ea0603cef595f27fef79d40c99cfef4b8ef3c944cccab4c049d45cb19e16d"
+      },
+      {
+        "relative_path": "zero_motion/depth_speed_out_of_view_stress_fixed/tracks.npz",
+        "bytes": 2344,
+        "sha256": "f411ff8efb4c12caa79b1dbfb457ba87a028552cba78ba2f7928ed3dd232123d"
+      },
+      {
+        "relative_path": "zero_motion/depth_speed_out_of_view_stress_orbit/metrics.json",
+        "bytes": 464,
+        "sha256": "c37bf0ea15b34eb42e3dc06f32e1cfc8108b68b96573af3bd2ff0931213f17b9"
+      },
+      {
+        "relative_path": "zero_motion/depth_speed_out_of_view_stress_orbit/tracks.npz",
+        "bytes": 2409,
+        "sha256": "93c886e51c89d8fb13c8c59809bd61fce2913827470657900a0b7b6b9aeb13ec"
+      },
+      {
+        "relative_path": "zero_motion/object_translation_fixed/metrics.json",
+        "bytes": 498,
+        "sha256": "8bb8c57b63af2ba30feab0c2a978e0fd015b7efff13c8c34a53e1ab93637da7d"
+      },
+      {
+        "relative_path": "zero_motion/object_translation_fixed/tracks.npz",
+        "bytes": 2321,
+        "sha256": "8107032215a87e7c562bcd3bc3e682cb701cd7839dd408c8bcec4982a930dc3e"
+      },
+      {
+        "relative_path": "zero_motion/object_translation_orbit/metrics.json",
+        "bytes": 497,
+        "sha256": "5aff669053ebf6f303b50f8042447d70f97eb268d0dcc47c6efaf025ab2eac90"
+      },
+      {
+        "relative_path": "zero_motion/object_translation_orbit/tracks.npz",
+        "bytes": 2388,
+        "sha256": "2d8b42cc2ea2e911d7a4b23fcf87e832b7ec16379dc78e7dbc9b7ac216d89ad0"
+      },
+      {
+        "relative_path": "zero_motion/occlusion_and_return_fixed/metrics.json",
+        "bytes": 494,
+        "sha256": "035d00b25e24530b550f5da97f50cd817043845622c02e392fa4beeb2012067c"
+      },
+      {
+        "relative_path": "zero_motion/occlusion_and_return_fixed/tracks.npz",
+        "bytes": 2374,
+        "sha256": "dc422d657ef75d44148c69bc0349e24cee4d70e27206bccff2eeba5a24eee8bd"
+      },
+      {
+        "relative_path": "zero_motion/occlusion_and_return_orbit/metrics.json",
+        "bytes": 494,
+        "sha256": "0e42b48759e7105de8741650f82ca9b274910a162b3bb962d6d74f18d5afd476"
+      },
+      {
+        "relative_path": "zero_motion/occlusion_and_return_orbit/tracks.npz",
+        "bytes": 2418,
+        "sha256": "22623740470eccf9f66506b2ebe6ab0e4546eeb4b34714493db5e32c186c8efb"
+      },
+      {
+        "relative_path": "zero_motion/rigid_rotation_fixed/metrics.json",
+        "bytes": 466,
+        "sha256": "f25f5a0e24e136855685691b5bc427a7c582b05acbbfc01dbf812df7ab70da63"
+      },
+      {
+        "relative_path": "zero_motion/rigid_rotation_fixed/tracks.npz",
+        "bytes": 2299,
+        "sha256": "392423e57e58c867410ab5b58811cc81ad0700b78a7d262c50727c3ddcf0db4a"
+      },
+      {
+        "relative_path": "zero_motion/rigid_rotation_orbit/metrics.json",
+        "bytes": 466,
+        "sha256": "d7a2ae011077654b8f87ce1bbdef1e4f717de90357376a2daad03fda537dbdb9"
+      },
+      {
+        "relative_path": "zero_motion/rigid_rotation_orbit/tracks.npz",
+        "bytes": 2375,
+        "sha256": "3583ed715f42e5dc0ad238dda2ec93238931fc57e6bdaebf382eee431021ee5c"
+      },
+      {
+        "relative_path": "zero_motion/static_scene_fixed/metrics.json",
+        "bytes": 402,
+        "sha256": "af5c14fc597f45ea03842268c1b11fdbb3cc163254083bc6234964bc9ed6fa21"
+      },
+      {
+        "relative_path": "zero_motion/static_scene_fixed/tracks.npz",
+        "bytes": 2285,
+        "sha256": "6e3c4c8982629925f67eb4cf850dbd0e765ff8ad026854b638ca239a853fd7b4"
+      },
+      {
+        "relative_path": "zero_motion/static_scene_orbit/metrics.json",
+        "bytes": 402,
+        "sha256": "5c9b08fd28c2e6a73021b5afed8fc642126fc02923fe6ba9038c0f7581e131e7"
+      },
+      {
+        "relative_path": "zero_motion/static_scene_orbit/tracks.npz",
+        "bytes": 2363,
+        "sha256": "9e10ebbec6c0207b52ca7935c38396e4f5b036661c1c6aaa0dbe15028801d1dc"
+      }
+    ]
+  }
+]

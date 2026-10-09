@@ -12,7 +12,7 @@ def main():
         uvh=np.einsum('tij,tqj->tqi',d['intrinsics'],pc);uv=uvh[...,:2]/uvh[...,2:3]
         # Avoid converting undefined initial rays to integer positions.
         px=np.floor(np.nan_to_num(uv[...,0],nan=-1)).astype(int);py=np.floor(np.nan_to_num(uv[...,1],nan=-1)).astype(int)
-        inside=(px>=0)&(px<256)&(py>=0)&(py<256)&d['trajectory_valid'];z=d['depth'][np.arange(len(pc))[:,None],np.clip(py,0,255),np.clip(px,0,255)].copy();z[~inside]=np.nan
+        inside=(px>=0)&(px<256)&(py>=0)&(py<256)&d['trajectory_valid'];z=d['depth'][np.arange(len(pc))[:,None],np.clip(py,0,255),np.clip(px,0,255)].copy();z[~inside|~np.isfinite(z)|(z<=0)]=np.nan
         ray=np.einsum('tij,tqj->tqi',np.linalg.inv(d['intrinsics']),np.concatenate([uv,np.ones((*uv.shape[:2],1))],-1))
         lifted=np.einsum('tij,tqj->tqi',d['camera_to_world'][:,:3,:3],ray*z[...,None])+d['camera_to_world'][:,None,:3,3]
         liftedflow=(lifted-lifted[0])@d['camera_to_world'][0,:3,:3]

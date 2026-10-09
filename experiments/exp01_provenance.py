@@ -21,9 +21,9 @@ def main():
         if not path.is_file() or 'QUARANTINED' in str(path) or path.suffix not in ['.npz','.json','.png'] or not (path.parent/'READY').exists():continue
         files.append({'path':str(path.relative_to(root)),'bytes':path.stat().st_size,'sha256':sha(path)})
     dataset=[]
-    for file in sorted((root/'data/exp01').glob('*/*/metadata.json')):
-        if file.parent.parent.name not in ['pilot','calibration']:continue
-        meta=json.loads(file.read_text());bundle=file.parent/'gt.npz';assert sha(bundle)==meta['sha256']==(file.parent/'READY').read_text().strip();dataset.append({'clip':file.parent.name,'split':file.parent.parent.name,'checks':meta['checks'],'sha256':meta['sha256']})
+    for file in sorted((root/'data/exp01').rglob('metadata.json')):
+        if not (file.parent/'gt.npz').exists():continue
+        meta=json.loads(file.read_text());bundle=file.parent/'gt.npz';assert sha(bundle)==meta['sha256']==(file.parent/'READY').read_text().strip();dataset.append({'clip':file.parent.name,'split':str(file.parent.parent.relative_to(root/'data/exp01')),'checks':meta['checks'],'sha256':meta['sha256']})
     patch=root/'worktrees/exp01/experiments/01-tracker-benchmark/ai_notes/spatrackerv2-sdpa-fail-closed.patch'
     provenance={'upstream_revisions':repos,'checkpoint_pins':checkpoints,'attention_patch_sha256':sha(patch),'python':sys.version,'hardware':'NVIDIA B300; Torch2.12cu130; isolated trackers overlay on verified sharedcore',
                 'environment_freeze':subprocess.check_output([sys.executable,'-m','pip','freeze'],text=True).splitlines(),'solver_pins':{'pycolmap':'3.11.1','pyceres':'2.4'},
