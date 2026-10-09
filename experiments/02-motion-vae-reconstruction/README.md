@@ -1,6 +1,6 @@
 # Experiment 2: reconstruction of 3D motion labels through frozen video VAEs
 
-**Status:** proposed, not executed. Defined 2026-10-08 by splitting the original tracker/codec study.
+**Status:** real frozen GPU debug pilot completed (168 source/codec jobs plus 24 context controls); broader ablations pending. Defined 2026-10-08 by splitting the original tracker/codec study. See [execution status](STATUS.md) and [measured pilot results](results/ai/pilot-v2/README.md).
 
 ## 1. Question
 

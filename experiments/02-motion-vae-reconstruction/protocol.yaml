@@ -1,6 +1,6 @@
 schema_version: 1
 kind: experiment_design
-status: proposed_not_executed
+status: debug_gpu_pilot_matrix_completed_broader_ablations_pending
 experiment_id: exp02_motion_vae_reconstruction
 dependency:
   input: validated_exp01_track_bundles
@@ -26,7 +26,7 @@ representation:
     - 99
     shared_across_methods_clips_and_codecs: true
     freeze_before_test: true
-    degenerate_axis_minimum_range_m: must_declare_after_calibration
+    degenerate_axis_minimum_range_m: 0.02
     control: symmetric_absolute_percentile_bounds
   invalid_fill: zero_displacement_color_computed_from_bounds
   scientific_rgb_dtype: float32
@@ -71,9 +71,9 @@ codecs:
   wan:
     parent_model: Wan2.2-TI2V-5B
     vae_file: Wan2.2_VAE.pth
-    checkpoint_revision: must_pin_on_gpu_host
-    weight_sha256: must_record
-    upstream_commit: must_pin
+    checkpoint_revision: 921dbaf3f1674a56f47e83fb80a34bac8a8f203e
+    weight_sha256: 20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36
+    upstream_commit: 1ea34ff48f87168174e12956e200b1d908b1c5ff
     channels: 48
     spatial_stride: 16
     temporal_stride: 4
@@ -86,9 +86,9 @@ codecs:
     parent_model: LTX-Video-2B-v0.9.6-non-distilled
     checkpoint_file: ltxv-2b-0.9.6-dev-04-25.safetensors
     component: vae_only
-    checkpoint_revision: must_pin_on_gpu_host
-    weight_sha256: must_record
-    config_snapshot_revision: must_pin
+    checkpoint_revision: 8984fa25007f376c1a299016d0957a37a2f797bb
+    weight_sha256: e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56
+    config_snapshot_revision: e58e28c39631af4d1468ee57a853764e11c1d37e
     diffusers_target_version: 0.33.1
     transformers_existing_adapter_version: 4.49.0
     channels: 128
@@ -142,3 +142,31 @@ training:
   diffusion_transformer_loaded: false
   text_encoder_loaded: false
   fine_tuning: false
+execution_pilot:
+  frames: 17
+  initial_query_grid:
+  - 16
+  - 16
+  simulator: SAPIEN3.0.3
+  test_clips: 12
+  calibration_clips: 12
+  stat_file: /mnt/nvme/scratch/phyla-ubuntu/data/exp02/calibration-stats-v2-balanced.json
+  run_root: /mnt/nvme/scratch/phyla-ubuntu/runs/exp02/simulator-pilot-v2
+  limitations:
+  - debug query density
+  - colored box surfaces and scripted links
+  - one seed per archetype
+  - not policy task data
+  primary_completed_jobs: 168
+  context33_completed_jobs: 24
+  gpus_released_to_exp03:
+  - 2
+  - 3
+  sources:
+  - gt
+  - zero
+  - gt_uv_gt_front_depth
+  - cotracker3_gt_geometry
+  - delta_gt_geometry
+  - spatrackerv2_gt_geometry_bf16
+  - spatrackerv2_gt_geometry_fp32_math
