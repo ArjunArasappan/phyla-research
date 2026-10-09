@@ -15,9 +15,12 @@ def main():
         pc_gt=np.einsum('tqj,tjk->tqk',d['world_xyz']-d['camera_to_world'][:,None,:3,3],d['camera_to_world'][:,:3,:3])
         mask=valid&finite;mask=mask.copy();mask[0]=False;difference=flow-gt
         groups={'all':valid,'visible':d['visible'],'occluded_in_view':d['in_frame']&~d['visible'],'out_of_view_front':valid&~d['in_frame']&(pc_gt[...,2]>0),
-                'foreground':valid&d['foreground'][None],'background':valid&~d['foreground'][None],'dynamic_gt':valid&(np.linalg.norm(gt,axis=-1)>.005),
+                'foreground_visible':d['visible']&d['foreground'][None],'dynamic_visible':d['visible']&(np.linalg.norm(gt,axis=-1)>.005),'foreground':valid&d['foreground'][None],'background':valid&~d['foreground'][None],'dynamic_gt':valid&(np.linalg.norm(gt,axis=-1)>.005),
                 'static_gt':valid&(np.linalg.norm(gt,axis=-1)<1e-8)}
         summary={name:metrics(flow,gt,eligible) for name,eligible in groups.items() if eligible[1:].any()}
+        summary['per_material_object_visible']={str(int(obj)):metrics(flow,gt,d['visible']&(d['material_ids'][None]==obj)) for obj in np.unique(d['material_ids']) if obj>=0 and (d['visible'][1:]&(d['material_ids'][None]==obj)).any()}
+        object_values=[v['epe_m'] for k,v in summary['per_material_object_visible'].items() if k!='0' and v['epe_m'] is not None]
+        summary['foreground_object_macro_visible_epe_m']=float(np.mean(object_values)) if object_values else None
         summary['axis_mae_m']=np.abs(difference[mask]).mean(0).tolist();summary['axis_rmse_m']=np.sqrt((difference[mask]**2).mean(0)).tolist()
         dt=np.diff(d['timestamps']);v=np.diff(flow,axis=0)/dt[:,None,None];vgt=np.diff(gt,axis=0)/dt[:,None,None];vmask=valid[1:]&valid[:-1]&finite[1:]&finite[:-1]
         summary['velocity_epe_m_per_s']=float(np.linalg.norm(v-vgt,axis=-1)[vmask].mean())

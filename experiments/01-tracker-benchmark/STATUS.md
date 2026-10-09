@@ -1,13 +1,15 @@
-# Experiment 1 live status
+# Experiment 1 executed status
 
-Completed: 12 uniform-color debugtest +12 separatelyseededcalibration real SAPIEN clips; frozen CoTracker3+GTdepth/poses, DELTA+GTdepth/poses, SpaTrackerV2 BF16 and corrected float32outer/SDPA-math GTgeometry all12each. RGB-only Spa geometry frontend cachedall12; CoTracker andSpa use identicalcache, withone initialGTdepthscale diagnostic. Raw unscaled nativegeometry saved. Alllearnedtracker scientificdata inNVMe.
+The bounded pilots are complete. No tracker GPU jobs are running.
 
-Extended axis/velocity/acceleration, GTvisible/occluded/dynamic/static/foreground masks, and native camera/depth/focal diagnostics saved inextended_metrics.json beside eachbundle. GT exact-front-ray lift visibleEPE<1e-8m; rendered-nearest-depth variant explicitly measuresrasteraliasing. InvalidFP32silentattentionfallback quarantined andexcluded. Legacyone-channelzero broadcastcontrol replacedbyexplicit3Dzero_motion_xyz.
+- 12 uniform-color debug clips and 12 separate calibration clips.
+- 12 textured primary clips with a 64×64 grid and 12 separate calibration clips.
+- 12 exact material-ID subset clips with a 16×16 grid for a paired density control.
+- SpaTrackerV2, CoTracker3 plus depth, and independent DELTA completed every primary and matched-control clip.
+- RGB-only geometry and native Spa/CoTracker completed the debug matrix; initial-GT-scale diagnostics are separate from GT geometry.
 
-Newtextured64×64querystaticfixed/orbit GT pair isvalidated; main-gridtracker profiling waitingtemporarilyforExp02leaseofGPU0/1. Noexp01GPUprocessrunningat03:12UTC.
+Reports, physical metrics, figures and compact synchronized footage are in `results/ai/`. Raw arrays remain at `/mnt/nvme/scratch/phyla-ubuntu/data/exp01/`. Checkpoint and artifact hashes are in the primary artifact ledger. Invalid silent-attention outputs and the legacy one-channel zero control are excluded; reasons and hashes are preserved in `ai_notes/quarantine-ledger.json`.
 
-Data: `/mnt/nvme/scratch/phyla-ubuntu/data/exp01/`
-Reports/footage: `results/ai/debug-pilot/`
-Logs: `/mnt/nvme/scratch/phyla-ubuntu/runs/exp01/`
+One seed per archetype and scripted linked boxes limit general claims. Official TAPVid3D integration and broader scene/asset replication remain future work. The exact-ID matched comparison isolates query density/context on textured scenes; comparison with the older uniform-color debug pilot does not isolate texture causation.
 
-Debuggeometryuniformsurfacesandone sceneperarchetype limitgeneralizationclaims. Scriptedlinkedrigidboxesratherthannativerobotjointarticulation. OfficialTAPVid3Dmetric integration, broadscene/assetreplication notdone. Nodeexpires05:11UTC,09Oct2026; archiveby05:05.
+The GPU node expires at 05:11 UTC on 9 October 2026. Root is backing up the scientific archives and integrating scoped commits.
