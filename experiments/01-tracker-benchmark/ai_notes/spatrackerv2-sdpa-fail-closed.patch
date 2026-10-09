@@ -1,0 +1,17 @@
+diff --git a/models/SpaTrackV2/models/tracker3D/co_tracker/utils.py b/models/SpaTrackV2/models/tracker3D/co_tracker/utils.py
+index 7287851..36da64a 100644
+--- a/models/SpaTrackV2/models/tracker3D/co_tracker/utils.py
++++ b/models/SpaTrackV2/models/tracker3D/co_tracker/utils.py
+@@ -382,10 +382,10 @@ class Attention(nn.Module):
+                 # print(f"q.shape: {q.shape}, dtype: {q.dtype}, device: {q.device}")
+                 # print(f"Flash SDP available: {torch.backends.cuda.flash_sdp_enabled()}")
+                 # print(f"Flash SDP allowed: {torch.backends.cuda.enable_flash_sdp}")
+-                with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):
++                with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=True, enable_mem_efficient=True):
+                     x = F.scaled_dot_product_attention(*input_args).permute(0,2,1,3).reshape(B,N1,-1)  # type: ignore
+             except Exception as e:
+-                print(e)
++                raise RuntimeError("SpaTracker attention failed; refusing silent identity fallback") from e
+ 
+         if self.to_out.bias.dtype != x.dtype:
+             x = x.to(self.to_out.bias.dtype)
