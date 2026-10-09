@@ -1,0 +1,2119 @@
+{
+  "root": "/mnt/nvme/scratch/phyla-ubuntu/runs/exp02/practical-shared-front-v1",
+  "jobs": 48,
+  "file_bytes": 417667694,
+  "records": [
+    {
+      "job": "articulated_links_fixed/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "853fc9757a7b26140b63d21ba15370263ca96ba3fd5a2bf46f76c3c312e678ac",
+        "gt_sha256": "d89b913f9b6847a22207a3ba243697f1971c18abbc2000b3a572ec515f3f5b2c",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "eabeb7a129eb03567c0eb7475e80629f48857c389b32447a25e020f3cb3510fc"
+        },
+        "reconstruction.npz": {
+          "bytes": 7551816,
+          "sha256": "18bbc0ee72e3e785dbd074f601545958dff76b77e8624888f7a7720113ff4429"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "3737e0bf4f04e65fc405f9d723374a7246546cbc800f4bb66fab390f945f2571"
+        },
+        "comparison.png": {
+          "bytes": 236684,
+          "sha256": "c53fc3225c1f423348e12dbdf34c2db208a51e1228a10ba86c8312fd1bd9e033"
+        },
+        "metrics.json": {
+          "bytes": 7985,
+          "sha256": "2ea51c2942e65402fe446a56ed91e429125e52fd280d6e690a2bd14f4b537b5f"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_fixed/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "853fc9757a7b26140b63d21ba15370263ca96ba3fd5a2bf46f76c3c312e678ac",
+        "gt_sha256": "d89b913f9b6847a22207a3ba243697f1971c18abbc2000b3a572ec515f3f5b2c",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "f509601bbd827dfa944a3a56d0064604d810372b3e5ffc291dcbadffe5ddcf43"
+        },
+        "reconstruction.npz": {
+          "bytes": 7373096,
+          "sha256": "2d742f67c611460e59b18c2bd42fd2e663b4de0f13b49a9dd0121043e5e48b26"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "cdb55a328321273f7fab1ada831500f253678f06b3e939c0534510fef6f4c015"
+        },
+        "comparison.png": {
+          "bytes": 247504,
+          "sha256": "ceae53cb58bdbd2025f6060284b80a07541b23469b356a51b74bad26fcc4ea14"
+        },
+        "metrics.json": {
+          "bytes": 7880,
+          "sha256": "6d13ae347feb7eed371c69c0d963683ab0a692634a341a7091832ece0c003c35"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_fixed/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "13173ad50c671a15ffb69975b6cecccb486c50a88da2a2920d7966428e55b4af",
+        "gt_sha256": "d89b913f9b6847a22207a3ba243697f1971c18abbc2000b3a572ec515f3f5b2c",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "665eb67bfb51c96f62f22202e1fe0349226b075e1d568880e787e4208b2f1a57"
+        },
+        "reconstruction.npz": {
+          "bytes": 8883567,
+          "sha256": "9e0fb278fac3c4be53ef4f5e9956cd7b57cabc669939db5d5b37dd6db0268c4b"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "e081385d831f9d4df915ebb0c9e19c797f42a397a366e31c7f7e2a333594aded"
+        },
+        "comparison.png": {
+          "bytes": 246581,
+          "sha256": "9c385516843aa1c1259c1b468e35a66b2690575c2c2dfc58c31ae5c97844bef5"
+        },
+        "metrics.json": {
+          "bytes": 7829,
+          "sha256": "e037ebd8cb1d0702dd0caf1b9f0edd344cf105ff7090e21801611a69e8f13b56"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_fixed/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "13173ad50c671a15ffb69975b6cecccb486c50a88da2a2920d7966428e55b4af",
+        "gt_sha256": "d89b913f9b6847a22207a3ba243697f1971c18abbc2000b3a572ec515f3f5b2c",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "2baece6df92578ba5e5dbe6ec7c6258486cad94e3e593a590aaa7487995d0cf8"
+        },
+        "reconstruction.npz": {
+          "bytes": 8780394,
+          "sha256": "2dbbb2bab78bb59a6d2bc366854eee98e85d701089d23c47acf00acbe955f71a"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "3077d865b153dd57fd42b456e820e6e3f38d30603fedffeb3171e73e099e89ea"
+        },
+        "comparison.png": {
+          "bytes": 249144,
+          "sha256": "4a5038226e7a59e8c0600e134dfa8b2f8b3c3aaaedcef872d9627896f7a03480"
+        },
+        "metrics.json": {
+          "bytes": 7714,
+          "sha256": "ca305e36458308ee7bc42200ae952dffd9383d78ae03770e7c4a05d545eff4c1"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_orbit/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "acc284da80239ba3fd19e2dd6f4831af05193ab3b0e805379a7c580a54335363",
+        "gt_sha256": "2caf584913a0e2c7bb0b4f7224cab68d63a1f06c14950f6fca186b22b87818a5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "4b4c14501cb6e30c47032d9b656b34a8d87ed97426c7bf6d76e56efe754e8d78"
+        },
+        "reconstruction.npz": {
+          "bytes": 7725303,
+          "sha256": "d3a1e3a5006878a6abd75c098654b79871e3cc2670f974feeac121aef8c060e9"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6ae854faa877e35822cf8dcf56c7524c402ad71b0c4acc795bbcf16ca3cb27f5"
+        },
+        "comparison.png": {
+          "bytes": 219358,
+          "sha256": "7b18fdc350e4ba0343edfe10273a2c117362c693b52ba33303e9b6afdde6f390"
+        },
+        "metrics.json": {
+          "bytes": 7974,
+          "sha256": "691e11e32847fce560fe467b277913158b63657bac143137900b716026feb52f"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_orbit/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "acc284da80239ba3fd19e2dd6f4831af05193ab3b0e805379a7c580a54335363",
+        "gt_sha256": "2caf584913a0e2c7bb0b4f7224cab68d63a1f06c14950f6fca186b22b87818a5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "121efa516ccc83526b3e85a35c12be3fcd9822ef14ee4fd8354f78cffc88620c"
+        },
+        "reconstruction.npz": {
+          "bytes": 7542604,
+          "sha256": "405c60d743a9548f689160aa408fa6454a2047e15548d7c2bc202dcc8566057d"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "ae090b9e9d5bf680ab6badb2f3375432ba64251fe3d7276062305c7fe5238e80"
+        },
+        "comparison.png": {
+          "bytes": 213239,
+          "sha256": "d1784fb539239da73d83ede175a54187646fc2e45083381ef03ce0e83e82dbcc"
+        },
+        "metrics.json": {
+          "bytes": 7873,
+          "sha256": "74daefe0c1737d7a437eef9e4ec24285d42481457fd4fd6816bc2cfe66741fc6"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_orbit/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "8671993c22b5f48906f4929695833d2b725f37ffc8f56bdc8c8ef2826b1e1cec",
+        "gt_sha256": "2caf584913a0e2c7bb0b4f7224cab68d63a1f06c14950f6fca186b22b87818a5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "464e48dd074ae29ac501281968de70034e3385ed34116771b52eb3d47fec6ec2"
+        },
+        "reconstruction.npz": {
+          "bytes": 8746930,
+          "sha256": "56282190cbd2be542c7885226d3ebf65014c8424cc0934268c8cc1f97e24d7bf"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "8b553ae40a8b11536e7c87769886a0344956af8feeadd1b6b0f2983b8a4192e9"
+        },
+        "comparison.png": {
+          "bytes": 248197,
+          "sha256": "757eaba200eead69322be5e2fd816b4f6adb49d4e4579d349d4c90c07bf4bc49"
+        },
+        "metrics.json": {
+          "bytes": 7920,
+          "sha256": "e100259cc837b0f56267c291a9851bec7fe2cf0d003d74e1a780b6d61fb6877e"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_orbit/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "8671993c22b5f48906f4929695833d2b725f37ffc8f56bdc8c8ef2826b1e1cec",
+        "gt_sha256": "2caf584913a0e2c7bb0b4f7224cab68d63a1f06c14950f6fca186b22b87818a5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "2b0e408800b663be9e67e71eef3f26adde90ae793c41d4bbd460ea1f09d8b425"
+        },
+        "reconstruction.npz": {
+          "bytes": 8614313,
+          "sha256": "94433ffdb543c82579af89a58e8dec0a2b2effa9b637e2b2bed88ce65d9e560c"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "3b6b5cc6c30127ac43c07420cfeeb0f4d8302366d6a4af4a94a0a913b620905a"
+        },
+        "comparison.png": {
+          "bytes": 246022,
+          "sha256": "31f153e9c97e96973292324ebe13b38109287de64e022515c2e088c260c61e96"
+        },
+        "metrics.json": {
+          "bytes": 7829,
+          "sha256": "0692fcc75e6d5ee973307f9e1c5745c8e0b3a7a03dfb4086a87ae884602ba1f6"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_fixed/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "fb972c17afcbbbb2234c8a7328e280ab8a2119f53239e693178148b0b8b236ba",
+        "gt_sha256": "5b6f8967f7b558f70ad0d616fb96d0929fc9bc8052268f4a0d78b64e23f3f42b",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "0614f1043426c0aff8fb36bc2cc894199c0757b0d33061f9dd80564ca6a868d4"
+        },
+        "reconstruction.npz": {
+          "bytes": 8910870,
+          "sha256": "c307827b6573ade6b6486dd733d62cb8f034ab9b8af70486d33f895fb54ff5ff"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "8579c543d5e5d24385394e3dd165f355e83d8c4b815d33bfeddd439fb44cacfb"
+        },
+        "comparison.png": {
+          "bytes": 249590,
+          "sha256": "aec9757fd33ee0357f6e1106a425aa171d0e714496774c78a4a0c749a5518cea"
+        },
+        "metrics.json": {
+          "bytes": 7921,
+          "sha256": "dbedbf6e86883d4a44778b935208edb47bf8b8f29a5eba30d91538e8d2fb4e31"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_fixed/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "fb972c17afcbbbb2234c8a7328e280ab8a2119f53239e693178148b0b8b236ba",
+        "gt_sha256": "5b6f8967f7b558f70ad0d616fb96d0929fc9bc8052268f4a0d78b64e23f3f42b",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "6d87d2294c333bbf977254dfcf89bedcb669f6f395b14eacb7e04fd09f17f26a"
+        },
+        "reconstruction.npz": {
+          "bytes": 8834477,
+          "sha256": "eee04e12a1fd331a3573564993a6480f7db36802e2b7623f3fa82580479397a3"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "8ab2d13f9a763a46e94eba8a6370f16b65e9c37183c15fb04cb0f514ebe98724"
+        },
+        "comparison.png": {
+          "bytes": 247017,
+          "sha256": "2d940a20b46b1b3eaf3551e3c740a54e06a2ade39c5d33e6ef2a1511b1cc0f16"
+        },
+        "metrics.json": {
+          "bytes": 7830,
+          "sha256": "fb37545ce4a87687fe319a91ac05d0fade7b76daec7d74d7a409cb3174efab4a"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_fixed/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a728a88475568b860eaeb89024617ca2f3d3a2519e9c7320f61f564b520c9abf",
+        "gt_sha256": "5b6f8967f7b558f70ad0d616fb96d0929fc9bc8052268f4a0d78b64e23f3f42b",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "12d7c78ffa56a7e95148707f15ca287f96c2c062e000e2faca2054a53d19ddbc"
+        },
+        "reconstruction.npz": {
+          "bytes": 8802912,
+          "sha256": "eff30f6534162490784ae6f7217c117a25af2ff0a47d05a97366d25b62b15d5a"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "46669bd985a60ba7118b1c540abd9481d60933796fcfaa6104a7c669ace26064"
+        },
+        "comparison.png": {
+          "bytes": 224590,
+          "sha256": "facc91191963d22bc6372b313ee9c1917cd1bed85d5547f5c2aee8044c286fc8"
+        },
+        "metrics.json": {
+          "bytes": 8023,
+          "sha256": "9b36db530daf68d8c7396516f997e4d15b940303e916bd17d444d0f7803c72dd"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_fixed/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a728a88475568b860eaeb89024617ca2f3d3a2519e9c7320f61f564b520c9abf",
+        "gt_sha256": "5b6f8967f7b558f70ad0d616fb96d0929fc9bc8052268f4a0d78b64e23f3f42b",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "989cb9a421beb592f23132d34352f9ebc456f489655bcf433d9f312263dd1bed"
+        },
+        "reconstruction.npz": {
+          "bytes": 8692316,
+          "sha256": "0abff71449bb6115cdac72c8622b93ec6fbd0fcc386f6b372a08272dd5726378"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "c1017892b8bde8026b44654b5b5a6e2d0d04e75463730dd708454deb77017c0e"
+        },
+        "comparison.png": {
+          "bytes": 227177,
+          "sha256": "15c60f421a2e4dbac35302931e25309d1870ea081a7b31c6a17609559b24462d"
+        },
+        "metrics.json": {
+          "bytes": 7926,
+          "sha256": "6c06b71a7cf41132ddd8d4870cdb6ec22eb2a2d26becd4d993c73584057b2b94"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_orbit/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "c38df6f2f5361f636d7ca23aac44c1905a2913660caeeac642f1f130d7fefc4a",
+        "gt_sha256": "64b25a6258e665d77815afa513494483ae07b7d0a89cadcdb32b933abcd247a3",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "6f1393f341394e57cc57b5ca640e9611f58af10f0d1f26ea9eecfdfa9c37ecdb"
+        },
+        "reconstruction.npz": {
+          "bytes": 9655640,
+          "sha256": "cca783aeee67a0eb483eabd6b49ef9936371e21fa5b6b4fcaba0a399445333ef"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "466ad5c22f662d2ba24c28074af075c67514f88388b789210da515134e3b987f"
+        },
+        "comparison.png": {
+          "bytes": 282657,
+          "sha256": "18e8ce94f2b28e9173f86af27ac765fed539625ad2bb24fbbec0211a712b5fad"
+        },
+        "metrics.json": {
+          "bytes": 7939,
+          "sha256": "64900ad444cc70614c4dd3213334b2bf8379ec0fae9426875e313147b9c76da9"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_orbit/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "c38df6f2f5361f636d7ca23aac44c1905a2913660caeeac642f1f130d7fefc4a",
+        "gt_sha256": "64b25a6258e665d77815afa513494483ae07b7d0a89cadcdb32b933abcd247a3",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "4c6584c2f7263b1725e0fb875e6599904b00010513b5a98b8ff5937eeb4e374e"
+        },
+        "reconstruction.npz": {
+          "bytes": 9498882,
+          "sha256": "9843c0ff3d0c2d98cf736f746a0176c1550e35951e1b416b1ad91d2c13032f6b"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "9862a7f8a897807f6226394d560c7d38cc540f2717075d5e7f1fe0744059335a"
+        },
+        "comparison.png": {
+          "bytes": 280755,
+          "sha256": "c73470d0cbfd6c92f18ccef8e3e3061f91c0951fc1bcdf33c1708bb018a1a3bb"
+        },
+        "metrics.json": {
+          "bytes": 7821,
+          "sha256": "412dc231ed7581f30bd821a385ce70efd964e3d2b5d39f90cfa4d53500dddf9e"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_orbit/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "e715d3d9bb8161c009c6c05cd620c22650d4f6239868417a852497bd72beac90",
+        "gt_sha256": "64b25a6258e665d77815afa513494483ae07b7d0a89cadcdb32b933abcd247a3",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "449404bff2c5fdc7713d27650a65106cd4e0d1ff1c40a24e3080d26329b67e61"
+        },
+        "reconstruction.npz": {
+          "bytes": 7193420,
+          "sha256": "3db7d225615bc7b235575e3248046a5950ec2eccd9de9e30b42bb797265dc0ef"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "c7ee692d9dca8d5663133a43feaa088db04ab8a9408056251a01e67df12dc064"
+        },
+        "comparison.png": {
+          "bytes": 229579,
+          "sha256": "5f60c63bfd09cc484e6295c6d34ec80f8e077a193d40b3de27e049ea082f8ea0"
+        },
+        "metrics.json": {
+          "bytes": 7992,
+          "sha256": "a7605a76790fabd7183b81c0c38b0d42cde7c2b80975662a09133820de4419df"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_orbit/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "e715d3d9bb8161c009c6c05cd620c22650d4f6239868417a852497bd72beac90",
+        "gt_sha256": "64b25a6258e665d77815afa513494483ae07b7d0a89cadcdb32b933abcd247a3",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "2853156b3aaaf2e184d4cf17565bc43987e72f8b4fc1b7c397bd29da7d6dc86e"
+        },
+        "reconstruction.npz": {
+          "bytes": 6862965,
+          "sha256": "be2e98628675c5e8de252167751f0d6e2990dc01c0fdfb3d5a8804819fc9f136"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "213fd01c3d01ab4189a5096800fbb3699c39d28f15713ffcb8743c5ae7e86bef"
+        },
+        "comparison.png": {
+          "bytes": 219563,
+          "sha256": "74a2645ab785c4ca10ba0c152986e03fe52da6281b307d0131cc8e8934c01cdc"
+        },
+        "metrics.json": {
+          "bytes": 7893,
+          "sha256": "596638a6446f6ea77513d66b6af819eecd5fffc22062571a24bceab7f782bcf9"
+        }
+      }
+    },
+    {
+      "job": "object_translation_fixed/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "7fb2d835aae2469a844bafd5a6b001b96c2d754774cad68004d241cedcc5cb37",
+        "gt_sha256": "376ed8f5f5f5a9e57539863911ba0855116827ef3cc6f58f78fd2fe0814a41af",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "ade357f609b7b52b35709adbe79c97e4a2b747c2209db5414fc1084a9daf97f0"
+        },
+        "reconstruction.npz": {
+          "bytes": 8347209,
+          "sha256": "e8101d09b57d8b472bd593361bdb41259e9df8894f4ee2869f67c885b77e02dc"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "16efc63efcfb4091ee6c11ea855d168c400b8a9182ab52661360c0a1bdbe5da0"
+        },
+        "comparison.png": {
+          "bytes": 222911,
+          "sha256": "f351ec835ecdcaa7ec338a80d38e25dcc249ece36b1d2feb3589467897481420"
+        },
+        "metrics.json": {
+          "bytes": 7960,
+          "sha256": "32e40ad16a63843eb54debcd64101dd0cb66c1b0a95902acbd485700551bd675"
+        }
+      }
+    },
+    {
+      "job": "object_translation_fixed/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "7fb2d835aae2469a844bafd5a6b001b96c2d754774cad68004d241cedcc5cb37",
+        "gt_sha256": "376ed8f5f5f5a9e57539863911ba0855116827ef3cc6f58f78fd2fe0814a41af",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "f14e6ad9bd27e9a1a96647fc14579c7a28f7b892bfad16d5f2f766edb0a754d4"
+        },
+        "reconstruction.npz": {
+          "bytes": 8316660,
+          "sha256": "28a6e99b8c66ddf93eec278f1be66899d6a7176a862d554a91f6157aac467a14"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "6250163237b5afb8a3e85d33bc8383d8b3edcbee773d363d27c5d57065fb92fe"
+        },
+        "comparison.png": {
+          "bytes": 227493,
+          "sha256": "188645a5cb8c92c10cd374c4014f035b2d7975350ff7360f9a9e7183bfbd857c"
+        },
+        "metrics.json": {
+          "bytes": 7848,
+          "sha256": "76cc4bd60496657e547ba00defb44a48b0528e0e0fec773eed67669fe3d61760"
+        }
+      }
+    },
+    {
+      "job": "object_translation_fixed/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "b41e1e4cde483510b0803d3d11996a3785ba106097c0ff2b39a7950a009851d0",
+        "gt_sha256": "376ed8f5f5f5a9e57539863911ba0855116827ef3cc6f58f78fd2fe0814a41af",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "1ddeb8df9862c5c5be925314f2aa614bea7003513d78f11658601d5bc116756d"
+        },
+        "reconstruction.npz": {
+          "bytes": 8559192,
+          "sha256": "cbbf4c4965485b787bb383f55c092ed243516a6bb963829d7bc44a82fa351267"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6a7872d6f9e178c2d236db6101482da203350b82d2f356fc5b4f2f353582262f"
+        },
+        "comparison.png": {
+          "bytes": 231387,
+          "sha256": "55cff3fddd5ffa3450bcc3cf27cb3c6b1b05a84759d3c958b2a85b203e59da03"
+        },
+        "metrics.json": {
+          "bytes": 7959,
+          "sha256": "d33258c0a55bf77673c63cd0f639c47fd20541591ad3d3a3113ce8be49a7c845"
+        }
+      }
+    },
+    {
+      "job": "object_translation_fixed/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "b41e1e4cde483510b0803d3d11996a3785ba106097c0ff2b39a7950a009851d0",
+        "gt_sha256": "376ed8f5f5f5a9e57539863911ba0855116827ef3cc6f58f78fd2fe0814a41af",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "c86edb03bb0baca63fb742ecbdb39df33447ed20b62e494bc1a0bad28cfdac69"
+        },
+        "reconstruction.npz": {
+          "bytes": 8491848,
+          "sha256": "92b9babc6ea9ab0eb1a9a563b6a6b845e92bffaad5fd7d437f606cd62d2d9a42"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "087c05ec74c259779f94528d9cc1b5e43baadb55c32c688670e19a32ffa2399e"
+        },
+        "comparison.png": {
+          "bytes": 232604,
+          "sha256": "07b847087944a90f2b1d723c89a8456f91eaea9e76b84019d3578d6616fa75cc"
+        },
+        "metrics.json": {
+          "bytes": 7851,
+          "sha256": "b5993a97a02f2ab6cb2c73a349c1313ebb405187b3736e51554fd7dd117d0175"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "c4ac73350de7bc9ae79459ff1ab4e40a21105c9d45a02eea6a6988dcfe4066cd",
+        "gt_sha256": "7c93aa9f3403b148d65a6c9cec239b54748e02a37d2d14786e7f90a347f3f4ed",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "f7ffe7f13b1ed30495fbd37697b23544a3d90ed1abb4cd53f0ad0e546875fffd"
+        },
+        "reconstruction.npz": {
+          "bytes": 9076090,
+          "sha256": "1f9234f45be4c62b4b2aab67b67932b9b1737a670531488dd432b84631722c11"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "896e593c0ad4470e75c65ed5afd642abc8a6f572ac9936227c552fb4137ab3af"
+        },
+        "comparison.png": {
+          "bytes": 246637,
+          "sha256": "7e37f5a81f96336b9edc527cab59a156d6f618e20a4f6d57998d2b75ee925177"
+        },
+        "metrics.json": {
+          "bytes": 7934,
+          "sha256": "b0c1ef50eb9de6f30fdf1d00158faf14cb2c7a85eb19af2ee152cd149fbd25e9"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "c4ac73350de7bc9ae79459ff1ab4e40a21105c9d45a02eea6a6988dcfe4066cd",
+        "gt_sha256": "7c93aa9f3403b148d65a6c9cec239b54748e02a37d2d14786e7f90a347f3f4ed",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "26c42a06fdc17c8685eae4bda2a0b10f9decf95991e4ea7199fd0b9cc77497a3"
+        },
+        "reconstruction.npz": {
+          "bytes": 8983642,
+          "sha256": "3b9d5f6eb6e7d9dee15b52396362edf2f5c355a2e86588138249d143c9fa7acb"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "2da0a8b6425285620ffa0a90aba437d9e3bcc9d95ff3eb0949744a58aa9c1bf0"
+        },
+        "comparison.png": {
+          "bytes": 253265,
+          "sha256": "c1f17f94c5d12cb5545aa8a1877904cad2bc0592f00a30666b2cf74b021b97a7"
+        },
+        "metrics.json": {
+          "bytes": 7833,
+          "sha256": "970d1196a9ae64130c934dab7ebb962cbaec762ecf44780ce81ae675cbb7e81c"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "6637ceadf05c8ac110a54dd78c30d5aea5a38492d516628d63154b4f7799e856",
+        "gt_sha256": "7c93aa9f3403b148d65a6c9cec239b54748e02a37d2d14786e7f90a347f3f4ed",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "7001bb24f0b2bb2b456c12d9aa4a91318cc90dd91f2590797fea1374766586de"
+        },
+        "reconstruction.npz": {
+          "bytes": 8408969,
+          "sha256": "2ace9b7ef4cd7bbe11f2eae8020778d737541fbead86c4f26e69f61e5330a58c"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6cc029cc0afe6b3ef7599af3fbe817b91c0337d64f30f389c26a0b36df9ca227"
+        },
+        "comparison.png": {
+          "bytes": 228837,
+          "sha256": "b4163405de550b7db2805df80f0641768906e76878f00c34765a768a642063c2"
+        },
+        "metrics.json": {
+          "bytes": 7961,
+          "sha256": "2407f483f110f92c3723843f1591ee6a66bc68cb39212f2b02c72cd54c9438f8"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "6637ceadf05c8ac110a54dd78c30d5aea5a38492d516628d63154b4f7799e856",
+        "gt_sha256": "7c93aa9f3403b148d65a6c9cec239b54748e02a37d2d14786e7f90a347f3f4ed",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "04cb3a8ebf7a56308ea06c0adaedeff9b4081818af3ee4563c13e78ef93ecf34"
+        },
+        "reconstruction.npz": {
+          "bytes": 8319215,
+          "sha256": "aed3211143f3da3e77994b5501f8d289bf4b584917d27d9bbd6afc4f9ef0eabe"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "f89b8b994ea175868d090e502ccd833e53760fdfefdf2955d22733cb3ca02183"
+        },
+        "comparison.png": {
+          "bytes": 227932,
+          "sha256": "9a262005bdb88ea536a72f60156737aca9098a75ee3015e61a682ff6c846c55e"
+        },
+        "metrics.json": {
+          "bytes": 7853,
+          "sha256": "f7cac093d8ec6b55d1c4429e05545a26957e331c289d1d04d95724faf0f83639"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_fixed/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "3d0e423dd2b15a5f291d9e590de5dfbd5ffd63cf97ec0b1e1885b603ce9c4d2d",
+        "gt_sha256": "773bc5146b9b12f994e8e2c94d67c412e8c9d11f99fb6fb81e46b3306e49d969",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "e7ffabba72f6d4f46dda5af62ba1d00aa222e3ac0bb0c4ae9eec9ed4ab0f0303"
+        },
+        "reconstruction.npz": {
+          "bytes": 8527195,
+          "sha256": "59fce87a384dbb680118433a47b980d34fa745dbb53326c22f4a8f8187d52a2f"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "12a1e6257629cd55cf03afcfc2f9b22d1b6aa843a96f9f38bf0c2ede69662549"
+        },
+        "comparison.png": {
+          "bytes": 231369,
+          "sha256": "4edfa514c3c7505772cc9a1921a35da0a51029ab5fda79744a2abac8e30b993b"
+        },
+        "metrics.json": {
+          "bytes": 8000,
+          "sha256": "6570930bb03d17c2c4efeee9987ddd8488058f7cdd5743b9891c2d4296d6c430"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_fixed/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "3d0e423dd2b15a5f291d9e590de5dfbd5ffd63cf97ec0b1e1885b603ce9c4d2d",
+        "gt_sha256": "773bc5146b9b12f994e8e2c94d67c412e8c9d11f99fb6fb81e46b3306e49d969",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "5c99aa5e4c23a94e9629c7e5ade7f8f7646276be67a2c06f24fc6186c3e2794f"
+        },
+        "reconstruction.npz": {
+          "bytes": 8506076,
+          "sha256": "3d6a155ef5a1841966f9ddac2484530bf51c6d0fc15b725638fc2cc316f10c6f"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "444e218832d0a91ed503917960d3f161634d4318321939a6da83849cd7c7ea6b"
+        },
+        "comparison.png": {
+          "bytes": 231133,
+          "sha256": "39659e86b2294d9a313b71b5f84b8cc3c51d1d1283d325e501a9b1a743e7bb89"
+        },
+        "metrics.json": {
+          "bytes": 7892,
+          "sha256": "eaa8b749e21f498b6b72fd07812c7641ce8333b4dfa6ff818eceaf687b6ccf2e"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_fixed/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "819e9343a6f88238065231d699881d70157dedf254444611d0ddecc8e3bdd642",
+        "gt_sha256": "773bc5146b9b12f994e8e2c94d67c412e8c9d11f99fb6fb81e46b3306e49d969",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "d910208db69eb148bc9a196fd6441542649aa25f64bb815e28015bbe12f9ea89"
+        },
+        "reconstruction.npz": {
+          "bytes": 7904103,
+          "sha256": "41a9de6f086cea62c2b3b0931e479e06433b6b2bc307080949ec299d7302acd0"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "3b792b9d97787001b5cb4f4995b6f20aaf54ccced0b957d109d5789ff04774d4"
+        },
+        "comparison.png": {
+          "bytes": 204974,
+          "sha256": "4a05035ad83183eb399ad8b827f84a4f0613dd3c10aa12e6edea6bfd1fb7d269"
+        },
+        "metrics.json": {
+          "bytes": 7953,
+          "sha256": "565b69ee0c0503a4a8927dba278044a875c09ef516cf69e4cf9eb67255fc57c9"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_fixed/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "819e9343a6f88238065231d699881d70157dedf254444611d0ddecc8e3bdd642",
+        "gt_sha256": "773bc5146b9b12f994e8e2c94d67c412e8c9d11f99fb6fb81e46b3306e49d969",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "0412399562ea09779b774a2721f9d37077424dda2ba8b27b861e6c6c261f1303"
+        },
+        "reconstruction.npz": {
+          "bytes": 7894152,
+          "sha256": "5ca2cb1e91b2328e346c44d353571cba97d8a997d065f3d49c1c8a2fc3fbcda4"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "96577640c3b80ce142243485aca6f0a22a2e685b9d2b3fec6454f815fa20e2d8"
+        },
+        "comparison.png": {
+          "bytes": 215204,
+          "sha256": "5aa75909f942256aed3f1714a6a991a349ebe164594e2423f0c81ff96ec18df6"
+        },
+        "metrics.json": {
+          "bytes": 7851,
+          "sha256": "e41ef09fc43134b7ff270d9558542f95f457fca555b5951bb832e6ec91f9dd80"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "b31a8bdcd242be135cea921e09499af129195db8ccf1ccc1a81ad29017fdbd22",
+        "gt_sha256": "862e0a1856e699901f1bb0c1e0a1f3cf5cbbd9834cd681224868f4f620d3156f",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "3a6d4d790a95cff29d84f3b253f59f2fbd925daf710926d3f0ae20d5cc31908b"
+        },
+        "reconstruction.npz": {
+          "bytes": 8963212,
+          "sha256": "3352490c017338914bd1b67a923c2d0742b69a40f28221f2a5b05e6858c68d85"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "1e035d0ef5db35d9f9c08e0a089c6d2672646ad8b4a3fed3396589e9f9ae03ef"
+        },
+        "comparison.png": {
+          "bytes": 260380,
+          "sha256": "bc6c186fe0c704f0a55b50e3d0ad99fa8c91875035ddc530d2ce821cd29da2d1"
+        },
+        "metrics.json": {
+          "bytes": 7977,
+          "sha256": "b6030b4fecb3107585ec28d45e1aafbd4dee36f4e1c75ee9235220c8a9be391e"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "b31a8bdcd242be135cea921e09499af129195db8ccf1ccc1a81ad29017fdbd22",
+        "gt_sha256": "862e0a1856e699901f1bb0c1e0a1f3cf5cbbd9834cd681224868f4f620d3156f",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "e92d183840e9ac11a6f642a078af6ee5e5b50a4ea3d46b2dce595b577202e6c6"
+        },
+        "reconstruction.npz": {
+          "bytes": 8888765,
+          "sha256": "9e073ecf3f59294f9ef26eee9c567042253c80ada08e518a46744845d9fbd8eb"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "0c275d42090ec4316a77685590fb99f6770d2c81d903565aa673afcadbaa3f7e"
+        },
+        "comparison.png": {
+          "bytes": 261473,
+          "sha256": "ac3e947d98b41b08dd4e97bf567b60a628126e5e821ce98154cb9872683114cd"
+        },
+        "metrics.json": {
+          "bytes": 7868,
+          "sha256": "ba5728acf65b255478665156c28a594122d3f87d7bc4d6b62a495f308f9980ea"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "4cfc93d1bea73df7923d8bd5a87220edc55ceb81995f50edb765c3cd04de3724",
+        "gt_sha256": "862e0a1856e699901f1bb0c1e0a1f3cf5cbbd9834cd681224868f4f620d3156f",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "2e28812ca7eb784c19188183ff8cc56d4cc4ba39805d1326b2eaa45055e14e27"
+        },
+        "reconstruction.npz": {
+          "bytes": 8702912,
+          "sha256": "de85912a8e0052bd885f49b51d2d9ba0179603e93911293a22cf468b4f36eefe"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "1064d346f4f5fcef2052ef7edc80e953fbd4d063c7cfd7c80927b22ce87b6d71"
+        },
+        "comparison.png": {
+          "bytes": 237150,
+          "sha256": "ddd9865332c2233bef4c052c677dfa125159af179d13e1164131a1e80b4b4599"
+        },
+        "metrics.json": {
+          "bytes": 7935,
+          "sha256": "f5e719297727282cad42995e763082b20310a31f64be769b524ad129080a8a2f"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "4cfc93d1bea73df7923d8bd5a87220edc55ceb81995f50edb765c3cd04de3724",
+        "gt_sha256": "862e0a1856e699901f1bb0c1e0a1f3cf5cbbd9834cd681224868f4f620d3156f",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "bd2e4fa9de7eed4b3b603da976c32f7795960161f2d3f4d92a5bd0b914c26292"
+        },
+        "reconstruction.npz": {
+          "bytes": 8633087,
+          "sha256": "09c719fddd0a522394af6efc12112687bda05068f46f58980e3c99e4d301c641"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "bab6e1b99a671a8e671e8c2470281b91211e8ef2414d250e6759582f85d528bd"
+        },
+        "comparison.png": {
+          "bytes": 236912,
+          "sha256": "f0aca4729c8512f2f5eaa2fc16b76f6068a34a55ee944275c710c97803e00d55"
+        },
+        "metrics.json": {
+          "bytes": 7829,
+          "sha256": "bf03d221bdc0dbf7c7f8e4bb5832269246675275737513f004b1e7c6060686ff"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_fixed/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "e51e14645bce3208840f787939e84d0267ee1120ecfa1210cc5f27f257c789c6",
+        "gt_sha256": "3a563e8657f8ac0b5878ffeb2d9295ca569e0d8e9add38203ee6123fa698d156",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "f32b78415a56e882bd5d00a54ba34339894819f33290993271779283a8504434"
+        },
+        "reconstruction.npz": {
+          "bytes": 7867130,
+          "sha256": "4d577ec5a6a2b0e116e99c61fe7c43b41f830d2917cf74396209562d8c8fd5c5"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "e6fbe4fcc7eaebe8e6ebee3acbf1f2d5d0d6834e9bf7b3872e3732c67ee66449"
+        },
+        "comparison.png": {
+          "bytes": 210040,
+          "sha256": "e1eb0ed83c95d03ac752b3e9c438b71a5ed80b4ce7b34ce9ae830748be1cad8d"
+        },
+        "metrics.json": {
+          "bytes": 7956,
+          "sha256": "e1b5e53bdf35ca06d387305cef562b027197a82657a08136e6e63189c84a8666"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_fixed/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "e51e14645bce3208840f787939e84d0267ee1120ecfa1210cc5f27f257c789c6",
+        "gt_sha256": "3a563e8657f8ac0b5878ffeb2d9295ca569e0d8e9add38203ee6123fa698d156",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "5abf670e9742b1a8b24e7b4af611e482d669dd849237220efc2bd9e0bd514972"
+        },
+        "reconstruction.npz": {
+          "bytes": 7888435,
+          "sha256": "7d8371300ee6b41ebb601b73d3ec5c6426cd832ad2b35afddef356f7a8e86ab2"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6c1cedc13b9a4e99d00cc75df151099c3eb6df536046a44faa7005ada7dc496a"
+        },
+        "comparison.png": {
+          "bytes": 213857,
+          "sha256": "46b9896334d30c65d8534f8acc61b4f0088cf7090b8cbbfec7f3a18613f73579"
+        },
+        "metrics.json": {
+          "bytes": 7875,
+          "sha256": "3b40a6d442c20f4e854513304d87654d11b0a172547024372ce8c30348864a0a"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_fixed/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a17fe7e1b79cb41a95581b2fd05d3e398699ccbad304080d44f070ba90d24f27",
+        "gt_sha256": "3a563e8657f8ac0b5878ffeb2d9295ca569e0d8e9add38203ee6123fa698d156",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "d69776d516ed6db46a0f344ebf186a70ab0b198a2e579608cd6b2c8cf83f3f07"
+        },
+        "reconstruction.npz": {
+          "bytes": 7697696,
+          "sha256": "0546a430bce7b851454bd8d8187ed636e59cf06927e537ffc6fb919a57ecfd77"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "1426c4550759682fa0f1936bc325f9e4636415e7459f570c6369d6b82d5a66bc"
+        },
+        "comparison.png": {
+          "bytes": 197571,
+          "sha256": "a96c1869e9e79227a4c2284ffc61ae0d5cf0a68353040baa4687993321c5b65a"
+        },
+        "metrics.json": {
+          "bytes": 7930,
+          "sha256": "01b3faa1421ab84ed7eec2487de6c0eb8838398cc017c7e498c483dac8329762"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_fixed/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a17fe7e1b79cb41a95581b2fd05d3e398699ccbad304080d44f070ba90d24f27",
+        "gt_sha256": "3a563e8657f8ac0b5878ffeb2d9295ca569e0d8e9add38203ee6123fa698d156",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "abb5ca8b2925417f3fb6cd096130195eb9d1e406ca3ed310ecd1190d43d4930e"
+        },
+        "reconstruction.npz": {
+          "bytes": 7668645,
+          "sha256": "4f7913f805e5c63b0f85fffbc0459e171f6fbc44785dcd158c786abb85106c2b"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "cb27d4a037e647f4287dcd3476f623b32c1b7aa9a1fd4274e9d941280ba94a5a"
+        },
+        "comparison.png": {
+          "bytes": 204765,
+          "sha256": "7bc85db9dd01ca5790db26208f44a2aa0d5785aa0b39c22bca48ce65aa3d1d0c"
+        },
+        "metrics.json": {
+          "bytes": 7842,
+          "sha256": "b576ea353f8b340fca0d448b2cce68a6456e44cfd767797de7d6bb7ea69171d1"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_orbit/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a34a505a889ec61bf885030ffc67c3354d23374a4231dbd2b893ab03d1bcf5be",
+        "gt_sha256": "08f8fec7cb0e6c1a2b591325ecf6aa2d858a46e185067bc4d7e4712c22c68ae5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "3a7616e0354d5eefab416198e0fe3fefa314648e54cf464f3f45a7b1e3026002"
+        },
+        "reconstruction.npz": {
+          "bytes": 9158272,
+          "sha256": "4e4161a9f4d88e8c768d95592528355d3e9319839ed75f7aa61069ccb3d6d57b"
+        },
+        "complete.json": {
+          "bytes": 617,
+          "sha256": "55f159676080a5225d731f7b82b90da1e08226dc793d7a7e8eda264517a11817"
+        },
+        "comparison.png": {
+          "bytes": 239549,
+          "sha256": "8f456a230c49ad45bb4da6291f82682f34c3f10444930ef50f105c32ab45d959"
+        },
+        "metrics.json": {
+          "bytes": 7918,
+          "sha256": "db69db98cc45ddc00acfe9a2787379524cfaa1b26b761428c67bfd8a1c4a0026"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_orbit/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a34a505a889ec61bf885030ffc67c3354d23374a4231dbd2b893ab03d1bcf5be",
+        "gt_sha256": "08f8fec7cb0e6c1a2b591325ecf6aa2d858a46e185067bc4d7e4712c22c68ae5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "cc6157a3b1fa29ef1db99ba60c474fb896c21d2f4a72c3cde901535a98fc8ff0"
+        },
+        "reconstruction.npz": {
+          "bytes": 9079704,
+          "sha256": "661d0cf11dc59fc3567b7205f885d4498f0b3b9cf82f3ad4d519e1d6ffc0ba54"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "58db68e1d7985efa0f42dc1d45b43ae7c541c04b7a4a963b57bc013285b4fe47"
+        },
+        "comparison.png": {
+          "bytes": 245239,
+          "sha256": "a0582750e7fdf9c5a2390bf3f1aac5cce8b3270322f55e6938914a7692ef800e"
+        },
+        "metrics.json": {
+          "bytes": 7813,
+          "sha256": "49b678959327e874264276b6d98bf383d03048db3fd0902532561ff936115614"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_orbit/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "02a66493393d03c659f45761f72b72de56f8fb8e64b8092ae09a3a44a59cf506",
+        "gt_sha256": "08f8fec7cb0e6c1a2b591325ecf6aa2d858a46e185067bc4d7e4712c22c68ae5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "2f0137e5a9dc8899cdda2258f773a20a746c2961bd6f2351a343d965dfe33306"
+        },
+        "reconstruction.npz": {
+          "bytes": 7953274,
+          "sha256": "6a4e695a1985572ddaa6bb5de4e0e9dfa69a752482ee1cb4a39d83efaa54de88"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "ff7dca1c8a634fdddc549c4bd1635ccf7ed954e281cc27db83ef60c254ad90b8"
+        },
+        "comparison.png": {
+          "bytes": 221769,
+          "sha256": "871f4f9b5a6d3298b4ef9be6be0db640082a61c0ac09e32674cf9c29fca1b036"
+        },
+        "metrics.json": {
+          "bytes": 7987,
+          "sha256": "cfeecde8f5b216459348c28a62ed960ca4810bfd3c3ee4e562e4829de10c9b9f"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_orbit/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "02a66493393d03c659f45761f72b72de56f8fb8e64b8092ae09a3a44a59cf506",
+        "gt_sha256": "08f8fec7cb0e6c1a2b591325ecf6aa2d858a46e185067bc4d7e4712c22c68ae5",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "a9c3676fb22687513bc277fe0494e0b4cd9ac08a01964a74159fb0b9b6a1784c"
+        },
+        "reconstruction.npz": {
+          "bytes": 7887799,
+          "sha256": "0082ce2ef3ad49b34b14a57e2b2523691c009075e0cfac13aa4a11ac3d6ec39f"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "59232f2f9776573fae502c0717cc093f99c13264067111af5c7505f9f107f903"
+        },
+        "comparison.png": {
+          "bytes": 224870,
+          "sha256": "856d2982c09c4260728a4a2d101d28a62e5f090a35d523d57a9ac913c617872f"
+        },
+        "metrics.json": {
+          "bytes": 7888,
+          "sha256": "7649bb92ae2d70160c8b8fe1f2577304a36d2ccef75471cb82dfeca7670d50a3"
+        }
+      }
+    },
+    {
+      "job": "static_scene_fixed/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "0adb0cb59880f63efb7b9e1763590fb3199df2549bab91c188af41577bc65d2e",
+        "gt_sha256": "4d272a103242eed6a912a39cf0dc4ecd92437715f009e9af9fe334b21ed1aa86",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "423465014347c3583857dd78f946c0aba18b219783144171c7b1309796eebaef"
+        },
+        "reconstruction.npz": {
+          "bytes": 7430188,
+          "sha256": "21bdda2d16d8b54f6e81218d941ad8cf235508c22db697d68d28275f7b69c561"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "9239360ccd85e2a5d4ca20b930f172d429e6492b89729680274b32b090b5ed2a"
+        },
+        "comparison.png": {
+          "bytes": 192717,
+          "sha256": "401fbc8632c12d93826966144bb54875392e34b5e8d2bd993a2bfe70d5102d98"
+        },
+        "metrics.json": {
+          "bytes": 7948,
+          "sha256": "bfa80ae71889a41aeeda6a25911483cd93a586df3fdac1f8d11982698700fe96"
+        }
+      }
+    },
+    {
+      "job": "static_scene_fixed/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "0adb0cb59880f63efb7b9e1763590fb3199df2549bab91c188af41577bc65d2e",
+        "gt_sha256": "4d272a103242eed6a912a39cf0dc4ecd92437715f009e9af9fe334b21ed1aa86",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "988db3470a1e94e88ac78ac4544bd7c2de2d8b019a1677c98e7e098c716ff8e0"
+        },
+        "reconstruction.npz": {
+          "bytes": 7529836,
+          "sha256": "2da330758ddbcd8451218319eadd08acd3dc8345ce734d66966d82acb906502f"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6bbf45e3e40da78e9e9161294b4c88d47c3d10d637017d2c0070541e621c61fe"
+        },
+        "comparison.png": {
+          "bytes": 204198,
+          "sha256": "63282d38110bcafe48f89eb356f8a022775c8423bebb3ae25b27a9f4e12eef2d"
+        },
+        "metrics.json": {
+          "bytes": 7857,
+          "sha256": "1db2daa126c44b1134ca4e0ca73f6161c896ae5e5f4f8ce2af044ae211004570"
+        }
+      }
+    },
+    {
+      "job": "static_scene_fixed/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "dec55780aee69ab30968dd21d5590f12fe2954abcc459b157efc9a902df97cbe",
+        "gt_sha256": "4d272a103242eed6a912a39cf0dc4ecd92437715f009e9af9fe334b21ed1aa86",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "45d28091abb430319dcb151b9272cbabef7644416041b022fde87a71011048a2"
+        },
+        "reconstruction.npz": {
+          "bytes": 7290968,
+          "sha256": "c4d77dbeacd17b57d402f053d37b64c642f607c9a9227416e71a74660eb0f1dc"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "276b1440e844d63a34dfb14f99d6ba9ba15108254c22e7ef1f97572c88106230"
+        },
+        "comparison.png": {
+          "bytes": 196819,
+          "sha256": "428aa28aa8f5974139a3bc1926f8f899e3b27756cebad40b0d32864aa037c20a"
+        },
+        "metrics.json": {
+          "bytes": 7892,
+          "sha256": "63d60bdee1df8857189911e612517d42a516d131dbcc55fe792f08417c0d667f"
+        }
+      }
+    },
+    {
+      "job": "static_scene_fixed/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "dec55780aee69ab30968dd21d5590f12fe2954abcc459b157efc9a902df97cbe",
+        "gt_sha256": "4d272a103242eed6a912a39cf0dc4ecd92437715f009e9af9fe334b21ed1aa86",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "065e6d496fce1f166b10c9fedb44aad8c38eb1179155a9378bde05a661d71b6a"
+        },
+        "reconstruction.npz": {
+          "bytes": 7318175,
+          "sha256": "208d1dbcb264e65f184b4a4ac3ecf0e5936e27b608f6af6d1c7b2bd92927bec8"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "4c5dd03c510cea6be911de44e4e150aa34f0fe6a3699c8c2a4298e983044f523"
+        },
+        "comparison.png": {
+          "bytes": 207260,
+          "sha256": "87afd6add5ca0aaf67c1e4ce496cb2c44eb3d3dbfce5a9737a2af97098d7b1e0"
+        },
+        "metrics.json": {
+          "bytes": 7809,
+          "sha256": "abb5f1c1f496649857b5f207e86921e2e1ad632d35bce90b758ca0458774ea7a"
+        }
+      }
+    },
+    {
+      "job": "static_scene_orbit/cotracker3_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a52ac422d3a222fea42a888b8be54882d887199c52e714187c7b32d089053684",
+        "gt_sha256": "9b38725384a6334cc21a65f115c759cc74f55efd1fb366f9443aed32ecb0c703",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "ac0647a9db9b2ef85f797f609c1e0d30c8923741f145ef06af563a3ab87d6185"
+        },
+        "reconstruction.npz": {
+          "bytes": 9105668,
+          "sha256": "3c19273e832d19710588c86fa5dd3d02de78fd71a06172465893fcb743330db2"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6b62e7ece255b42e5dcb7bc819c33eba83ec2e14a159c824d4b78f0d5e935f23"
+        },
+        "comparison.png": {
+          "bytes": 238069,
+          "sha256": "2163a6d8f3d8e5d02cbcff4fa83c58a593130cd05ac35726f1f84eb20750dd73"
+        },
+        "metrics.json": {
+          "bytes": 7919,
+          "sha256": "f07c69fc70a8754e4a1e9d1cec846408a36d4e1bba7a382f454aec0d50ff2854"
+        }
+      }
+    },
+    {
+      "job": "static_scene_orbit/cotracker3_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "a52ac422d3a222fea42a888b8be54882d887199c52e714187c7b32d089053684",
+        "gt_sha256": "9b38725384a6334cc21a65f115c759cc74f55efd1fb366f9443aed32ecb0c703",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "f4058f63edc9ea88f8eee6fc91086829362befd9ae889f83b1fedfec6bd9603e"
+        },
+        "reconstruction.npz": {
+          "bytes": 9042754,
+          "sha256": "ca5d9ca00ae6fce9e9c3eca8ff0e7d4ab2bbfcaee978bb4ffdc7a2acf85492f5"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "06c1973565bf6af72b0ed86e8bc02623da598a5b89215b14e5ee46ae814e29ce"
+        },
+        "comparison.png": {
+          "bytes": 245456,
+          "sha256": "976c27640f7e3fd0b78e261832b7e90df4b4c13399437a049e6d018222559dc0"
+        },
+        "metrics.json": {
+          "bytes": 7817,
+          "sha256": "96c2348302f0d033f952650e6f7a2fb45123d4fb1d761bcad1aa4ec67c42a172"
+        }
+      }
+    },
+    {
+      "job": "static_scene_orbit/spatrackerv2_shared_front_initial_GT_scale/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "f43dbe8cd9c35d1eabfa922a708fe8ee607577a6b5e4e5db8a1d59fa1d73317a",
+        "gt_sha256": "9b38725384a6334cc21a65f115c759cc74f55efd1fb366f9443aed32ecb0c703",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "0c35dda33f51a65cbc8011fe2ad51e64bbb6e066ef77a0767aca6d9328de36a9"
+        },
+        "reconstruction.npz": {
+          "bytes": 7955579,
+          "sha256": "953913c8ea90eaee8d94b33ba11b52f08558a56efe5ad60d19d05dd52c3c841d"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "371162b34a51f9788692b5b0cc47dce7d935fec7b3a235c8537d98fc2cf49e6b"
+        },
+        "comparison.png": {
+          "bytes": 223789,
+          "sha256": "15ef95be8686860df83d2e4c1a8845f659238d4fe1ec48326fdf563e5f527874"
+        },
+        "metrics.json": {
+          "bytes": 7975,
+          "sha256": "87eef6f45cd79ae714fc6d70f0741cb63b426e5a8a05f21919490c437f33d6ea"
+        }
+      }
+    },
+    {
+      "job": "static_scene_orbit/spatrackerv2_shared_front_initial_GT_scale/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "f43dbe8cd9c35d1eabfa922a708fe8ee607577a6b5e4e5db8a1d59fa1d73317a",
+        "gt_sha256": "9b38725384a6334cc21a65f115c759cc74f55efd1fb366f9443aed32ecb0c703",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "9604b392a4f8e65ac2de3ea45f8eff2eb578e410ef8e00237659404466e43536"
+        },
+        "reconstruction.npz": {
+          "bytes": 7932040,
+          "sha256": "2f6d9a2b9e1b78464b0253e87f0c23f0c5c34c91f9dcc62c9714ffe237617b20"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "8fa7b69aecd374ff54a5308092c189be7cd983a01b02aced118e03ba1c640e67"
+        },
+        "comparison.png": {
+          "bytes": 227376,
+          "sha256": "c22881cbf235a4532292b55f5fea9f16ad1b5d058ce61e071ab4ab72d6b82ca4"
+        },
+        "metrics.json": {
+          "bytes": 7883,
+          "sha256": "cc618850430520902907735682cb1e98fcc28555a832cde06d958cb51e1a46e2"
+        }
+      }
+    }
+  ]
+}
