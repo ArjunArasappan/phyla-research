@@ -1,40 +1,14 @@
-# Experiment 1 executed Textured primary-grid pilot
+# Experiment 1 primary textured64 measurements
 
-Real SAPIEN rendered scenes: 12 test clips + 12 disjoint-seeded calibration clips, 33 frames at 20 Hz, 256×256 RGB. Queries: 64×64, 2104 valid material points in the first listed clip. Exact actor-local material GT and time-varying ray visibility.
+[Completed experimental setup, hypotheses, measured results, videos and interactive viewer](/Users/arjunarasappan/Documents/Codex/2026-10-06/re/outputs/gpu-research-checkout/experiments/01-tracker-benchmark/results/ai/README.md)
 
-Seeded nonrepeating material textures provide material cues; this study does not establish a texture-only causal effect. Scripted linked rigid boxes stand in for articulation; no native robot-joint or broad OOD ranking claim. SpaTrackerV2, CoTracker3 depth lifts and independent DELTA frozen3D are measured separately below. Predicted-geometry rows use one GT initial-depth scale and are privileged-scale diagnostics, not raw metric monocular scores.
+| Method | Fixed EPE cm | Orbit EPE cm | Overall EPE cm | PCK <1 cm % | Visible coverage % |
+|---|---|---|---|---|---|
+| CoTracker3 + GT geometry | 0.627 | 2.637 | 1.632 | 64.71 | 99.947 |
+| DELTA + GT geometry | 0.708 | 5.189 | 2.949 | 51.72 | 100.000 |
+| SpaTrackerV2 + GT geometry (corrected float32 outer / SDPA) | 2.379 | 3.336 | 2.857 | 88.87 | 100.000 |
+| GT UV + exact front ray | 0.000 | 0.000 | 0.000 | 100.00 | 100.000 |
+| GT UV + rendered front depth | 0.036 | 0.512 | 0.274 | 96.06 | 99.960 |
+| Zero motion | 1.897 | 1.931 | 1.914 | 95.96 | 100.000 |
 
-## GT supplied geometry / controls
-
-| Method / geometry regime | Fixed visible EPE (cm) | Orbit visible EPE (cm) |
-|---|---:|---:|
-| cotracker3_gt_geometry | 0.627 | 2.637 |
-| delta_gt_geometry | 0.708 | 5.189 |
-| gt_uv_exact_front_ray | 0.000 | 0.000 |
-| gt_uv_gt_front_depth | 0.036 | 0.512 |
-| spatrackerv2_gt_geometry_fp32_math | 2.379 | 3.336 |
-| zero_motion_xyz | 1.897 | 1.931 |
-
-EPE excludes frame 0, uses GT visibility, and is conditional on finite predictions. Coverage and per-clip numbers are in `per_clip.csv`. Clip means are macro-averaged separately for each camera mode. GT-UV/exact-front-ray baseline verifies numerical closure; GT-UV/rendered-nearest-depth shows raster/sampling error. Both are visible-only; hidden material depth is never leaked. Raw tracker outputs are retained beside canonical trajectories.
-
-SpaTracker BF16 diagnostic and corrected FP32 SDPA/math precision control appear as separate variants, not independent architectures. The initial FP32 attempt hit an upstream swallowed attention exception and was quarantined, excluded from all summaries; the tracked fail-closed patch enables supported SDPA math fallback and raises remaining failures. Broad model rankings require further input-convention verification and wider independent scene replication.
-
-![Visible geometry](visible_geometry.png)
-
-![Translation-orbit time curves](translation_orbit_time.png)
-
-
-## Foreground accuracy and physical diagnostics
-
-The visible-scene mean is dominated by background points. The table below weights each foreground object equally within each clip and then averages clips. Occluded-point errors and missing-prediction coverage remain separate in extended_metrics.json and the CSV.
-
-| Method | Visible foreground-object macro EPE (cm) | Visible coverage |
-|---|---:|---:|
-| cotracker3_gt_geometry | 3.893 | 0.9995 |
-| delta_gt_geometry | 6.401 | 1.0000 |
-| gt_uv_exact_front_ray | 0.000 | 1.0000 |
-| gt_uv_gt_front_depth | 0.667 | 0.9996 |
-| spatrackerv2_gt_geometry_fp32_math | 21.282 | 1.0000 |
-| zero_motion_xyz | 22.289 | 1.0000 |
-
-Per-axis MAE/RMSE, velocity (m/s), acceleration (m/s²), visibility/motion strata and per-object scores are retained beside every source bundle. CoTracker lifting rejects nonpositive or missing sensor depth; missing geometry counts as a failure in threshold scores. Older uniform-color debug sources are not merged into this primary leaderboard.
+Frame 0 excluded; GT-visible mask; EPE conditional on finite geometry; missing geometry counts as a PCK failure. Values average clip means. Raw CSVs and plots are retained beside this file.

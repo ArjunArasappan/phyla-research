@@ -1,0 +1,19 @@
+{
+  "clip": "object_translation_orbit",
+  "source": "exact_simulator_GT",
+  "grid_size": 16,
+  "frames": 17,
+  "source_fps": 20,
+  "display_rgb": "clamped_and_quantized_to_uint8_for_preview_only",
+  "error": "Euclidean displacement error against GT, millimeters, all initially valid queries",
+  "error_map_shared_max_mm": 43.026559483185466,
+  "source_archive": "/Users/arjunarasappan/Documents/Codex/2026-10-06/re/outputs/gpu-experiment-archive/exp02-scientific-artifacts.tar.gz",
+  "archive_members": {
+    "wan": "runs/exp02/simulator-pilot-v2/object_translation_orbit/gt/wan/reconstruction.npz",
+    "ltx": "runs/exp02/simulator-pilot-v2/object_translation_orbit/gt/ltx/reconstruction.npz"
+  },
+  "npz_sha256": {
+    "wan": "e7239fbf870252381fd1d8bb62697babda69238e2dd9f2c01f8362b4f17de4bb",
+    "ltx": "304bd15c5ad5ca9180878c2e014d8e0c6882c53d2b61d036ce9ef17ac5dfa629"
+  }
+}

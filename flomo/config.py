@@ -116,6 +116,7 @@ class EvalConfig:
     action_space: str = "native"
     flow_source: str = ""
     sim_backend: str = "physx_cpu"
+    render_backend: str = "gpu"
     ood_condition: str = "id"
 
 

@@ -89,7 +89,7 @@ class ManiSkillAdapter:
             sensor_configs["base_camera"]={"pose":sapien_utils.look_at(eye=[-.1+.4*np.cos(np.pi/6),.4*np.sin(np.pi/6),.6],target=[-.1,0,.1])}
         if e.ood_condition not in {"id","cube_color","camera30"}: raise ValueError("Unknown OOD intervention")
         self.env=gym.make(e.env_id,robot_uids=e.robot,num_envs=self.n,obs_mode="rgb+depth+segmentation" if collect_geometry else "rgb",
-                          control_mode=e.control_mode,sim_backend=e.sim_backend,reconfiguration_freq=1,
+                          control_mode=e.control_mode,sim_backend=e.sim_backend,render_backend=e.render_backend,reconfiguration_freq=1,
                           sensor_configs=sensor_configs,max_episode_steps=e.horizon)
         space=self.env.unwrapped.single_action_space
         self.action_dim=space.shape[-1]; self.low=np.asarray(space.low); self.high=np.asarray(space.high)
