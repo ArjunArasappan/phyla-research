@@ -1,6 +1,6 @@
 # Experiment 3: data efficiency and OOD generalization of flow supervision versus RGB video prediction
 
-**Status:** tentative design, 2026-10-08. This document proposes an experiment; it does not report trained models or measured results. Freeze a smaller executable protocol after Experiment 1 validates the labels/codecs and GPU profiling establishes a practical budget.
+**Status:** tentative design, 2026-10-08. This document proposes an experiment; it does not report trained models or measured results. Freeze a smaller executable protocol after Experiment 1 validates the labels and Experiment 2 validates the codecs and GPU profiling establishes a practical budget.
 
 ## 1. Main question
 
@@ -46,6 +46,14 @@ Freeze the VAE and text encoder in all primary arms. Train the same LoRA and act
 A is both a practical lower-cost baseline and an architecture control. For the latter, retain a same-sized future stream of masked dummy tokens and no auxiliary loss, with no content path to action prediction. Verify masking. Report the lower-cost action-only implementation separately if its architecture/compute differs.
 
 Natural-video pretraining favors RGB statistically, while flow supplies geometry derived from simulator privilege. Shared initialization controls the checkpoint, but it does not make the target distributions equally pretrained. A randomly initialized compact model or frozen-backbone head-only experiment is an optional diagnostic of this asymmetry, not a replacement for the primary pretrained-policy test.
+
+### Mandatory LoRA SFT policy for Wan/LTX/DiT adaptation
+
+All adaptation of pretrained Wan or LTX diffusion transformers uses LoRA SFT: original DiT weights remain frozen, and optimizer groups contain only registered LoRA parameters plus explicitly identified newly initialized action/interface heads. The VAE and text encoder remain frozen. No full-parameter DiT fine-tuning is part of this experiment.
+
+This constraint applies during both action-free adaptation/midtraining and robot SFT, including RGB, GT-flow, predicted-flow, and action-only comparison arms. The supervised target/loss differs by phase; parameter-efficient adaptation remains the same. Fix LoRA target modules, rank, initialization, and trainable parameter budget across matched arms. Existing pretrained visual projections are frozen unless explicitly adapted through LoRA; newly added heads are recorded separately.
+
+Before launch, assert the optimizer parameter allowlist, inspect `requires_grad`, run a backward/optimizer-step smoke test, and verify frozen base weights remain unchanged. Save adapters/new heads and exact base-checkpoint provenance, with optimizer/RNG state for resume. Exported artifacts must identify the required immutable base weights; a LoRA checkpoint is not a standalone full model.
 
 ## 3. Two training regimes, with separate claims
 
@@ -103,7 +111,7 @@ Fit normalization on the selected training subset only, or use a declared indepe
 
 ## 6. Flow and RGB target construction
 
-Reuse Experiment 1's persistent-point oracle, coordinate convention, visibility masks, raw predicted-track storage, and RGB displacement mapping. [Experiment 1](../01-tracker-and-vae-benchmark/README.md) establishes tracker quality and codec distortion before policy training.
+Reuse Experiment 1's persistent-point oracle, coordinates, visibility masks, and raw tracks; use Experiment 2's validated RGB displacement mapping and codec contract. [Experiment 1](../01-tracker-benchmark/README.md) establishes tracker quality, while [Experiment 2](../02-motion-vae-reconstruction/README.md) establishes representation/codec distortion before policy training.
 
 For each observation anchor, query a fixed image grid and define cumulative displacement in that anchor camera. Flow pixels retain initial-query identities. Do not substitute a future-frame raster where identities collide or disappear.
 
@@ -194,7 +202,7 @@ Predeclare the primary contrast (F-GT minus R at low N for ID, and appearance/ca
 ### Secondary diagnostics
 
 - Held-out action error under teacher-forced observations, alongside closed-loop success.
-- Flow forecast physical EPE/velocity error and RGB reconstruction/prediction metrics against their own targets, with codec reconstruction floors from Experiment 1.
+- Flow forecast physical EPE/velocity error and RGB reconstruction/prediction metrics against their own targets, with codec reconstruction floors from Experiment 2.
 - Prediction accuracy on foreground, object boundaries, and occlusion intervals.
 - Observation perturbation/action consistency on paired rerenders.
 - Sensitivity to tracker label quality, missing coverage, and motion-RGB clipping.
@@ -211,7 +219,7 @@ RGB and flow auxiliary losses are in different target domains; never rank policy
 - Region-weighted RGB to test whether foreground focus explains flow gains.
 - RGB + 2D optical-flow supervision, or depth prediction, to distinguish 3D motion from generic extra structure. Match extra-stream capacity or report it.
 - Static/zero flow, or flow shuffled across unrelated episodes, as a small sanity ablation. These are intentionally incorrect objectives and not substitute baselines for meaningful flow.
-- Flow label-noise sweep using controlled perturbations grounded in Experiment 1, with equal action examples.
+- Flow label-noise sweep using tracker errors from Experiment 1 and controlled perturbations from Experiment 2, with equal action examples.
 - A comparison using identical domain randomization for both arms. If augmentation closes the gap, flow's apparent advantage may be replaceable nuisance robustness.
 - Matched small-backbone or from-scratch runs to examine pretrained-RGB prior effects.
 - RF jointly supervising RGB and flow to test complementarity, with its additional compute reported.
@@ -268,7 +276,7 @@ A result table should contain task, target arm, backend, stage regime, N, extra 
 
 Recommended order:
 
-1. Validate labels/codecs via Experiment 1; freeze the target timing and observation contract.
+1. Validate labels via Experiment 1 and codecs via Experiment 2; freeze the target timing and observation contract.
 2. Establish expert replay, ID/OOD manifests, and expert feasibility under each shift.
 3. Run a tiny overfit/leakage test and confirm identical R/F token shapes, parameter counts, and action inputs.
 4. Run the 12-run pilot and check whether the training budget is reasonable using ID development data.

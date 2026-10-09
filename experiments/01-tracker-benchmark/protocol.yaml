@@ -1,0 +1,255 @@
+schema_version: 1
+kind: experiment_design
+status: proposed_not_executed
+experiment_id: exp01_tracker_geometry
+implementation_entrypoint: experiments/exp01.py
+source_repository: /Users/arjunarasappan/Documents/Phyla/phyla-research
+remote:
+  host: ubuntu@204.52.23.47
+  project_root: /home/ubuntu/phyla-research
+  gpu_inventory: 8_B300_compute_capability_10_3_verified
+  resource_budget: profile_before_setting
+objective:
+  tracking: simulator_ground_truth_material_point_geometry
+  downstream_policy_claims: false
+stages:
+- sanity
+- generate
+- track
+- score
+- report
+- publish_track_bundles
+data:
+  preferred_generator: kubric
+  alternative_generator: maniskill_sapien
+  report_simulators_separately: true
+  units: meters
+  camera_axes:
+  - right
+  - down
+  - forward
+  extrinsics: camera_to_world
+  depth: axial_camera_z
+  rgb_shape_hw:
+  - 256
+  - 256
+  fps: 20
+  motion_blur: false
+  archetypes:
+  - static_scene
+  - object_translation
+  - rigid_rotation
+  - articulated_links
+  - occlusion_and_return
+  - depth_speed_out_of_view_stress
+  pilot:
+    scene_seeds_per_archetype: 1
+    camera_modes:
+    - fixed
+    - orbit
+    clips: 12
+    frames: 33
+    paired_object_trajectories: true
+    same_initial_camera_for_pairs: true
+  expansion:
+    scene_seeds_per_archetype: 5
+    camera_modes:
+    - fixed
+    - translation
+    - orbit
+    clips: 90
+    frames: 65
+  calibration:
+    initial_clips: 12
+    disjoint_seeds_from_test: true
+    source: ground_truth_only
+    fitting_balance: clips_and_foreground
+  seed_manifest: must_freeze_before_execution
+  asset_manifest: must_record
+queries:
+  debug_grid:
+  - 16
+  - 16
+  proposed_primary_grid:
+  - 64
+  - 64
+  profile_fallback_grid:
+  - 32
+  - 32
+  freeze_one_primary_grid_before_comparing_methods: true
+  primary_anchor_frame: 0
+  identity: persistent_material_point
+  initial_sampling: integer_pixel_centers_or_exact_subpixel_raycast
+  invalid_initial_slots: permanently_invalid
+  support_point_and_chunk_policy: must_record_per_method
+  later_anchor_windows: rerun_queries_and_ground_truth_at_new_anchor
+oracle:
+  save_material_ids: true
+  save_link_ids: true
+  save_local_coordinates_or_triangle_barycentrics: true
+  save_per_frame_body_poses: true
+  save_world_and_camera_xyz: true
+  masks:
+  - initial_valid
+  - trajectory_valid
+  - positive_camera_depth
+  - in_frame
+  - visible
+  - occluded_in_view
+  - out_of_view
+  visibility: first_surface_raycast_with_identity_and_depth_tolerance
+  deformable_scenes: deferred_until_material_oracle_exists
+  acceptance:
+    initial_reprojection_tolerance_px: 0.25
+    static_anchor_flow: numerical_zero
+    known_translation_fixture_m: 0.01
+    depth_and_timestamp_consistency: required
+coordinates:
+  canonical_flow: cumulative_displacement_in_fixed_query_camera
+  subtract_query_frame: true
+  per_frame_camera_coordinates_must_transform_before_subtraction: true
+  resize_crop_intrinsics: K_prime_equals_A_K
+  monocular_scale:
+    native_reprojection: primary_nonmetric_diagnostic
+    raw_metric_evaluation: only_with_verified_units
+    initial_gt_depth_scalar: separately_labeled_privileged_diagnostic
+    scale_camera_translation_and_xyz_together: true
+    per_frame_alignment: prohibited_for_primary_metrics
+    whole_clip_sim3: optional_oracle_diagnostic_only
+methods:
+- id: gt
+  family: oracle
+  regimes:
+  - exact_material_geometry
+  priority: required
+- id: zero_motion
+  family: control
+  regimes:
+  - zero_cumulative_displacement
+  priority: required
+- id: gt_uv_lift
+  family: control
+  regimes:
+  - gt_depth_gt_camera
+  - shared_depth_gt_camera
+  oracle_scope: visible_points_only
+  priority: required
+- id: cotracker3
+  family: 2d_plus_depth
+  regimes:
+  - gt_depth_gt_camera
+  - shared_depth_gt_camera
+  - shared_depth_shared_camera
+  checkpoint_variant: must_pin
+  priority: required
+- id: spatrackerv2
+  family: 3d
+  regimes:
+  - native_rgb
+  - gt_geometry
+  - shared_geometry_if_supported
+  priority: required
+- id: tapip3d
+  family: 3d
+  regimes:
+  - native_rgb
+  - gt_geometry
+  priority: independent_3d_comparison
+- id: delta
+  family: 3d
+  regimes:
+  - native_depth_pipeline
+  - gt_depth_geometry_if_supported
+  priority: independent_3d_comparison
+- id: bootstapir_or_tapir
+  family: 2d_plus_depth
+  regimes:
+  - gt_depth_gt_camera
+  - shared_depth_shared_camera
+  priority: optional_expansion
+method_policy:
+  at_least_one_independent_3d_baseline: target_before_full_comparison
+  native_and_privileged_leaderboards: separate
+  shared_frontend: pinned_verified_spatrackerv2_geometry_frontend
+  cache_shared_depth_cameras_intrinsics_once: true
+  gt_depth_for_occluded_points: visible_front_surface_not_hidden_material_depth
+  save_raw_before_sanitization: true
+  missing_predictions: retain_nan_and_finite_mask
+  primary_confidence_filtering: false
+  record_supplied_and_actually_used_gt_fields: true
+metrics:
+  tracking_primary:
+  - cumulative_displacement_epe_m
+  - axis_mae_rmse_m
+  - median_p90_p95_displacement_error_m
+  - physical_pck_missing_counts_as_failure
+  - finite_prediction_coverage
+  physical_thresholds_m:
+  - 0.01
+  - 0.02
+  - 0.05
+  - 0.1
+  tracking_secondary:
+  - absolute_position_epe_with_declared_gauge_and_scale
+  - initial_depth_position_error
+  - depth_normalized_epe
+  - reprojection_epe_px
+  - velocity_epe_m_per_s
+  - acceleration_epe_m_per_s2
+  - static_false_motion_m
+  - occlusion_reacquisition_error
+  - visibility_accuracy_f1
+  - camera_rotation_translation_rpe
+  - official_tapvid3d_metrics_with_documented_policy
+  direction_metric_minimum_cumulative_gt_motion_m: 0.005
+  masks:
+  - visible
+  - occluded_in_view
+  - out_of_view
+  - foreground
+  - static_background
+  - motion_boundary
+  missing_prediction_policy:
+    epe: finite_conditional_with_coverage_beside_it
+    threshold_success: missing_is_failure
+    all_method_finite_intersection: secondary_only
+  aggregation:
+    first: per_clip_and_per_object
+    comparison: paired
+    bootstrap_unit: independent_scene_family_with_camera_siblings_together
+    point_samples_are_independent_replicates: false
+artifacts:
+  root_on_gpu: must_choose_after_disk_inventory
+  arrays: npz_no_pickle_objects
+  metadata: json
+  scientific_input: lossless_arrays
+  immutable_hashes: required
+  atomic_writes: required
+  completion_marker_after_validation: true
+  required:
+  - rgb_depth_intrinsics_camera_poses_timestamps
+  - material_point_gt_all_masks
+  - native_predictions_depth_cameras_uv_confidence_when_available
+  - canonical_track_arrays
+  - source_rgb_raw_clipped_and_roundtrip_flows
+  - latent_codes
+  - raw_and_clamped_decoded_rgb
+  - reconstructed_flow
+  - per_clip_and_per_object_metrics
+  - checkpoint_environment_provenance
+  - runtime_peak_memory
+  - failures_and_missing_jobs
+visualizations:
+- paired_tracker_geometry_leaderboards_by_input_regime
+- synchronized_rgb_and_3d_point_tracks
+- temporal_axis_and_coverage_errors
+- camera_motion_and_occlusion_failure_gallery
+acceptance:
+  actual_gpu_inference: not_yet_run
+  claims_require_traceable_artifacts: true
+  all_jobs_completed_or_explicitly_failed: required
+  minimum_tracker_accuracy_gate: none_experiment_measures_it
+  expansion_after_core_validation: true
+handoff:
+  consumer: experiment_02
+  publish: immutable_per_source_track_bundles_after_validation

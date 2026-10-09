@@ -1,0 +1,144 @@
+schema_version: 1
+kind: experiment_design
+status: proposed_not_executed
+experiment_id: exp02_motion_vae_reconstruction
+dependency:
+  input: validated_exp01_track_bundles
+  start: GT_ready_then_tracker_bundles_incrementally
+  calibration: separate_GT_calibration_split
+stages:
+- validate_inputs
+- render
+- codec
+- score
+- report
+representation:
+  channels:
+  - dx
+  - dy
+  - dz
+  layout: initial_query_grid
+  target: cumulative_anchor_camera_flow
+  statistics:
+    primary: calibration_gt_channel_percentiles
+    percentiles:
+    - 1
+    - 99
+    shared_across_methods_clips_and_codecs: true
+    freeze_before_test: true
+    degenerate_axis_minimum_range_m: must_declare_after_calibration
+    control: symmetric_absolute_percentile_bounds
+  invalid_fill: zero_displacement_color_computed_from_bounds
+  scientific_rgb_dtype: float32
+  preview_compression_used_for_metrics: false
+  rasterizer:
+    primary: bilinear_grid_to_image
+    align_corners: false
+    image_hw:
+    - 256
+    - 256
+    inverse_sampler: validated_against_actual_pixel_center_mapping
+    control: exact_integer_block_replication_with_center_sampling
+  clipping_metrics:
+  - fraction_per_axis
+  - magnitude
+  - foreground_fraction
+  - tail_error
+  quantization_control: uint8_separate_from_float_primary
+codecs:
+  common:
+    frozen: true
+    load_text_encoder: false
+    load_diffusion_transformer: false
+    posterior: mode
+    batch_size_initial: 1
+    inference_dtype_initial: bfloat16_if_supported
+    reference_dtype_subset: float32_if_feasible
+    input_range:
+    - -1
+    - 1
+    primary_frames: 17
+    context_control_frames: 33
+    legacy_control_valid_frames: 16
+    legacy_padding: repeat_last_to_17_and_exclude_padding_from_scores
+    primary_exclude_query_frame_from_motion_scores: true
+    native_latent_scaling: apply_exactly_once_and_reverse_on_decode
+    save_unclamped_decoder_output: true
+    save_runtime_clamped_output: true
+    report_overshoot: true
+    report_actual_bytes_latency_and_peak_memory: true
+    tiling: record_and_compare_if_changed
+  wan:
+    parent_model: Wan2.2-TI2V-5B
+    vae_file: Wan2.2_VAE.pth
+    checkpoint_revision: must_pin_on_gpu_host
+    weight_sha256: must_record
+    upstream_commit: must_pin
+    channels: 48
+    spatial_stride: 16
+    temporal_stride: 4
+    expected_latent_cthw_at_17x256x256:
+    - 48
+    - 5
+    - 16
+    - 16
+  ltx:
+    parent_model: LTX-Video-2B-v0.9.6-non-distilled
+    checkpoint_file: ltxv-2b-0.9.6-dev-04-25.safetensors
+    component: vae_only
+    checkpoint_revision: must_pin_on_gpu_host
+    weight_sha256: must_record
+    config_snapshot_revision: must_pin
+    diffusers_target_version: 0.33.1
+    transformers_existing_adapter_version: 4.49.0
+    channels: 128
+    spatial_stride: 32
+    temporal_stride: 8
+    expected_latent_cthw_at_17x256x256:
+    - 128
+    - 3
+    - 8
+    - 8
+    primary_diagnostic_decoder_timestep: 0
+    primary_stochastic_decoder_noise: false
+    upstream_recommended_decode_control: verify_pinned_release_then_compare_subset
+metrics:
+  representation:
+  - range_clipping_error
+  - no_vae_raster_roundtrip_error
+  - optional_quantization_error
+  codec_primary:
+  - codec_only_epe_against_no_vae_roundtrip
+  - decoded_to_raw_source_epe
+  - decoded_to_gt_epe
+  - gt_source_codec_floor
+  - depth_axis_error
+  - velocity_error
+  - static_false_motion
+  codec_diagnostics:
+  - rgb_mse_mae
+  - psnr_data_range_one
+  - ssim
+  - displacement_gain
+  - temporal_lag_without_primary_realignment
+  - sign_flips_above_motion_threshold
+  - boundary_blending
+  - decoder_overshoot
+  error_identity: tracking_plus_range_plus_representation_plus_codec_equals_total_vector_error
+  scalar_epe_additivity: false
+  aggregation:
+    first: per_clip_and_per_object
+    comparison: paired
+    bootstrap_unit: independent_scene_family_with_camera_siblings_together
+    point_samples_are_independent_replicates: false
+optional_controlled_labels:
+- coordinate_noise
+- temporal_jitter
+- sinusoidal_motion_amplitude_frequency
+- thin_boundaries
+- neighboring_motion_discontinuities
+training:
+  vae_frozen: true
+  diffusion_transformer_loaded: false
+  text_encoder_loaded: false
+  fine_tuning: false
