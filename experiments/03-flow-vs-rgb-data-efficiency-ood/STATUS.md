@@ -8,4 +8,4 @@ No flow-supervision efficacy, sample-efficiency, or OOD superiority claim is sup
 
 ## New H100 recovery
 
-All twelve learned policies restored on the new persistent volume. Simulator RGB/native8D validation and53 repository tests passed. Evaluation queue is launched, waiting for pinned model assets; no new success rates are asserted. Setup and renderer/software provenance: `../recovery/README.md`. Persistent progress: `/workspace/phyla-research-runs/evaluation-status.json`.
+All twelve learned policies restored on the new persistent volume. Simulator RGB/native8D validation and53 repository tests passed. Pinned model assets are restored and converted. The first saved policy passed exact frozen-base verification and began its ID evaluation. All36 groups /180rollouts are queued; no completed new success rate is asserted yet. Setup and renderer/software provenance: `../recovery/README.md`. Persistent progress: `/workspace/phyla-research-runs/evaluation-status.json`.
