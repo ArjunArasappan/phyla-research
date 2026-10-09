@@ -34,6 +34,15 @@ def wait_for(name):
         time.sleep(60)
 
 render=mistune.create_markdown(plugins=['table'])
+def copy_tree(source,target):
+    # Persistent volume supports file bytes, not directory chmod/copystat.
+    for path in source.rglob('*'):
+        dest=target/path.relative_to(source)
+        if path.is_dir():dest.mkdir(parents=True,exist_ok=True)
+        elif path.is_file():
+            dest.parent.mkdir(parents=True,exist_ok=True)
+            with path.open('rb') as inf,dest.open('wb') as outf:shutil.copyfileobj(inf,outf,256*1024)
+
 def webpage(text):
     body=render(text)
     body=re.sub(r'<a href="([^"]+\.mp4)">([^<]+)</a>',r'<a href="\1">\2</a><video controls preload="none" src="\1"></video>',body)
@@ -71,7 +80,7 @@ try:
     status('packaging_downloads')
     bundle=RESULTS/'download'
     dest=bundle/'experiment-03-final'
-    shutil.copytree(cohort,dest,copy_function=shutil.copyfile,dirs_exist_ok=True)
+    copy_tree(cohort,dest)
     # Replace only Experiment 3 entries in the existing Experiment 1/2 packet.
     for suffix in ('md','html'):
         path=bundle/f'index.{suffix}'
@@ -95,7 +104,7 @@ try:
     run('git','fetch','origin','main')
     run('git','merge','--ff-only','origin/main')
     target=REPO/'experiments/03-flow-vs-rgb-data-efficiency-ood/results/ai/recovery-cohort'
-    shutil.copytree(cohort,target,copy_function=shutil.copyfile,dirs_exist_ok=True)
+    copy_tree(cohort,target)
     run('git','add',str(target.relative_to(REPO)))
     changed=subprocess.run(['git','diff','--cached','--quiet'],cwd=REPO).returncode
     if changed:
