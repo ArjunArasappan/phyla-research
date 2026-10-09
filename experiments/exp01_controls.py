@@ -23,8 +23,10 @@ def main():
             hit,hitid,front_z=ray_hits(np.broadcast_to(cv[:3,3],direction.shape),direction,d['body_poses'][t],half_sizes)
             exact_world.append(hit)
         exact_world=np.stack(exact_world);exactflow=(exact_world-exact_world[0])@d['camera_to_world'][0,:3,:3]
-        for name,flow in [('gt_uv_exact_front_ray',exactflow),('gt_uv_gt_front_depth',liftedflow),('zero_motion',np.where(d['trajectory_valid'][...,None],0.,np.nan))]:
-            out=Path(a.output)/name/clip.parent.name;out.mkdir(parents=True,exist_ok=True)
+        for name,flow in [('gt_uv_exact_front_ray',exactflow),('gt_uv_gt_front_depth',liftedflow),('zero_motion_xyz',np.where(d['trajectory_valid'][...,None],np.zeros_like(d['flow']),np.nan))]:
+            out=Path(a.output)/name/clip.parent.name
+            if (out/'READY').exists(): continue
+            out.mkdir(parents=True,exist_ok=True)
             np.savez_compressed(out/'tracks.npz',flow=flow.astype(np.float32),initial_valid=d['initial_valid'],query_ids=d['query_ids'],grid_shape=d['grid_shape'],foreground=d['foreground'],visible=d['visible'],timestamps=d['timestamps'])
             report={'method':name,'visible':metrics(flow,d['flow'],d['visible']),'all_diagnostic_not_hidden_point_oracle':metrics(flow,d['flow'],d['trajectory_valid']),
                     'note':'GT UV samples visible front-surface rendered axial depth; hidden point depth never provided.'}

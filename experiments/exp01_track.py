@@ -1,5 +1,5 @@
 """Frozen tracker adapters; native arrays preserved alongside canonical output."""
-import argparse,json,time,sys,hashlib
+import argparse,json,time,sys,hashlib,random
 from pathlib import Path
 import numpy as np
 import torch
@@ -33,6 +33,7 @@ def main():
     for clip in sorted(Path(a.data).glob('*/gt.npz')):
         out=Path(a.output)/clip.parent.name
         if (out/'READY').exists():continue
+        random.seed(0);np.random.seed(0);torch.manual_seed(0);torch.cuda.manual_seed_all(0)
         d=np.load(clip); geometry=np.load(Path(a.geometry_cache)/clip.parent.name/'geometry.npz') if a.geometry_cache else d
         valid=d['initial_valid']; ids=np.flatnonzero(valid); uv=d['query_uv'][ids]; t=len(d['rgb']); q=len(valid)
         video=torch.from_numpy(d['rgb'].copy()).permute(0,3,1,2).float().cuda();queries=np.c_[np.zeros(len(ids)),uv].astype(np.float32)
@@ -61,6 +62,7 @@ def main():
                 raw={name:value.detach().cpu().float().numpy() if isinstance(value,torch.Tensor) else value for name,value in zip(names,ret)}
                 pc=raw['camera_xyz'][...,:3];world=np.einsum('tij,tqj->tqi',raw['camera_to_world'][:,:3,:3],pc)+raw['camera_to_world'][:,:3,3][:,None]
                 raw['world_xyz']=world
+        raw['input_queries']=queries;raw['selected_query_ids']=ids
         elapsed=time.time()-start; canonical=np.full((t,q,3),np.nan,np.float32)
         canonical[:,ids]=(world-world[0])@(raw['camera_to_world'][0,:3,:3] if a.method=='spatrackerv2' else geometry['camera_to_world'][0,:3,:3])
         scale=1.0
@@ -70,7 +72,7 @@ def main():
             scale=float(np.median(gt_pc0[usable,2]/pc[0,usable,2]));canonical*=scale;raw['flow_native_arbitrary_scale']=native_flow;raw['initial_gt_depth_scale']=np.array(scale)
         out.mkdir(parents=True,exist_ok=True);np.savez_compressed(out/'raw.npz',**raw)
         np.savez_compressed(out/'tracks.npz',flow=canonical,finite=np.isfinite(canonical).all(-1),query_ids=d['query_ids'],initial_valid=valid,grid_shape=d['grid_shape'],foreground=d['foreground'],visible=d['visible'],timestamps=d['timestamps'])
-        report={'precision':'bf16_autocast' if a.bf16 else 'float32','method':a.method,'regime':'shared_predicted_geometry_initial_GT_scale_diagnostic' if a.geometry_cache else 'gt_depth_gt_camera','initial_gt_depth_scale':scale,'geometry_cache':a.geometry_cache,'elapsed_s':elapsed,'peak_memory_bytes':torch.cuda.max_memory_allocated(),'checkpoint':a.checkpoint,'input_sha256':hashlib.sha256(clip.read_bytes()).hexdigest(),
+        report={'seed':0,'query_count':int(len(ids)),'support_policy':{'cotracker3':'native6x6supportgrid','delta':'native6x6supportgrid+64virtualtracks','spatrackerv2':'track_num256, replace_ratio0.2, support_frame32, iters4'}[a.method],'precision':'bf16_outer_autocast' if a.bf16 else 'float32_outer_native_internal_attention_precision','method':a.method,'regime':'shared_predicted_geometry_initial_GT_scale_diagnostic' if a.geometry_cache else 'gt_depth_gt_camera','initial_gt_depth_scale':scale,'geometry_cache':a.geometry_cache,'elapsed_s':elapsed,'peak_memory_bytes':torch.cuda.max_memory_allocated(),'checkpoint':a.checkpoint,'input_sha256':hashlib.sha256(clip.read_bytes()).hexdigest(),
             'all':metrics(canonical,d['flow'],d['trajectory_valid']),'visible':metrics(canonical,d['flow'],d['visible']),
             'foreground':metrics(canonical,d['flow'],d['trajectory_valid']&d['foreground'][None]),'static_background':metrics(canonical,d['flow'],d['trajectory_valid']&(~d['foreground'])[None])}
         (out/'metrics.json').write_text(json.dumps(report,indent=2));(out/'READY').write_text('validated_shape_raw_preserved\n');print(json.dumps({'clip':clip.parent.name,**report}),flush=True)
