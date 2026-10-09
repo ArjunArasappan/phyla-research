@@ -40,7 +40,7 @@ def ray_hits(origins,directions,poses,half_sizes):
     points[ids<0]=np.nan
     return points,ids,distance
 
-def generate_clip(out,archetype,mode,seed,grid=16,frames=33):
+def generate_clip(out,archetype,mode,seed,grid=16,frames=33,textured=False):
     import sapien
     if (out/"READY").exists(): return
     rng=np.random.default_rng(seed); offset=rng.uniform(-.05,.05,3); offset[2]=0
@@ -50,8 +50,13 @@ def generate_clip(out,archetype,mode,seed,grid=16,frames=33):
     halves=[np.array([1.4,1.4,.06]),np.array([.16,.22,.2]),np.array([.13,.22,.18])]
     colors=[[.35,.4,.5,1],[.8,.2,.1,1],[.1,.65,.3,1]]
     actors=[]
+    out.mkdir(parents=True,exist_ok=True)
     for i,(half,color) in enumerate(zip(halves,colors)):
         b=scene.create_actor_builder(); mat=sapien.render.RenderMaterial(); mat.base_color=color
+        if textured:
+            from PIL import Image
+            texture=rng.integers(30,255,(24,24,3),dtype=np.uint8);texture=Image.fromarray(texture).resize((384,384),Image.Resampling.NEAREST)
+            texture_path=out/f"material_{i}.png";texture.save(texture_path);mat.base_color_texture=sapien.render.RenderTexture2D(str(texture_path))
         b.add_box_visual(half_size=half,material=mat); actors.append(b.build_kinematic(name=f'box_{i}'))
     camera=scene.add_camera('benchmark',256,256,np.pi/3,.01,20.)
     pixels=np.rint(np.linspace(4,251,grid)).astype(int)
@@ -113,16 +118,16 @@ def generate_clip(out,archetype,mode,seed,grid=16,frames=33):
               'seed_effect':'actor_initial_xy_offsets; deterministic kinematic motion','units':'meters','depth':'axial_camera_z','axes':'right_down_forward',
               'flow':'cumulative_displacement_in_anchor_camera','grid_layout':'row_major_v_then_u','trajectory_source':'exact_actor_local_box_surface',
               'visibility':'exact_first_surface_ray_box_intersection','checks':checks,'sha256':hashlib.sha256(bundle.read_bytes()).hexdigest(),
-              'limitations':['plain colored geometry; texture randomization pending','scripted kinematic links rather than native joint articulation']}
+              'textured':textured,'limitations':([] if textured else ['plain colored geometry; texture randomization pending'])+['scripted kinematic links rather than native joint articulation']}
     save_json(out/'metadata.json',metadata); (out/'READY').write_text(metadata['sha256']+'\n')
     from PIL import Image
     Image.fromarray(rgb[0]).save(out/'first_frame.png')
     print(json.dumps({'clip':str(out),'checks':checks}),flush=True)
 
 def main():
-    p=argparse.ArgumentParser(); p.add_argument('--output',required=True); p.add_argument('--grid',type=int,default=16); p.add_argument('--clips',type=int,default=2); p.add_argument('--seed-offset',type=int,default=100)
+    p=argparse.ArgumentParser(); p.add_argument('--output',required=True); p.add_argument('--grid',type=int,default=16); p.add_argument('--clips',type=int,default=2); p.add_argument('--seed-offset',type=int,default=100);p.add_argument('--textured',action='store_true')
     args=p.parse_args(); archetypes=['static_scene','object_translation','rigid_rotation','articulated_links','occlusion_and_return','depth_speed_out_of_view_stress']
     root=Path(args.output); jobs=[(a,m) for a in archetypes for m in ['fixed','orbit']][:args.clips]
-    for i,(a,m) in enumerate(jobs): generate_clip(root/f'{a}_{m}',a,m,args.seed_offset+i//2,args.grid)
+    for i,(a,m) in enumerate(jobs): generate_clip(root/f'{a}_{m}',a,m,args.seed_offset+i//2,args.grid,textured=args.textured)
 
 if __name__=='__main__': main()

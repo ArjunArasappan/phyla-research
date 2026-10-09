@@ -1,7 +1,13 @@
 # Experiment 1 live status
 
-24 real SAPIEN GT clips complete: 12 pilot + 12 calibration. GT pixel-center/depth closure validated. Frozen CoTracker3+GTdepth/GTcamera CUDA completed all12pilot clips; ~3.6 GB peak VRAM. SpaTrackerV2 GT-geometry running on GPU0, exact PID36104, tmux phyla-exp01.
+Completed: 12 uniform-color debugtest +12 separatelyseededcalibration real SAPIEN clips; frozen CoTracker3+GTdepth/poses, DELTA+GTdepth/poses, SpaTrackerV2 BF16 and corrected float32outer/SDPA-math GTgeometry all12each. RGB-only Spa geometry frontend cachedall12; CoTracker andSpa use identicalcache, withone initialGTdepthscale diagnostic. Raw unscaled nativegeometry saved. Alllearnedtracker scientificdata inNVMe.
 
-Data and raw predictions: `/mnt/nvme/scratch/phyla-ubuntu/data/exp01/`. Logs: `/mnt/nvme/scratch/phyla-ubuntu/runs/exp01/`.
+Extended axis/velocity/acceleration, GTvisible/occluded/dynamic/static/foreground masks, and native camera/depth/focal diagnostics saved inextended_metrics.json beside eachbundle. GT exact-front-ray lift visibleEPE<1e-8m; rendered-nearest-depth variant explicitly measuresrasteraliasing. InvalidFP32silentattentionfallback quarantined andexcluded. Legacyone-channelzero broadcastcontrol replacedbyexplicit3Dzero_motion_xyz.
 
-These are debug16×16 query results on plain colored kinematic rigid geometry. Uniform floor makes correspondence ambiguous; no general tracker ranking claim. Native RGB frontends, independent3D baseline and64×64density remain pending.
+Newtextured64×64querystaticfixed/orbit GT pair isvalidated; main-gridtracker profiling waitingtemporarilyforExp02leaseofGPU0/1. Noexp01GPUprocessrunningat03:12UTC.
+
+Data: `/mnt/nvme/scratch/phyla-ubuntu/data/exp01/`
+Reports/footage: `results/ai/debug-pilot/`
+Logs: `/mnt/nvme/scratch/phyla-ubuntu/runs/exp01/`
+
+Debuggeometryuniformsurfacesandone sceneperarchetype limitgeneralizationclaims. Scriptedlinkedrigidboxesratherthannativerobotjointarticulation. OfficialTAPVid3Dmetric integration, broadscene/assetreplication notdone. Nodeexpires05:11UTC,09Oct2026; archiveby05:05.
