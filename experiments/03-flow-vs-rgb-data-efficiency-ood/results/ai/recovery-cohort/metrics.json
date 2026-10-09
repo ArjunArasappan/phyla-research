@@ -18,6 +18,15 @@
       "successes": 0,
       "rollouts": 5,
       "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed0/eval_cube_color"
+    },
+    {
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed0/eval_camera30"
     }
   ],
   "protocol": {

@@ -10,12 +10,13 @@ Compare action-only, RGB-future-supervised and GT-flow-supervised policies at fi
 
 ## Measured results
 
-Completed condition groups: 2/36. Rollouts: 10/180.
+Completed condition groups: 3/36. Rollouts: 15/180.
 
 | N | Arm | Optimizer seed | Condition | Successes / rollouts |
 |---|---|---|---|---|
 | 16 | A | 0 | id | 0/5 |
 | 16 | A | 0 | cube_color | 0/5 |
+| 16 | A | 0 | camera30 | 0/5 |
 
 ## Visuals
 
@@ -33,6 +34,11 @@ Completed condition groups: 2/36. Rollouts: 10/180.
 - [N016_A_seed0 / cube_color / cohort_000002.mp4](videos/N016_A_seed0/cube_color/cohort_000002.mp4)
 - [N016_A_seed0 / cube_color / cohort_000003.mp4](videos/N016_A_seed0/cube_color/cohort_000003.mp4)
 - [N016_A_seed0 / cube_color / cohort_000004.mp4](videos/N016_A_seed0/cube_color/cohort_000004.mp4)
+- [N016_A_seed0 / camera30 / cohort_000000.mp4](videos/N016_A_seed0/camera30/cohort_000000.mp4)
+- [N016_A_seed0 / camera30 / cohort_000001.mp4](videos/N016_A_seed0/camera30/cohort_000001.mp4)
+- [N016_A_seed0 / camera30 / cohort_000002.mp4](videos/N016_A_seed0/camera30/cohort_000002.mp4)
+- [N016_A_seed0 / camera30 / cohort_000003.mp4](videos/N016_A_seed0/camera30/cohort_000003.mp4)
+- [N016_A_seed0 / camera30 / cohort_000004.mp4](videos/N016_A_seed0/camera30/cohort_000004.mp4)
 
 ## Measurement scope
 
