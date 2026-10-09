@@ -1,0 +1,1591 @@
+{
+  "root": "/mnt/nvme/scratch/phyla-ubuntu/runs/exp02/textured64-bounded-v1",
+  "jobs": 36,
+  "file_bytes": 207283150,
+  "records": [
+    {
+      "job": "articulated_links_fixed/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "1a1336d63f467d09b4bcfb363dbe6c8cab12fa5984353a3f691aca3dbc72a9fa",
+        "gt_sha256": "1a1336d63f467d09b4bcfb363dbe6c8cab12fa5984353a3f691aca3dbc72a9fa",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "aa86f1e1d851bcaf154009da845fa5c0ff2d03c14f752075512f58e682594f83"
+        },
+        "reconstruction.npz": {
+          "bytes": 2989675,
+          "sha256": "2a2ca6930b72ec77eb7f21a145f013c98c70d2b8c5260c546933c58ef8deac8d"
+        },
+        "complete.json": {
+          "bytes": 611,
+          "sha256": "32b35e25cd65ee083b62e4c1755c3b9aa44ea45ef639f2db980d06b511bfe179"
+        },
+        "comparison.png": {
+          "bytes": 190440,
+          "sha256": "5507731dbc8c07f9b1e018f8aaac2f2037af9e086c485eb745c632687b77bffc"
+        },
+        "metrics.json": {
+          "bytes": 7628,
+          "sha256": "69817c29f127b94599b8d68515522372df5965075a5662ed35511dacf6a65844"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_fixed/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "1a1336d63f467d09b4bcfb363dbe6c8cab12fa5984353a3f691aca3dbc72a9fa",
+        "gt_sha256": "1a1336d63f467d09b4bcfb363dbe6c8cab12fa5984353a3f691aca3dbc72a9fa",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "ae0a58790a2346b5c2b0147b97887c36fa8708e5df770f68c0d195a440319004"
+        },
+        "reconstruction.npz": {
+          "bytes": 2807242,
+          "sha256": "0a4c6a24c52c166a0c7522fc023a5d5bcb76826ccd500b8c9d769d196bf648be"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "fb460ca3cb450e3d59185b25122259ab38ca54335227a3f4f34cae69ac5bf440"
+        },
+        "comparison.png": {
+          "bytes": 180574,
+          "sha256": "560be3637f0a3b927dc367f02b5be6f9899fa10412cb04afed34a04c73da9cdd"
+        },
+        "metrics.json": {
+          "bytes": 7541,
+          "sha256": "25bdd49ce23a701f94a347eab96a7e7c9793a12c7ea2b3654d88feafe07a6697"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_orbit/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "291821c4acb1ac3de30064ac870507c9d6647e14ff0e917f768e4456f756504a",
+        "gt_sha256": "291821c4acb1ac3de30064ac870507c9d6647e14ff0e917f768e4456f756504a",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "aa86f1e1d851bcaf154009da845fa5c0ff2d03c14f752075512f58e682594f83"
+        },
+        "reconstruction.npz": {
+          "bytes": 2989675,
+          "sha256": "2a2ca6930b72ec77eb7f21a145f013c98c70d2b8c5260c546933c58ef8deac8d"
+        },
+        "complete.json": {
+          "bytes": 612,
+          "sha256": "b2c4bd1857d1ff4fbe3a90bad3e343bef0df46ae3927a2bdfc6b908136a4b116"
+        },
+        "comparison.png": {
+          "bytes": 190440,
+          "sha256": "5507731dbc8c07f9b1e018f8aaac2f2037af9e086c485eb745c632687b77bffc"
+        },
+        "metrics.json": {
+          "bytes": 7630,
+          "sha256": "e5a40a651f73a0da2d737526b0b4be09cc0c4a736c158c61c9a3826750df25ce"
+        }
+      }
+    },
+    {
+      "job": "articulated_links_orbit/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "291821c4acb1ac3de30064ac870507c9d6647e14ff0e917f768e4456f756504a",
+        "gt_sha256": "291821c4acb1ac3de30064ac870507c9d6647e14ff0e917f768e4456f756504a",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "ae0a58790a2346b5c2b0147b97887c36fa8708e5df770f68c0d195a440319004"
+        },
+        "reconstruction.npz": {
+          "bytes": 2807242,
+          "sha256": "0a4c6a24c52c166a0c7522fc023a5d5bcb76826ccd500b8c9d769d196bf648be"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "d191622e4cb2fdc1fa45592c474f80bc2f992e245544842edd142e653e608403"
+        },
+        "comparison.png": {
+          "bytes": 180574,
+          "sha256": "560be3637f0a3b927dc367f02b5be6f9899fa10412cb04afed34a04c73da9cdd"
+        },
+        "metrics.json": {
+          "bytes": 7543,
+          "sha256": "bcf6c660c911ab7f9ad368d6dfece0f4988ef53c9114d9d14ffb3e3849037783"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_fixed/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "45c45041c0fd9276a5e2778208759232560c0c97c03b1adf73e4dce8b1c89098",
+        "gt_sha256": "45c45041c0fd9276a5e2778208759232560c0c97c03b1adf73e4dce8b1c89098",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "e01e582ed0408b499ebcd28051c45ee027812f135f258868dcf5f31dfeab2585"
+        },
+        "reconstruction.npz": {
+          "bytes": 3026720,
+          "sha256": "08e80d69b5011861d884906383a92a4b55b3d20d5e2f549ece8309d297d74065"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "e11480eae127644a32ee115aa1fdbc6d5b6a5699b1979818b5f3560828b797a9"
+        },
+        "comparison.png": {
+          "bytes": 197703,
+          "sha256": "8bf3cec1230407a092349b09a98f0880cbec87991237cfca4c838af5c5488838"
+        },
+        "metrics.json": {
+          "bytes": 7417,
+          "sha256": "92265db4a7fd0d2e6971d7a757ac27a2f426c541201d8ed0875081eeaf56c0c5"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_fixed/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "45c45041c0fd9276a5e2778208759232560c0c97c03b1adf73e4dce8b1c89098",
+        "gt_sha256": "45c45041c0fd9276a5e2778208759232560c0c97c03b1adf73e4dce8b1c89098",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "39c9e478d5554c75e42f0e04f5d12318669d10d4b96711bb2bc1eeb15c11673f"
+        },
+        "reconstruction.npz": {
+          "bytes": 2799812,
+          "sha256": "9e203fc6bd103fcce1fe652fc9c9b71eadc4e950ac3684508339f3a9f1acb0b3"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "5f465d28098abdc105479dfc1bcf3bf7e8c5919d13289faa4f2be055ea559430"
+        },
+        "comparison.png": {
+          "bytes": 191573,
+          "sha256": "ca461d3e909211018bcac68e3508a0ccf312c53761f9f91830166d0ceb857b28"
+        },
+        "metrics.json": {
+          "bytes": 7319,
+          "sha256": "d186774b943dfa649d12fc2085a0fba17ac90c140f4d47a35f1f361a130397cb"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_orbit/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "b2812c0cf910f988234bdbe6020d9038be74676f02cd77bbc732b8d29ab262ed",
+        "gt_sha256": "b2812c0cf910f988234bdbe6020d9038be74676f02cd77bbc732b8d29ab262ed",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "e01e582ed0408b499ebcd28051c45ee027812f135f258868dcf5f31dfeab2585"
+        },
+        "reconstruction.npz": {
+          "bytes": 3026720,
+          "sha256": "08e80d69b5011861d884906383a92a4b55b3d20d5e2f549ece8309d297d74065"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "3d8cd4dddcba1231e94ec34644cc3e09b4177623bfb4aa66120946991bb9093d"
+        },
+        "comparison.png": {
+          "bytes": 197703,
+          "sha256": "8bf3cec1230407a092349b09a98f0880cbec87991237cfca4c838af5c5488838"
+        },
+        "metrics.json": {
+          "bytes": 7417,
+          "sha256": "e0449fe95d084aa5a28f2c42d02fa86ec7ab5ddc0dacab810a2ebfe61a654d81"
+        }
+      }
+    },
+    {
+      "job": "depth_speed_out_of_view_stress_orbit/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "b2812c0cf910f988234bdbe6020d9038be74676f02cd77bbc732b8d29ab262ed",
+        "gt_sha256": "b2812c0cf910f988234bdbe6020d9038be74676f02cd77bbc732b8d29ab262ed",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "39c9e478d5554c75e42f0e04f5d12318669d10d4b96711bb2bc1eeb15c11673f"
+        },
+        "reconstruction.npz": {
+          "bytes": 2799812,
+          "sha256": "9e203fc6bd103fcce1fe652fc9c9b71eadc4e950ac3684508339f3a9f1acb0b3"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "d7b65017c83fe0f6af06be2cc5c0de1e8c445c3333cc14650f088a5b5c89985c"
+        },
+        "comparison.png": {
+          "bytes": 191573,
+          "sha256": "ca461d3e909211018bcac68e3508a0ccf312c53761f9f91830166d0ceb857b28"
+        },
+        "metrics.json": {
+          "bytes": 7320,
+          "sha256": "2975c59fbb8c5804520dce4d8125b41357b5c9fc1b12631622e3bb93bc498e83"
+        }
+      }
+    },
+    {
+      "job": "object_translation_fixed/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "edcb5d4a5aa16e0116801931f0cf83a5c970e6a7bbcc2b66e006941827b79986",
+        "gt_sha256": "edcb5d4a5aa16e0116801931f0cf83a5c970e6a7bbcc2b66e006941827b79986",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "d44d60dd02b221ac26874e9abed2dda96a391257da86649e25ba92f65023bb63"
+        },
+        "reconstruction.npz": {
+          "bytes": 2712426,
+          "sha256": "2fb1cf7389bcf89a738596bba9854eb441be6e506898a0a982b124ab21ac02f8"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "36a2f48e1f81a3f8dd65f934e87af7af1f7e91b3ad57a1fbffabd8448b8ead87"
+        },
+        "comparison.png": {
+          "bytes": 191877,
+          "sha256": "477792e5f5b554cc1e4b9d981b91afe22ce60b5d54272fe6bcde52ea1ce1e3d0"
+        },
+        "metrics.json": {
+          "bytes": 7424,
+          "sha256": "b8ecd5f5ab948f7153feb9eb5665df82f7695f68f57589c9374470981a09556b"
+        }
+      }
+    },
+    {
+      "job": "object_translation_fixed/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "edcb5d4a5aa16e0116801931f0cf83a5c970e6a7bbcc2b66e006941827b79986",
+        "gt_sha256": "edcb5d4a5aa16e0116801931f0cf83a5c970e6a7bbcc2b66e006941827b79986",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "875121baf82af9a787c3fe0800c48769bc8f216909c8d5811e7782a064ccce18"
+        },
+        "reconstruction.npz": {
+          "bytes": 2540213,
+          "sha256": "8fa896c7cf788dd448bb1cd5dcdd418c46efecfef3843be4ba7a3bdb36687153"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "93995513364c2ea9f70b5e69232abc10b3a01629ffde7b6adf19430bb7374418"
+        },
+        "comparison.png": {
+          "bytes": 188867,
+          "sha256": "a6f6def7512d2dc80f35a87d7c417db6b228f2c6dfe17eceb7d6734e79c441a4"
+        },
+        "metrics.json": {
+          "bytes": 7354,
+          "sha256": "cc207e4c5ef13f5fae7fa223e19b7b9b989b3c761a9e3bacac25153794f97127"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/cotracker3_gt_geometry/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "7f887e1b466b61c27fb5336f00bcb2aa00cd24b19a6ed01388031e04b63b0fe8",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "151768cbbe5b052a804d2e565daa9f2b0fef5e4c1af9caf2ba2bee349d6be9c7"
+        },
+        "reconstruction.npz": {
+          "bytes": 10959707,
+          "sha256": "d5210e885ed7e49ad64a295ae5da8cc5af7d3a702edac8d945eca90d43813c93"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "8f4dc5b9e7da8522bbe513ec32d525a8f9ca50422ecf637676354cb21c09cd92"
+        },
+        "comparison.png": {
+          "bytes": 240694,
+          "sha256": "12a49345321c5cf39264fb211423d701cc6cf3594b317191c8ad15fc5e3b3264"
+        },
+        "metrics.json": {
+          "bytes": 8038,
+          "sha256": "8d7f9657604014246882f89ac360ae34b6cccf256caf269f9b142c9fe126f9b5"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/cotracker3_gt_geometry/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "7f887e1b466b61c27fb5336f00bcb2aa00cd24b19a6ed01388031e04b63b0fe8",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "66713e80ab80bc0dd79e3e44d9f397ea217d52fbe09f97a9edf06f363e16356e"
+        },
+        "reconstruction.npz": {
+          "bytes": 11089384,
+          "sha256": "dda2d83448056f372b2a3cad6fd00ff5508291374e3e7e4aaf2a344d1e30d346"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "7434e65bc841cde5706ce7d99fd7a6d8ad20d608b5566c2c6b8c860bf8ec39ff"
+        },
+        "comparison.png": {
+          "bytes": 246407,
+          "sha256": "f4ae1f8790eb2a669f9af619819b5e8ae7e4f0263d24ab458b357b4fdd037d91"
+        },
+        "metrics.json": {
+          "bytes": 7941,
+          "sha256": "42bae1a54b53292991ccbb2e50782954ccbce84baa939cca87b1d23234128500"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/delta_gt_geometry/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "91d07a7b53aafb222e83672220bcf4ba83c92aad1dd637615ead6e8d133224a3",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "b147cd59e605646cb8de43996379a864f3c6c849a832e152abefb7c325276288"
+        },
+        "reconstruction.npz": {
+          "bytes": 11074629,
+          "sha256": "5ee24ef22694456b260ed88e799a57b80d60eaf58c13b2c00dec8eb089837480"
+        },
+        "complete.json": {
+          "bytes": 616,
+          "sha256": "8292c18c5bca863e90327ff6d36b4d0cd347578985d7959eb77c6de2640148aa"
+        },
+        "comparison.png": {
+          "bytes": 256496,
+          "sha256": "a04a622950cc0780d4a74bc9533496c8e6a550780881a89cf74fdd00c4114821"
+        },
+        "metrics.json": {
+          "bytes": 7919,
+          "sha256": "3b1d00ddc5491d92eae17da95957d5709bdbaeea06d9d2d01a7f5543ccbe8312"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/delta_gt_geometry/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "91d07a7b53aafb222e83672220bcf4ba83c92aad1dd637615ead6e8d133224a3",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "967f00e470a741da7fb28542f3f2d9a0d944a7541b02b779ab8e8de93a9a5880"
+        },
+        "reconstruction.npz": {
+          "bytes": 11055840,
+          "sha256": "d08a187b9ca6bd7fdf6a775dbf38ef50338b1087c22b4c3c016ac7c157e8f000"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "369dea3bf26f36e6911d17d495c82fb95da4656d16807fd4f9f021d9b8ee2b8d"
+        },
+        "comparison.png": {
+          "bytes": 264531,
+          "sha256": "94d0b92f56e0c6270ddba794736d6555ca2fbfde7a986510ad1dc5053a3f29da"
+        },
+        "metrics.json": {
+          "bytes": 7811,
+          "sha256": "369169da34a8c0a450d2ebd85c4209daedbd9746ec479117d37989295a1995af"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "d44d60dd02b221ac26874e9abed2dda96a391257da86649e25ba92f65023bb63"
+        },
+        "reconstruction.npz": {
+          "bytes": 2712426,
+          "sha256": "2fb1cf7389bcf89a738596bba9854eb441be6e506898a0a982b124ab21ac02f8"
+        },
+        "complete.json": {
+          "bytes": 612,
+          "sha256": "774b81cb2609a5d6520a37b7b1c23fc279178edef0a9db5c2606bbcfb7007ad5"
+        },
+        "comparison.png": {
+          "bytes": 191877,
+          "sha256": "477792e5f5b554cc1e4b9d981b91afe22ce60b5d54272fe6bcde52ea1ce1e3d0"
+        },
+        "metrics.json": {
+          "bytes": 7424,
+          "sha256": "196015be0ca27e2276532d3de9421fa08a7df78f2a8482b7aa618959a9752cb8"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "875121baf82af9a787c3fe0800c48769bc8f216909c8d5811e7782a064ccce18"
+        },
+        "reconstruction.npz": {
+          "bytes": 2540213,
+          "sha256": "8fa896c7cf788dd448bb1cd5dcdd418c46efecfef3843be4ba7a3bdb36687153"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "96609e6e550183109ad7d198f63dd414491bc34c7810213fb60402090f11f614"
+        },
+        "comparison.png": {
+          "bytes": 188867,
+          "sha256": "a6f6def7512d2dc80f35a87d7c417db6b228f2c6dfe17eceb7d6734e79c441a4"
+        },
+        "metrics.json": {
+          "bytes": 7354,
+          "sha256": "3ea206cd38355daf98f3ea3e7adb7ce5646296104969761daeb0bf4b28a4071f"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/spatrackerv2_gt_geometry_fp32_math/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "13b4248d43e516e4a5af80202e138fbff062f50be5fc3e4429199cc1c7cc017c",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "941e177cbcebe220cd1be57603e5c892a642ed34d3537c8bad58b34ead9a7439"
+        },
+        "reconstruction.npz": {
+          "bytes": 9930717,
+          "sha256": "aa1e2327a17465d3e0d13ee93a9c221985bbbd326ef38569877c75107a3bddb2"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "30caa0f1d62cad3de5cc6b9e3c659930dd51c6cef3c143ae2e4036443cf6314c"
+        },
+        "comparison.png": {
+          "bytes": 234766,
+          "sha256": "8b5f08f3005dbb847f58320a58e999834b3fd0c705de2f8f1b81258a28ec015a"
+        },
+        "metrics.json": {
+          "bytes": 7959,
+          "sha256": "077926947fb9aece0b1f1772ff4f6f05dcfe4c96be4f9dde299989bb35a02e6f"
+        }
+      }
+    },
+    {
+      "job": "object_translation_orbit/spatrackerv2_gt_geometry_fp32_math/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "13b4248d43e516e4a5af80202e138fbff062f50be5fc3e4429199cc1c7cc017c",
+        "gt_sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "b7ef05a0e74c0503868af4c0e73cb272088933484aa4bc8842373f8352b3edf7"
+        },
+        "reconstruction.npz": {
+          "bytes": 9968235,
+          "sha256": "c7a834f518d32dcfc2ceef02810ea87ad5af1a399b410e83ad0c0ca90b78280d"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6da04dec54447787d97c1d6948ac0d5432f00cd809cc8ba69e7fbaf0c32cca82"
+        },
+        "comparison.png": {
+          "bytes": 238718,
+          "sha256": "f8618ef0d6f7503703460a1523448651a0a9b6f5a293817a8b2a648f10c5147b"
+        },
+        "metrics.json": {
+          "bytes": 7861,
+          "sha256": "8c0b26d7288d5a9d1d43c676b1063bcbed1abbf97c49378bbb7e4d02d2f02fe0"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_fixed/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "0f053bdc4db0052c8504d7badf673f912cf268808161581f022365fa22da01ab",
+        "gt_sha256": "0f053bdc4db0052c8504d7badf673f912cf268808161581f022365fa22da01ab",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "7c57c9c5bcdc848061a1edbefc348bbbf6ed665e81ae23d5558ec892b636977d"
+        },
+        "reconstruction.npz": {
+          "bytes": 2683852,
+          "sha256": "7afb86894a15955fbd9a171379037c06c0f777214eb7bd40ae4c2a00a75ad172"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "8e5f93017503cfb965bf8e156dff4cb11978e80669dc700e24d4a990adf50a46"
+        },
+        "comparison.png": {
+          "bytes": 181441,
+          "sha256": "17bf02e5677b7651b76382194bc555b6c171caa7299218e85419967d6cd4eba6"
+        },
+        "metrics.json": {
+          "bytes": 7428,
+          "sha256": "a9711b1b7436a0bb33cccd50f926ce81394bf0b9f3b1f847e32bc72d78cba6a8"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_fixed/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "0f053bdc4db0052c8504d7badf673f912cf268808161581f022365fa22da01ab",
+        "gt_sha256": "0f053bdc4db0052c8504d7badf673f912cf268808161581f022365fa22da01ab",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "2b4aa573040de317890a0b4e3da16f4958ddaf3b5dc1c3e8d7bd3b4eabfb5306"
+        },
+        "reconstruction.npz": {
+          "bytes": 2530071,
+          "sha256": "c71ce4068216e6329abf00c17052540acb27d6a1379bf69e2e5e67ee73df24cc"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "bc407e704aa22b60f282463a924fc6fcbb2ab5dd5a0abb8aa021acab6f83e57b"
+        },
+        "comparison.png": {
+          "bytes": 180128,
+          "sha256": "c9a7ab9d4ab7ca79ac4f24895f00df3a25aa5822dd6d87fd70fba6969c40076d"
+        },
+        "metrics.json": {
+          "bytes": 7335,
+          "sha256": "4470c7f175cd83d367ef0c79c556a010595865fce98f18e7e380ff5514acdabb"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/cotracker3_gt_geometry/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "41c9757be9da83a68b3dace10b0bfe51cf794a75abeda7e941988c1f99442dcd",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "a6147687b3428baaa8102c945d0cada915bfbd00d568184cb08e6275e9cb3d20"
+        },
+        "reconstruction.npz": {
+          "bytes": 10835499,
+          "sha256": "481457cdfb65adee80b0808341a868174f52d511bfdefaaf251f248aa019c45c"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "3151a63925da5e3ced577edd867bfb6027a668943755123aca54bdfc0e6b28aa"
+        },
+        "comparison.png": {
+          "bytes": 231225,
+          "sha256": "b95f4ba3000cd9279df1c93dfd4107396e811532f7e76341541ddbd57ca4cc7a"
+        },
+        "metrics.json": {
+          "bytes": 8042,
+          "sha256": "956dd8ee154bc4f7dd31f9d2e909fc4414e43e3d939903c60029eb3f6ea80cd4"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/cotracker3_gt_geometry/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "41c9757be9da83a68b3dace10b0bfe51cf794a75abeda7e941988c1f99442dcd",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "fa92fd83f0599d32968a27e4edcad2e59b7186846e36bf2946ea83a6edd58605"
+        },
+        "reconstruction.npz": {
+          "bytes": 10928686,
+          "sha256": "36e67122c5b4911b32504954a7b99f03256d049d76f762dbedbf3837abbaba94"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "4cb13447fcbd7238f1f312ad88622146ea961ca38eff6901d981a187432b2e54"
+        },
+        "comparison.png": {
+          "bytes": 243195,
+          "sha256": "7f9e4006314ea8adcc10216a333aa5b640a8a1f91e69b966d4779626923bc54a"
+        },
+        "metrics.json": {
+          "bytes": 7935,
+          "sha256": "5f123e4a82ae6d1b685ca8c0916899458c5ea649e73812f9ef9eb6f299828dab"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/delta_gt_geometry/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "caca543220e6fd031bc2c2a2fdef723b1bf64fff156781476e224f03dfed651c",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "c23a52b4ce43f3e4010c814904f1248e7272763a91134df5d1c6421e12adc1b4"
+        },
+        "reconstruction.npz": {
+          "bytes": 11008663,
+          "sha256": "d08ca91e4ebf231c2ed7d9299ff62adf890c970f6208dd50ec8b7f375375d117"
+        },
+        "complete.json": {
+          "bytes": 618,
+          "sha256": "dc027bb137cf23a4b32389517d7ae83315862523cf084dcba55c99ef16b16cb1"
+        },
+        "comparison.png": {
+          "bytes": 250229,
+          "sha256": "aca119f04cdf2906d0788bb3e5a7800b65476d030ab5346e8ca5e9d3918fbcec"
+        },
+        "metrics.json": {
+          "bytes": 7895,
+          "sha256": "01563368d7835c8813a0e26a381bfa6257c94d8c9dba0c440ab76e377e239ed5"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/delta_gt_geometry/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "caca543220e6fd031bc2c2a2fdef723b1bf64fff156781476e224f03dfed651c",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "f4c6cfbe2c33a4f1b2ee9badec54ed2cc7e19c7045b56f82d7c8e24ef62bb9b2"
+        },
+        "reconstruction.npz": {
+          "bytes": 11001221,
+          "sha256": "ef2e4c5eab66ec124283ede3d27bbef76a3d18db70d42dc0d064859d9ac6f1aa"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "6d7f6b2ccf68bfe7715073d85b9ea2fb4683b7efd91e76c32574857d4dfeebbc"
+        },
+        "comparison.png": {
+          "bytes": 253974,
+          "sha256": "03abb24f3e4ef2a26af3fc5cb005b4ae4d6b9c182ec8bdfc7a25bc171e07b89b"
+        },
+        "metrics.json": {
+          "bytes": 7788,
+          "sha256": "33aa4a3cdb03d8a8d83e42a91f33d9c9ef2da95fe81538ce2d3863d466ddae0f"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "7c57c9c5bcdc848061a1edbefc348bbbf6ed665e81ae23d5558ec892b636977d"
+        },
+        "reconstruction.npz": {
+          "bytes": 2683852,
+          "sha256": "7afb86894a15955fbd9a171379037c06c0f777214eb7bd40ae4c2a00a75ad172"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "6a9551554bd735428838ccc0302f0fbd9e88539e0ad83f9135f7a401b595d5d1"
+        },
+        "comparison.png": {
+          "bytes": 181441,
+          "sha256": "17bf02e5677b7651b76382194bc555b6c171caa7299218e85419967d6cd4eba6"
+        },
+        "metrics.json": {
+          "bytes": 7428,
+          "sha256": "6047f16f5857ee4651bd16fe1459c3b40dc9c38a31cb5e47f2d47278c9568722"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "2b4aa573040de317890a0b4e3da16f4958ddaf3b5dc1c3e8d7bd3b4eabfb5306"
+        },
+        "reconstruction.npz": {
+          "bytes": 2530071,
+          "sha256": "c71ce4068216e6329abf00c17052540acb27d6a1379bf69e2e5e67ee73df24cc"
+        },
+        "complete.json": {
+          "bytes": 612,
+          "sha256": "d75898f8b1d578db9ea75d73f3a4897d724536c08b301b2d1c94e0f41f1549bc"
+        },
+        "comparison.png": {
+          "bytes": 180128,
+          "sha256": "c9a7ab9d4ab7ca79ac4f24895f00df3a25aa5822dd6d87fd70fba6969c40076d"
+        },
+        "metrics.json": {
+          "bytes": 7336,
+          "sha256": "e5ede6dcc06ecc66dc7e27395fd32da51b7882a4fd06550984de38c5a79187c8"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/spatrackerv2_gt_geometry_fp32_math/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "aa0d3dafa4905eada6e5599a52ac2c8f93193dfb8ef974afe8565c961a90b6fe",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "63d5902fc4630e30708d1390169277e322fdd896b7083ea010204be712650aa1"
+        },
+        "reconstruction.npz": {
+          "bytes": 9687329,
+          "sha256": "ce440695af3da0f88cda2c93392c2566d4612cd006bd7585c6057f95d3a41db1"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "65f72ceef88e1e461c305c4bccd7e19c862d269d51c9ef28a1e12e92cc046afc"
+        },
+        "comparison.png": {
+          "bytes": 229366,
+          "sha256": "4a452c5d3a2cc50467102e58b11a68ee6c1c6b66ec2635317e5031a71061df54"
+        },
+        "metrics.json": {
+          "bytes": 7943,
+          "sha256": "cd3eb89e4fe17f6f7a4d4b5c0de3a3b3e0c0de5f8d4b39c8f72e286fb43283c9"
+        }
+      }
+    },
+    {
+      "job": "occlusion_and_return_orbit/spatrackerv2_gt_geometry_fp32_math/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "tracker_prediction",
+        "source_sha256": "aa0d3dafa4905eada6e5599a52ac2c8f93193dfb8ef974afe8565c961a90b6fe",
+        "gt_sha256": "5e9eaa4ba8205d652280fda0396e31d959d7a77b5c23e8e03fa67f2b17e456d1",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "d892b7e803564740ac9bdc7af557bcf65663be0e77520da9dcd84f6718131f3a"
+        },
+        "reconstruction.npz": {
+          "bytes": 9720036,
+          "sha256": "c4fef6b739a8d9f54d7ed3f855dfd017bf21481cad09b18b765489e1cad239c7"
+        },
+        "complete.json": {
+          "bytes": 619,
+          "sha256": "4eb1c76cda8548a0b8927ccad3ee3e099ea14631220f6caef56ae3f975400f69"
+        },
+        "comparison.png": {
+          "bytes": 239053,
+          "sha256": "c705f0d4962fa62a16c46375f4f5179fbd6eb17521b9888fcc59d875a2fa0d2e"
+        },
+        "metrics.json": {
+          "bytes": 7847,
+          "sha256": "13778b06f825bcea7a18be3fc2ed38f6a350caa536d6ade45e47ad4c0185711f"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_fixed/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "3fd9043bf9532c119eb4cef1e40a70b7299d877be408c479cc02e4a589edc012",
+        "gt_sha256": "3fd9043bf9532c119eb4cef1e40a70b7299d877be408c479cc02e4a589edc012",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "1d363e1ddd417216aca1563b47974db194bc83efc9318e776a25df8ebce56f2c"
+        },
+        "reconstruction.npz": {
+          "bytes": 3406521,
+          "sha256": "4b2ddf03bc4de0bc156dcaeb1d227c121f8875ff2f2203a86cfbd08ff9082dc8"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "ce94030a137ec27192038faaa35c93ca8e75213a98b1a88e35a871c0ef225da6"
+        },
+        "comparison.png": {
+          "bytes": 185325,
+          "sha256": "3c454cbb808fb371ede4c9626f61981719cca6c38f1b0d4c1340b801ed35b964"
+        },
+        "metrics.json": {
+          "bytes": 7566,
+          "sha256": "a36b1b101294d4cb78f3aa78cad2ac697a413e56ec584a31eb58a336bbb1cd1c"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_fixed/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "3fd9043bf9532c119eb4cef1e40a70b7299d877be408c479cc02e4a589edc012",
+        "gt_sha256": "3fd9043bf9532c119eb4cef1e40a70b7299d877be408c479cc02e4a589edc012",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "910d1452792e211fc9e772a5449be6a674c79ef902ecab1f3386d40b2165270d"
+        },
+        "reconstruction.npz": {
+          "bytes": 3252201,
+          "sha256": "71291d7d0427f4346b21edc5ad82e6fe0cb6b4f3e2681780401ff2769a4b68ca"
+        },
+        "complete.json": {
+          "bytes": 612,
+          "sha256": "d463e12dc9e092e6a54c7bbdf3c1182a4a74bbba5ceaa7b3da72e9ff52c96b65"
+        },
+        "comparison.png": {
+          "bytes": 189031,
+          "sha256": "b8e812b5764fc288c41003056e40e2659094ae7eb188172372d4d33206513b3f"
+        },
+        "metrics.json": {
+          "bytes": 7479,
+          "sha256": "c4c95dfd2722d23e99ae98c4e454d329931f2dee7ea356d680e8537a7d3c4da0"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_orbit/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "5be950af56eeede546a28958de9b4a72a8605cc3c5dfa7053098a76e13a1be21",
+        "gt_sha256": "5be950af56eeede546a28958de9b4a72a8605cc3c5dfa7053098a76e13a1be21",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "1d363e1ddd417216aca1563b47974db194bc83efc9318e776a25df8ebce56f2c"
+        },
+        "reconstruction.npz": {
+          "bytes": 3406521,
+          "sha256": "4b2ddf03bc4de0bc156dcaeb1d227c121f8875ff2f2203a86cfbd08ff9082dc8"
+        },
+        "complete.json": {
+          "bytes": 612,
+          "sha256": "fbaf5ef778479b6a8b404a97e624d5dbc113433468e4f38227844c25c18a06f5"
+        },
+        "comparison.png": {
+          "bytes": 185325,
+          "sha256": "3c454cbb808fb371ede4c9626f61981719cca6c38f1b0d4c1340b801ed35b964"
+        },
+        "metrics.json": {
+          "bytes": 7567,
+          "sha256": "f29115f5e0f4a92494f6e1cbe9a9b3cbee20da362e982cbb77abb4421fcf57d7"
+        }
+      }
+    },
+    {
+      "job": "rigid_rotation_orbit/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "5be950af56eeede546a28958de9b4a72a8605cc3c5dfa7053098a76e13a1be21",
+        "gt_sha256": "5be950af56eeede546a28958de9b4a72a8605cc3c5dfa7053098a76e13a1be21",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "910d1452792e211fc9e772a5449be6a674c79ef902ecab1f3386d40b2165270d"
+        },
+        "reconstruction.npz": {
+          "bytes": 3252201,
+          "sha256": "71291d7d0427f4346b21edc5ad82e6fe0cb6b4f3e2681780401ff2769a4b68ca"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "bdda519b778a2fb4381a2d68a52f92eec2917ab9019d29aaa466bf838e5dde0d"
+        },
+        "comparison.png": {
+          "bytes": 189031,
+          "sha256": "b8e812b5764fc288c41003056e40e2659094ae7eb188172372d4d33206513b3f"
+        },
+        "metrics.json": {
+          "bytes": 7479,
+          "sha256": "d6b53fa2410428f33cf69d5cc28989f265e6e6a4ea94e03084f6f0017bf9d454"
+        }
+      }
+    },
+    {
+      "job": "static_scene_fixed/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "7e36ab2184528fc005bf359677e3540c6beade554b08c3807e8bf48711c40908",
+        "gt_sha256": "7e36ab2184528fc005bf359677e3540c6beade554b08c3807e8bf48711c40908",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "0d6c2725de9657ce06f0b64f9b1d026519bb82f76a6f7d80b7aaf5be37aa2553"
+        },
+        "reconstruction.npz": {
+          "bytes": 2453500,
+          "sha256": "126bc980336cec1d7a9513673d7ce54e3d4c3d1076eccd51056f34d5f0ce3a0d"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "4ca2a84f29d689374a1cb2353be5402ab3661a0905bcae4efac1946f2b25f49f"
+        },
+        "comparison.png": {
+          "bytes": 165845,
+          "sha256": "5d7b653fca632f0c40dde3cd06538fd561fcbb6d7953a003c2f32806119e7daf"
+        },
+        "metrics.json": {
+          "bytes": 7449,
+          "sha256": "894ec74403239f9d4fee4d91d574fd17214e93b1615845f95ee0706b3855d346"
+        }
+      }
+    },
+    {
+      "job": "static_scene_fixed/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "7e36ab2184528fc005bf359677e3540c6beade554b08c3807e8bf48711c40908",
+        "gt_sha256": "7e36ab2184528fc005bf359677e3540c6beade554b08c3807e8bf48711c40908",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "abb2256eaa8a043533e95f13822cb587510b04c8211c9aaf8945b3d5f2e44c14"
+        },
+        "reconstruction.npz": {
+          "bytes": 2296749,
+          "sha256": "7c745d25ce0f1575f5b74e4e68a1276bf6a6cb6e955b4ccbfa60b654118f7303"
+        },
+        "complete.json": {
+          "bytes": 612,
+          "sha256": "3376cf8d4c2c04e700cc6de317559dd7ca0ff9310fc034ee78eea120f0775251"
+        },
+        "comparison.png": {
+          "bytes": 176301,
+          "sha256": "bd418e36c376bce60f7d73a12b91be633e5df860ef4458461dc5b0b01df85118"
+        },
+        "metrics.json": {
+          "bytes": 7375,
+          "sha256": "be55892ebb629438929d5bda2bcf473566fba4a889e1a80b28d34c10ea077602"
+        }
+      }
+    },
+    {
+      "job": "static_scene_orbit/gt/ltx",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "9f3c1fcb8945d6fb958bda048bb108a65588cd7f41dc45e48d8dcfbd247fafac",
+        "gt_sha256": "9f3c1fcb8945d6fb958bda048bb108a65588cd7f41dc45e48d8dcfbd247fafac",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "ltx",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "source_sha256": "e6fb3fe995e23c1f2457bc26c554789a8d74718c17f1853baab33939bd8dfb56",
+        "revision": "8984fa25007f376c1a299016d0957a37a2f797bb",
+        "config_revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "config_sha256": "fdf9d40b5a5d0ca3b1379a6d3f1753fb8627dee4927bb98e5ebadd14e4a3e4cb",
+        "tensors": 226,
+        "converter_version": 2,
+        "dtype": "bfloat16",
+        "component": "vae_only"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 50658,
+          "sha256": "0d6c2725de9657ce06f0b64f9b1d026519bb82f76a6f7d80b7aaf5be37aa2553"
+        },
+        "reconstruction.npz": {
+          "bytes": 2453500,
+          "sha256": "126bc980336cec1d7a9513673d7ce54e3d4c3d1076eccd51056f34d5f0ce3a0d"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "14dfe8c671ff5247abff734cf76b9357c88504dfe319d7b27a12d409eee2a660"
+        },
+        "comparison.png": {
+          "bytes": 165845,
+          "sha256": "5d7b653fca632f0c40dde3cd06538fd561fcbb6d7953a003c2f32806119e7daf"
+        },
+        "metrics.json": {
+          "bytes": 7450,
+          "sha256": "7f5f25a35de3d6dc4ac44ee493150d2b730db99f31630b8833fc17337b86db7f"
+        }
+      }
+    },
+    {
+      "job": "static_scene_orbit/gt/wan",
+      "input_signature": {
+        "implementation_sha256": "cf63e87ae747d9b56bbcb5cfd49ea900341286f55ba060ab4a1c8d528072acb4",
+        "source_kind": "simulator_gt",
+        "source_sha256": "9f3c1fcb8945d6fb958bda048bb108a65588cd7f41dc45e48d8dcfbd247fafac",
+        "gt_sha256": "9f3c1fcb8945d6fb958bda048bb108a65588cd7f41dc45e48d8dcfbd247fafac",
+        "stats_sha256": "fa910a86784cc53a446af5ee50a0e6c48e8786aee85731493838514a3b1d2d95",
+        "codec": "wan",
+        "frames": 17,
+        "render_size": 256
+      },
+      "codec_signature": {
+        "repo": "Wan-AI/Wan2.2-TI2V-5B",
+        "revision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e",
+        "file": "Wan2.2_VAE.pth",
+        "sha256": "20eb789667fa5e60e7516bf509512f6cb61f01b0aa0695eadaea930c13892b36",
+        "bytes": 2818839170,
+        "upstream_sha": "1ea34ff48f87168174e12956e200b1d908b1c5ff"
+      },
+      "files": {
+        "latent.pt": {
+          "bytes": 247266,
+          "sha256": "abb2256eaa8a043533e95f13822cb587510b04c8211c9aaf8945b3d5f2e44c14"
+        },
+        "reconstruction.npz": {
+          "bytes": 2296749,
+          "sha256": "7c745d25ce0f1575f5b74e4e68a1276bf6a6cb6e955b4ccbfa60b654118f7303"
+        },
+        "complete.json": {
+          "bytes": 613,
+          "sha256": "0eb709726daf90b91cb71c7708f7b6fda204bfad16ef59a474b873c053baa6b2"
+        },
+        "comparison.png": {
+          "bytes": 176301,
+          "sha256": "bd418e36c376bce60f7d73a12b91be633e5df860ef4458461dc5b0b01df85118"
+        },
+        "metrics.json": {
+          "bytes": 7375,
+          "sha256": "4c2eb80033aee452d85864f86ebe794da4d30b23ed634052b06d9c6152b47342"
+        }
+      }
+    }
+  ]
+}
