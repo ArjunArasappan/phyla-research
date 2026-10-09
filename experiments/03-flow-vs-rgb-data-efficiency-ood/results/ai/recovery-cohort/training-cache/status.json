@@ -1,0 +1,12 @@
+{
+  "output": "/workspace/phyla-research-runs/exp03-recovery-root/data/exp03/pushcube/debug-cache/ltx",
+  "phase": "completed",
+  "pid": 10098,
+  "requested_windows": 398,
+  "subsets": [
+    16,
+    64
+  ],
+  "updated_unix": 1791535121.2345095,
+  "validated": true
+}

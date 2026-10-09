@@ -1,0 +1,7 @@
+{
+  "encoder_signature": "6557a2ba65c3ebcee59e57d5c78578884a174d2bdb5cc3c84c7f2a7e6315bbda",
+  "numpy": "1.26.4",
+  "original_dataset_id": "65ad2c7f23ef6be2f251693aab2fd81a94c079b4c83ec63525af6e513268b340",
+  "python": "3.12.3",
+  "torch": "2.8.0+cu128"
+}

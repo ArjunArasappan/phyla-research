@@ -1,0 +1,459 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:1100px;margin:30px auto;font:16px/1.5 system-ui}img,video{max-width:100%}th,td{border:1px solid #ccc;padding:6px}table{border-collapse:collapse}pre{white-space:pre-wrap}</style><h1>Experiment 3: recorded evaluation results</h1>
+<h2>Motivation and hypothesis</h2>
+<p>Compare action-only, RGB-future-supervised and GT-flow-supervised policies at fixed demonstration count and training budget. Hypothesis: auxiliary supervision changes paired task success and OOD performance.</p>
+<h2>Experimental setup</h2>
+<p>12 saved final LoRA policies; N16/N64, A/R/F-GT, two optimizer seeds. PushCube-v1/Panda, native8D control, RGB+instruction, seeds20000–20004, ID/color/camera30, 150 steps, four-action execution, eight Euler sampler steps, shift5. H100 inference, CPU PhysX and CPU Vulkan rendering. No extra training.</p>
+<h2>Measured results</h2>
+<p>Completed condition groups: 36/36. Rollouts: 180/180.</p>
+<table>
+<thead>
+<tr>
+  <th>N</th>
+  <th>Arm</th>
+  <th>Optimizer seed</th>
+  <th>Condition</th>
+  <th>Successes / rollouts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>16</td>
+  <td>A</td>
+  <td>0</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>A</td>
+  <td>0</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>A</td>
+  <td>0</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>A</td>
+  <td>1</td>
+  <td>id</td>
+  <td>2/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>A</td>
+  <td>1</td>
+  <td>cube_color</td>
+  <td>2/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>A</td>
+  <td>1</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>R</td>
+  <td>0</td>
+  <td>id</td>
+  <td>1/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>R</td>
+  <td>0</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>R</td>
+  <td>0</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>R</td>
+  <td>1</td>
+  <td>id</td>
+  <td>1/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>R</td>
+  <td>1</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>R</td>
+  <td>1</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>F-GT</td>
+  <td>0</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>F-GT</td>
+  <td>0</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>F-GT</td>
+  <td>0</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>F-GT</td>
+  <td>1</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>F-GT</td>
+  <td>1</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>F-GT</td>
+  <td>1</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>A</td>
+  <td>0</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>A</td>
+  <td>0</td>
+  <td>cube_color</td>
+  <td>1/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>A</td>
+  <td>0</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>A</td>
+  <td>1</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>A</td>
+  <td>1</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>A</td>
+  <td>1</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>R</td>
+  <td>0</td>
+  <td>id</td>
+  <td>1/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>R</td>
+  <td>0</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>R</td>
+  <td>0</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>R</td>
+  <td>1</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>R</td>
+  <td>1</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>R</td>
+  <td>1</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>F-GT</td>
+  <td>0</td>
+  <td>id</td>
+  <td>1/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>F-GT</td>
+  <td>0</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>F-GT</td>
+  <td>0</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>F-GT</td>
+  <td>1</td>
+  <td>id</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>F-GT</td>
+  <td>1</td>
+  <td>cube_color</td>
+  <td>0/5</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>F-GT</td>
+  <td>1</td>
+  <td>camera30</td>
+  <td>0/5</td>
+</tr>
+</tbody>
+</table>
+<h2>Visuals</h2>
+<p><img src="success.png" alt="Success measurements" /></p>
+<h2>Recordings</h2>
+<ul>
+<li><a href="videos/N016_A_seed0/id/cohort_000000.mp4">N016_A_seed0 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_A_seed0/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/id/cohort_000001.mp4">N016_A_seed0 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_A_seed0/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/id/cohort_000002.mp4">N016_A_seed0 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_A_seed0/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/id/cohort_000003.mp4">N016_A_seed0 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_A_seed0/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/id/cohort_000004.mp4">N016_A_seed0 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_A_seed0/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/cube_color/cohort_000000.mp4">N016_A_seed0 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_A_seed0/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/cube_color/cohort_000001.mp4">N016_A_seed0 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_A_seed0/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/cube_color/cohort_000002.mp4">N016_A_seed0 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_A_seed0/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/cube_color/cohort_000003.mp4">N016_A_seed0 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_A_seed0/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/cube_color/cohort_000004.mp4">N016_A_seed0 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_A_seed0/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/camera30/cohort_000000.mp4">N016_A_seed0 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_A_seed0/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/camera30/cohort_000001.mp4">N016_A_seed0 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_A_seed0/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/camera30/cohort_000002.mp4">N016_A_seed0 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_A_seed0/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/camera30/cohort_000003.mp4">N016_A_seed0 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_A_seed0/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_A_seed0/camera30/cohort_000004.mp4">N016_A_seed0 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_A_seed0/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/id/cohort_000000.mp4">N016_A_seed1 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_A_seed1/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/id/cohort_000001.mp4">N016_A_seed1 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_A_seed1/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/id/cohort_000002.mp4">N016_A_seed1 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_A_seed1/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/id/cohort_000003.mp4">N016_A_seed1 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_A_seed1/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/id/cohort_000004.mp4">N016_A_seed1 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_A_seed1/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/cube_color/cohort_000000.mp4">N016_A_seed1 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_A_seed1/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/cube_color/cohort_000001.mp4">N016_A_seed1 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_A_seed1/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/cube_color/cohort_000002.mp4">N016_A_seed1 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_A_seed1/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/cube_color/cohort_000003.mp4">N016_A_seed1 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_A_seed1/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/cube_color/cohort_000004.mp4">N016_A_seed1 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_A_seed1/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/camera30/cohort_000000.mp4">N016_A_seed1 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_A_seed1/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/camera30/cohort_000001.mp4">N016_A_seed1 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_A_seed1/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/camera30/cohort_000002.mp4">N016_A_seed1 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_A_seed1/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/camera30/cohort_000003.mp4">N016_A_seed1 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_A_seed1/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_A_seed1/camera30/cohort_000004.mp4">N016_A_seed1 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_A_seed1/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/id/cohort_000000.mp4">N016_R_seed0 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_R_seed0/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/id/cohort_000001.mp4">N016_R_seed0 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_R_seed0/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/id/cohort_000002.mp4">N016_R_seed0 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_R_seed0/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/id/cohort_000003.mp4">N016_R_seed0 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_R_seed0/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/id/cohort_000004.mp4">N016_R_seed0 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_R_seed0/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/cube_color/cohort_000000.mp4">N016_R_seed0 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_R_seed0/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/cube_color/cohort_000001.mp4">N016_R_seed0 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_R_seed0/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/cube_color/cohort_000002.mp4">N016_R_seed0 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_R_seed0/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/cube_color/cohort_000003.mp4">N016_R_seed0 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_R_seed0/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/cube_color/cohort_000004.mp4">N016_R_seed0 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_R_seed0/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/camera30/cohort_000000.mp4">N016_R_seed0 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_R_seed0/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/camera30/cohort_000001.mp4">N016_R_seed0 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_R_seed0/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/camera30/cohort_000002.mp4">N016_R_seed0 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_R_seed0/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/camera30/cohort_000003.mp4">N016_R_seed0 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_R_seed0/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_R_seed0/camera30/cohort_000004.mp4">N016_R_seed0 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_R_seed0/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/id/cohort_000000.mp4">N016_R_seed1 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_R_seed1/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/id/cohort_000001.mp4">N016_R_seed1 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_R_seed1/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/id/cohort_000002.mp4">N016_R_seed1 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_R_seed1/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/id/cohort_000003.mp4">N016_R_seed1 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_R_seed1/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/id/cohort_000004.mp4">N016_R_seed1 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_R_seed1/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/cube_color/cohort_000000.mp4">N016_R_seed1 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_R_seed1/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/cube_color/cohort_000001.mp4">N016_R_seed1 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_R_seed1/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/cube_color/cohort_000002.mp4">N016_R_seed1 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_R_seed1/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/cube_color/cohort_000003.mp4">N016_R_seed1 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_R_seed1/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/cube_color/cohort_000004.mp4">N016_R_seed1 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_R_seed1/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/camera30/cohort_000000.mp4">N016_R_seed1 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_R_seed1/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/camera30/cohort_000001.mp4">N016_R_seed1 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_R_seed1/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/camera30/cohort_000002.mp4">N016_R_seed1 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_R_seed1/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/camera30/cohort_000003.mp4">N016_R_seed1 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_R_seed1/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_R_seed1/camera30/cohort_000004.mp4">N016_R_seed1 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_R_seed1/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/id/cohort_000000.mp4">N016_F-GT_seed0 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/id/cohort_000001.mp4">N016_F-GT_seed0 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/id/cohort_000002.mp4">N016_F-GT_seed0 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/id/cohort_000003.mp4">N016_F-GT_seed0 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/id/cohort_000004.mp4">N016_F-GT_seed0 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/cube_color/cohort_000000.mp4">N016_F-GT_seed0 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/cube_color/cohort_000001.mp4">N016_F-GT_seed0 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/cube_color/cohort_000002.mp4">N016_F-GT_seed0 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/cube_color/cohort_000003.mp4">N016_F-GT_seed0 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/cube_color/cohort_000004.mp4">N016_F-GT_seed0 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/camera30/cohort_000000.mp4">N016_F-GT_seed0 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/camera30/cohort_000001.mp4">N016_F-GT_seed0 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/camera30/cohort_000002.mp4">N016_F-GT_seed0 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/camera30/cohort_000003.mp4">N016_F-GT_seed0 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed0/camera30/cohort_000004.mp4">N016_F-GT_seed0 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed0/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/id/cohort_000000.mp4">N016_F-GT_seed1 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/id/cohort_000001.mp4">N016_F-GT_seed1 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/id/cohort_000002.mp4">N016_F-GT_seed1 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/id/cohort_000003.mp4">N016_F-GT_seed1 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/id/cohort_000004.mp4">N016_F-GT_seed1 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/cube_color/cohort_000000.mp4">N016_F-GT_seed1 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/cube_color/cohort_000001.mp4">N016_F-GT_seed1 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/cube_color/cohort_000002.mp4">N016_F-GT_seed1 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/cube_color/cohort_000003.mp4">N016_F-GT_seed1 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/cube_color/cohort_000004.mp4">N016_F-GT_seed1 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/camera30/cohort_000000.mp4">N016_F-GT_seed1 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/camera30/cohort_000001.mp4">N016_F-GT_seed1 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/camera30/cohort_000002.mp4">N016_F-GT_seed1 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/camera30/cohort_000003.mp4">N016_F-GT_seed1 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N016_F-GT_seed1/camera30/cohort_000004.mp4">N016_F-GT_seed1 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N016_F-GT_seed1/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/id/cohort_000000.mp4">N064_A_seed0 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_A_seed0/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/id/cohort_000001.mp4">N064_A_seed0 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_A_seed0/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/id/cohort_000002.mp4">N064_A_seed0 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_A_seed0/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/id/cohort_000003.mp4">N064_A_seed0 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_A_seed0/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/id/cohort_000004.mp4">N064_A_seed0 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_A_seed0/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/cube_color/cohort_000000.mp4">N064_A_seed0 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_A_seed0/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/cube_color/cohort_000001.mp4">N064_A_seed0 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_A_seed0/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/cube_color/cohort_000002.mp4">N064_A_seed0 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_A_seed0/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/cube_color/cohort_000003.mp4">N064_A_seed0 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_A_seed0/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/cube_color/cohort_000004.mp4">N064_A_seed0 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_A_seed0/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/camera30/cohort_000000.mp4">N064_A_seed0 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_A_seed0/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/camera30/cohort_000001.mp4">N064_A_seed0 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_A_seed0/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/camera30/cohort_000002.mp4">N064_A_seed0 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_A_seed0/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/camera30/cohort_000003.mp4">N064_A_seed0 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_A_seed0/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_A_seed0/camera30/cohort_000004.mp4">N064_A_seed0 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_A_seed0/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/id/cohort_000000.mp4">N064_A_seed1 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_A_seed1/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/id/cohort_000001.mp4">N064_A_seed1 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_A_seed1/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/id/cohort_000002.mp4">N064_A_seed1 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_A_seed1/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/id/cohort_000003.mp4">N064_A_seed1 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_A_seed1/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/id/cohort_000004.mp4">N064_A_seed1 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_A_seed1/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/cube_color/cohort_000000.mp4">N064_A_seed1 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_A_seed1/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/cube_color/cohort_000001.mp4">N064_A_seed1 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_A_seed1/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/cube_color/cohort_000002.mp4">N064_A_seed1 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_A_seed1/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/cube_color/cohort_000003.mp4">N064_A_seed1 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_A_seed1/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/cube_color/cohort_000004.mp4">N064_A_seed1 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_A_seed1/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/camera30/cohort_000000.mp4">N064_A_seed1 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_A_seed1/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/camera30/cohort_000001.mp4">N064_A_seed1 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_A_seed1/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/camera30/cohort_000002.mp4">N064_A_seed1 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_A_seed1/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/camera30/cohort_000003.mp4">N064_A_seed1 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_A_seed1/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_A_seed1/camera30/cohort_000004.mp4">N064_A_seed1 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_A_seed1/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/id/cohort_000000.mp4">N064_R_seed0 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_R_seed0/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/id/cohort_000001.mp4">N064_R_seed0 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_R_seed0/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/id/cohort_000002.mp4">N064_R_seed0 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_R_seed0/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/id/cohort_000003.mp4">N064_R_seed0 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_R_seed0/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/id/cohort_000004.mp4">N064_R_seed0 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_R_seed0/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/cube_color/cohort_000000.mp4">N064_R_seed0 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_R_seed0/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/cube_color/cohort_000001.mp4">N064_R_seed0 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_R_seed0/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/cube_color/cohort_000002.mp4">N064_R_seed0 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_R_seed0/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/cube_color/cohort_000003.mp4">N064_R_seed0 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_R_seed0/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/cube_color/cohort_000004.mp4">N064_R_seed0 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_R_seed0/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/camera30/cohort_000000.mp4">N064_R_seed0 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_R_seed0/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/camera30/cohort_000001.mp4">N064_R_seed0 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_R_seed0/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/camera30/cohort_000002.mp4">N064_R_seed0 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_R_seed0/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/camera30/cohort_000003.mp4">N064_R_seed0 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_R_seed0/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_R_seed0/camera30/cohort_000004.mp4">N064_R_seed0 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_R_seed0/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/id/cohort_000000.mp4">N064_R_seed1 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_R_seed1/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/id/cohort_000001.mp4">N064_R_seed1 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_R_seed1/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/id/cohort_000002.mp4">N064_R_seed1 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_R_seed1/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/id/cohort_000003.mp4">N064_R_seed1 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_R_seed1/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/id/cohort_000004.mp4">N064_R_seed1 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_R_seed1/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/cube_color/cohort_000000.mp4">N064_R_seed1 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_R_seed1/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/cube_color/cohort_000001.mp4">N064_R_seed1 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_R_seed1/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/cube_color/cohort_000002.mp4">N064_R_seed1 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_R_seed1/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/cube_color/cohort_000003.mp4">N064_R_seed1 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_R_seed1/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/cube_color/cohort_000004.mp4">N064_R_seed1 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_R_seed1/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/camera30/cohort_000000.mp4">N064_R_seed1 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_R_seed1/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/camera30/cohort_000001.mp4">N064_R_seed1 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_R_seed1/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/camera30/cohort_000002.mp4">N064_R_seed1 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_R_seed1/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/camera30/cohort_000003.mp4">N064_R_seed1 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_R_seed1/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_R_seed1/camera30/cohort_000004.mp4">N064_R_seed1 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_R_seed1/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/id/cohort_000000.mp4">N064_F-GT_seed0 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/id/cohort_000001.mp4">N064_F-GT_seed0 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/id/cohort_000002.mp4">N064_F-GT_seed0 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/id/cohort_000003.mp4">N064_F-GT_seed0 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/id/cohort_000004.mp4">N064_F-GT_seed0 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/cube_color/cohort_000000.mp4">N064_F-GT_seed0 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/cube_color/cohort_000001.mp4">N064_F-GT_seed0 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/cube_color/cohort_000002.mp4">N064_F-GT_seed0 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/cube_color/cohort_000003.mp4">N064_F-GT_seed0 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/cube_color/cohort_000004.mp4">N064_F-GT_seed0 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/camera30/cohort_000000.mp4">N064_F-GT_seed0 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/camera30/cohort_000001.mp4">N064_F-GT_seed0 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/camera30/cohort_000002.mp4">N064_F-GT_seed0 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/camera30/cohort_000003.mp4">N064_F-GT_seed0 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed0/camera30/cohort_000004.mp4">N064_F-GT_seed0 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed0/camera30/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/id/cohort_000000.mp4">N064_F-GT_seed1 / id / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/id/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/id/cohort_000001.mp4">N064_F-GT_seed1 / id / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/id/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/id/cohort_000002.mp4">N064_F-GT_seed1 / id / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/id/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/id/cohort_000003.mp4">N064_F-GT_seed1 / id / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/id/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/id/cohort_000004.mp4">N064_F-GT_seed1 / id / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/id/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/cube_color/cohort_000000.mp4">N064_F-GT_seed1 / cube_color / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/cube_color/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/cube_color/cohort_000001.mp4">N064_F-GT_seed1 / cube_color / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/cube_color/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/cube_color/cohort_000002.mp4">N064_F-GT_seed1 / cube_color / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/cube_color/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/cube_color/cohort_000003.mp4">N064_F-GT_seed1 / cube_color / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/cube_color/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/cube_color/cohort_000004.mp4">N064_F-GT_seed1 / cube_color / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/cube_color/cohort_000004.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/camera30/cohort_000000.mp4">N064_F-GT_seed1 / camera30 / cohort_000000.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/camera30/cohort_000000.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/camera30/cohort_000001.mp4">N064_F-GT_seed1 / camera30 / cohort_000001.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/camera30/cohort_000001.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/camera30/cohort_000002.mp4">N064_F-GT_seed1 / camera30 / cohort_000002.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/camera30/cohort_000002.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/camera30/cohort_000003.mp4">N064_F-GT_seed1 / camera30 / cohort_000003.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/camera30/cohort_000003.mp4"></video></li>
+<li><a href="videos/N064_F-GT_seed1/camera30/cohort_000004.mp4">N064_F-GT_seed1 / camera30 / cohort_000004.mp4</a><video controls preload="none" src="videos/N064_F-GT_seed1/camera30/cohort_000004.mp4"></video></li>
+</ul>
+<h2>Measurement scope</h2>
+<p>One task, one subset seed, two optimizer seeds and five resets per condition. The recovered cohort uses CPU rendering and Torch2.8; the original node used GPU rendering and Torch2.12. Missing cells are omitted. No original partial summaries are merged into this cohort.</p>

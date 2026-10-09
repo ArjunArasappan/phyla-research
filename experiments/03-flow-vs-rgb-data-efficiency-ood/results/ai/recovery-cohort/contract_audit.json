@@ -1,11 +1,11 @@
 {
   "trained_policies": 12,
-  "completed_condition_cells": 3,
+  "completed_condition_cells": 36,
   "requested_cells": 36,
-  "evaluated_rollouts": 15,
+  "evaluated_rollouts": 180,
   "errors": [],
   "reference_cell": "N016_A_seed0/id",
-  "cross_policy_physical_reset_comparisons": 2,
+  "cross_policy_physical_reset_comparisons": 35,
   "results": [
     {
       "run": "N016_A_seed0",
@@ -33,6 +33,336 @@
       "N": 16,
       "arm": "A",
       "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_A_seed1",
+      "condition": "id",
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "successes": 2,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_A_seed1",
+      "condition": "cube_color",
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "successes": 2,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_A_seed1",
+      "condition": "camera30",
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_R_seed0",
+      "condition": "id",
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "successes": 1,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_R_seed0",
+      "condition": "cube_color",
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_R_seed0",
+      "condition": "camera30",
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_R_seed1",
+      "condition": "id",
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "successes": 1,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_R_seed1",
+      "condition": "cube_color",
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_R_seed1",
+      "condition": "camera30",
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "condition": "id",
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "condition": "cube_color",
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "condition": "camera30",
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_F-GT_seed1",
+      "condition": "id",
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_F-GT_seed1",
+      "condition": "cube_color",
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_F-GT_seed1",
+      "condition": "camera30",
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_A_seed0",
+      "condition": "id",
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_A_seed0",
+      "condition": "cube_color",
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "successes": 1,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_A_seed0",
+      "condition": "camera30",
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_A_seed1",
+      "condition": "id",
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_A_seed1",
+      "condition": "cube_color",
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_A_seed1",
+      "condition": "camera30",
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_R_seed0",
+      "condition": "id",
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "successes": 1,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_R_seed0",
+      "condition": "cube_color",
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_R_seed0",
+      "condition": "camera30",
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_R_seed1",
+      "condition": "id",
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_R_seed1",
+      "condition": "cube_color",
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_R_seed1",
+      "condition": "camera30",
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_F-GT_seed0",
+      "condition": "id",
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "successes": 1,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_F-GT_seed0",
+      "condition": "cube_color",
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_F-GT_seed0",
+      "condition": "camera30",
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_F-GT_seed1",
+      "condition": "id",
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_F-GT_seed1",
+      "condition": "cube_color",
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N064_F-GT_seed1",
+      "condition": "camera30",
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
       "successes": 0,
       "trials": 5,
       "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"

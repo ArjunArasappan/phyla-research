@@ -27,6 +27,303 @@
       "successes": 0,
       "rollouts": 5,
       "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed0/eval_camera30"
+    },
+    {
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "condition": "id",
+      "successes": 2,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed1/eval_id"
+    },
+    {
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "condition": "cube_color",
+      "successes": 2,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed1/eval_cube_color"
+    },
+    {
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed1/eval_camera30"
+    },
+    {
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "condition": "id",
+      "successes": 1,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_R_seed0/eval_id"
+    },
+    {
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_R_seed0/eval_cube_color"
+    },
+    {
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_R_seed0/eval_camera30"
+    },
+    {
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "condition": "id",
+      "successes": 1,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_R_seed1/eval_id"
+    },
+    {
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_R_seed1/eval_cube_color"
+    },
+    {
+      "N": 16,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_R_seed1/eval_camera30"
+    },
+    {
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_F-GT_seed0/eval_id"
+    },
+    {
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_F-GT_seed0/eval_cube_color"
+    },
+    {
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_F-GT_seed0/eval_camera30"
+    },
+    {
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_F-GT_seed1/eval_id"
+    },
+    {
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_F-GT_seed1/eval_cube_color"
+    },
+    {
+      "N": 16,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_F-GT_seed1/eval_camera30"
+    },
+    {
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_A_seed0/eval_id"
+    },
+    {
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "condition": "cube_color",
+      "successes": 1,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_A_seed0/eval_cube_color"
+    },
+    {
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_A_seed0/eval_camera30"
+    },
+    {
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_A_seed1/eval_id"
+    },
+    {
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_A_seed1/eval_cube_color"
+    },
+    {
+      "N": 64,
+      "arm": "A",
+      "optimizer_seed": 1,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_A_seed1/eval_camera30"
+    },
+    {
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "condition": "id",
+      "successes": 1,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_R_seed0/eval_id"
+    },
+    {
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_R_seed0/eval_cube_color"
+    },
+    {
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 0,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_R_seed0/eval_camera30"
+    },
+    {
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_R_seed1/eval_id"
+    },
+    {
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_R_seed1/eval_cube_color"
+    },
+    {
+      "N": 64,
+      "arm": "R",
+      "optimizer_seed": 1,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_R_seed1/eval_camera30"
+    },
+    {
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "condition": "id",
+      "successes": 1,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_F-GT_seed0/eval_id"
+    },
+    {
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_F-GT_seed0/eval_cube_color"
+    },
+    {
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 0,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_F-GT_seed0/eval_camera30"
+    },
+    {
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_F-GT_seed1/eval_id"
+    },
+    {
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_F-GT_seed1/eval_cube_color"
+    },
+    {
+      "N": 64,
+      "arm": "F-GT",
+      "optimizer_seed": 1,
+      "condition": "camera30",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N064_F-GT_seed1/eval_camera30"
     }
   ],
   "protocol": {
