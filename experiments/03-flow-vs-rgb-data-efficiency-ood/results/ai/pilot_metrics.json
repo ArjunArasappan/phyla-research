@@ -1,0 +1,277 @@
+{
+  "results": [],
+  "training": [
+    {
+      "run": "N016_A_seed0",
+      "N": 16,
+      "arm": "A",
+      "subset_seed": 0,
+      "optimizer_seed": 0,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_A_seed0.yaml",
+      "gpu": 4,
+      "completed_updates": 1000,
+      "total_update_seconds": 603.3847596989863,
+      "last_action_loss": 0.11430061608552933,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N016_A_seed1",
+      "N": 16,
+      "arm": "A",
+      "subset_seed": 0,
+      "optimizer_seed": 1,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_A_seed1.yaml",
+      "gpu": 4,
+      "completed_updates": 1000,
+      "total_update_seconds": 523.8376969399851,
+      "last_action_loss": 0.4397827163338661,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N016_R_seed0",
+      "N": 16,
+      "arm": "R",
+      "subset_seed": 0,
+      "optimizer_seed": 0,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_R_seed0.yaml",
+      "gpu": 4,
+      "completed_updates": 1000,
+      "total_update_seconds": 509.0633093220058,
+      "last_action_loss": 0.0891576036810875,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N016_R_seed1",
+      "N": 16,
+      "arm": "R",
+      "subset_seed": 0,
+      "optimizer_seed": 1,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_R_seed1.yaml",
+      "gpu": 4,
+      "completed_updates": 1000,
+      "total_update_seconds": 503.662696381969,
+      "last_action_loss": 0.421492088586092,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "N": 16,
+      "arm": "F-GT",
+      "subset_seed": 0,
+      "optimizer_seed": 0,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_F-GT_seed0.yaml",
+      "gpu": 4,
+      "completed_updates": 1000,
+      "total_update_seconds": 512.5170493679889,
+      "last_action_loss": 0.07721623964607716,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N016_F-GT_seed1",
+      "N": 16,
+      "arm": "F-GT",
+      "subset_seed": 0,
+      "optimizer_seed": 1,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_F-GT_seed1.yaml",
+      "gpu": 4,
+      "completed_updates": 1000,
+      "total_update_seconds": 520.1511239620049,
+      "last_action_loss": 0.41985176503658295,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N064_A_seed0",
+      "N": 64,
+      "arm": "A",
+      "subset_seed": 0,
+      "optimizer_seed": 0,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_A_seed0.yaml",
+      "gpu": 5,
+      "completed_updates": 1000,
+      "total_update_seconds": 577.3386521899738,
+      "last_action_loss": 0.17609763890504837,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N064_A_seed1",
+      "N": 64,
+      "arm": "A",
+      "subset_seed": 0,
+      "optimizer_seed": 1,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_A_seed1.yaml",
+      "gpu": 5,
+      "completed_updates": 1000,
+      "total_update_seconds": 524.6434553889758,
+      "last_action_loss": 0.44603338092565536,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N064_R_seed0",
+      "N": 64,
+      "arm": "R",
+      "subset_seed": 0,
+      "optimizer_seed": 0,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_R_seed0.yaml",
+      "gpu": 5,
+      "completed_updates": 1000,
+      "total_update_seconds": 578.2596141600161,
+      "last_action_loss": 0.09877228364348412,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N064_R_seed1",
+      "N": 64,
+      "arm": "R",
+      "subset_seed": 0,
+      "optimizer_seed": 1,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_R_seed1.yaml",
+      "gpu": 5,
+      "completed_updates": 1000,
+      "total_update_seconds": 554.1127400240202,
+      "last_action_loss": 0.413730651140213,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N064_F-GT_seed0",
+      "N": 64,
+      "arm": "F-GT",
+      "subset_seed": 0,
+      "optimizer_seed": 0,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_F-GT_seed0.yaml",
+      "gpu": 5,
+      "completed_updates": 1000,
+      "total_update_seconds": 569.3033194680002,
+      "last_action_loss": 0.07846253737807274,
+      "frozen_base_verified": true
+    },
+    {
+      "run": "N064_F-GT_seed1",
+      "N": 64,
+      "arm": "F-GT",
+      "subset_seed": 0,
+      "optimizer_seed": 1,
+      "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_F-GT_seed1.yaml",
+      "gpu": 5,
+      "completed_updates": 1000,
+      "total_update_seconds": 509.3827340439839,
+      "last_action_loss": 0.4258228540420532,
+      "frozen_base_verified": true
+    }
+  ],
+  "protocol": {
+    "runs": [
+      {
+        "run": "N016_A_seed0",
+        "N": 16,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_A_seed0.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_A_seed1",
+        "N": 16,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_A_seed1.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_R_seed0",
+        "N": 16,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_R_seed0.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_R_seed1",
+        "N": 16,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_R_seed1.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_F-GT_seed0",
+        "N": 16,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_F-GT_seed0.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_F-GT_seed1",
+        "N": 16,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_F-GT_seed1.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N064_A_seed0",
+        "N": 64,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_A_seed0.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_A_seed1",
+        "N": 64,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_A_seed1.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_R_seed0",
+        "N": 64,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_R_seed0.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_R_seed1",
+        "N": 64,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_R_seed1.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_F-GT_seed0",
+        "N": 64,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_F-GT_seed0.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_F-GT_seed1",
+        "N": 64,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_F-GT_seed1.yaml",
+        "gpu": 5
+      }
+    ],
+    "updates": 1000,
+    "effective_batch": 4,
+    "selection": "fixed_final_checkpoint_no_OOD_tuning",
+    "evaluation": "5episodes\u00d73conditions; pilot_only"
+  }
+}

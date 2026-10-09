@@ -88,7 +88,7 @@ class BundlePolicy:
         with autocast(self.device,precision):
             result=sample_joint(self.model,batch,self.steps,self.shift,self.sampler,seed)
         if "action" not in result: raise ValueError("Bundle does not predict executable actions")
-        return ActionChunk(result["action"].cpu(),list(episode_ids),list(observation_steps),self.bundle_id,result.get("flow"),result.get("video"))
+        return ActionChunk(result["action"].float().cpu(),list(episode_ids),list(observation_steps),self.bundle_id,result.get("flow"),result.get("video"))
 
 
 class ChunkExecutor:

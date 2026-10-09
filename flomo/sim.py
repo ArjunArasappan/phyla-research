@@ -207,7 +207,7 @@ def motion_consistency(predicted,encoders,stats,geometry,grid_size):
     tracks,valid=oracle_tracks(geometry[0]["depth"],geometry[0]["segmentation"],geometry[0]["intrinsics"],poses,
                              np.stack([g["body_poses"] for g in geometry[:h]]),geometry[0]["body_ids"],grid_size)
     actual=canonical_flow(tracks,poses)
-    decoded=encoders.decode_video(predicted,h).permute(0,2,3,1).cpu().numpy()
+    decoded=encoders.decode_video(predicted,h).permute(0,2,3,1).float().cpu().numpy()
     # Decode onto the same initial query grid; label boundaries stay diagnostic limitations.
     from .geometry import query_grid
     uv=query_grid(decoded.shape[1],decoded.shape[2],grid_size)
@@ -254,12 +254,12 @@ def evaluate(config: Config,bundle=None,baseline=None,policy_instance=None):
                         latencies.append(time.monotonic()-begin); executor.install(chunk,[step]*env.n)
                         if config.eval.record and step==0:
                             from .data import atomic_npz
-                            predicted={"actions_normalized":chunk.actions.numpy()}
+                            predicted={"actions_normalized":chunk.actions.float().numpy()}
                             for modality in ("flow","video"):
                                 latent=getattr(chunk,modality,None)
                                 if latent is not None:
                                     predicted[modality+"_latent"]=latent[0].float().cpu().numpy()
-                                    predicted[modality+"_decoded_rgb"]=policy.encoders.decode_video(latent[0],config.model.horizon).permute(0,2,3,1).cpu().numpy()
+                                    predicted[modality+"_decoded_rgb"]=policy.encoders.decode_video(latent[0],config.model.horizon).permute(0,2,3,1).float().cpu().numpy()
                             atomic_npz(output/f"predicted_aux_{start:06d}.npz",predicted)
                         active_flow=chunk.flow[0] if chunk.flow is not None and env.n==1 and config.eval.record else None
                     action=codec.decode(executor.pop()).numpy()
