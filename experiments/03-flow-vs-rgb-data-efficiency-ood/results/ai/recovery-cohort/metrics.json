@@ -1,0 +1,139 @@
+{
+  "cohort": "H100 recovery with CPU renderer",
+  "results": [
+    {
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "condition": "id",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed0/eval_id"
+    },
+    {
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "condition": "cube_color",
+      "successes": 0,
+      "rollouts": 5,
+      "artifact": "/workspace/phyla-research-runs/exp03-recovery-root/runs/exp03/pilot/N016_A_seed0/eval_cube_color"
+    }
+  ],
+  "protocol": {
+    "runs": [
+      {
+        "run": "N016_A_seed0",
+        "N": 16,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_A_seed0.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_A_seed1",
+        "N": 16,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_A_seed1.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_R_seed0",
+        "N": 16,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_R_seed0.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_R_seed1",
+        "N": 16,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_R_seed1.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_F-GT_seed0",
+        "N": 16,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_F-GT_seed0.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N016_F-GT_seed1",
+        "N": 16,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N016_F-GT_seed1.yaml",
+        "gpu": 4
+      },
+      {
+        "run": "N064_A_seed0",
+        "N": 64,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_A_seed0.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_A_seed1",
+        "N": 64,
+        "arm": "A",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_A_seed1.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_R_seed0",
+        "N": 64,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_R_seed0.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_R_seed1",
+        "N": 64,
+        "arm": "R",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_R_seed1.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_F-GT_seed0",
+        "N": 64,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 0,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_F-GT_seed0.yaml",
+        "gpu": 5
+      },
+      {
+        "run": "N064_F-GT_seed1",
+        "N": 64,
+        "arm": "F-GT",
+        "subset_seed": 0,
+        "optimizer_seed": 1,
+        "config": "experiments/03-flow-vs-rgb-data-efficiency-ood/configs/N064_F-GT_seed1.yaml",
+        "gpu": 5
+      }
+    ],
+    "updates": 1000,
+    "effective_batch": 4,
+    "selection": "fixed_final_checkpoint_no_OOD_tuning",
+    "evaluation": "5episodes\u00d73conditions; pilot_only"
+  }
+}

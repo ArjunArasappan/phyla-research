@@ -1,0 +1,31 @@
+{
+  "trained_policies": 12,
+  "completed_condition_cells": 2,
+  "requested_cells": 36,
+  "evaluated_rollouts": 10,
+  "errors": [],
+  "reference_cell": "N016_A_seed0/id",
+  "cross_policy_physical_reset_comparisons": 1,
+  "results": [
+    {
+      "run": "N016_A_seed0",
+      "condition": "id",
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    },
+    {
+      "run": "N016_A_seed0",
+      "condition": "cube_color",
+      "N": 16,
+      "arm": "A",
+      "optimizer_seed": 0,
+      "successes": 0,
+      "trials": 5,
+      "ledger_id": "115625a4f6f2b857e0069a2663beeb47bfe1e8d9435025eee036f65822d7ee85"
+    }
+  ]
+}
