@@ -1,6 +1,6 @@
 # Experiment 1 executed Uniform-color debug pilot
 
-Real SAPIEN rendered scenes: 12 test clips + 12 disjoint-seeded calibration clips, 33 frames at 20 Hz, 256×256 RGB. Queries: 16×16, 132 valid material points in the static scene. Exact actor-local material GT and time-varying ray visibility.
+Real SAPIEN rendered scenes: 12 test clips + 12 disjoint-seeded calibration clips, 33 frames at 20 Hz, 256×256 RGB. Queries: 16×16, 132 valid material points in the first listed clip. Exact actor-local material GT and time-varying ray visibility.
 
 Uniform colored surfaces produce substantial correspondence ambiguity. Scripted linked rigid boxes stand in for articulation; no native robot-joint or broad OOD ranking claim. SpaTrackerV2, CoTracker3 depth lifts and independent DELTA frozen3D are measured separately below. Predicted-geometry rows use one GT initial-depth scale and are privileged-scale diagnostics, not raw metric monocular scores.
 

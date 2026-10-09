@@ -1,0 +1,107 @@
+{
+  "source": "Read-only SSH stdout of saved per-condition summary.json before node connectivity loss",
+  "partial": true,
+  "last_observed_completed_cells": 25,
+  "requested_cells": 36,
+  "numeric_cells_captured_here": 19,
+  "rollouts_per_cell": 5,
+  "audit_status": "Full cross-policy reset/scientific-array audit not completed locally; no complete comparison or efficacy claim",
+  "raw_rollout_arrays_preserved_locally": false,
+  "results": [
+    {
+      "run": "N016_A_seed0",
+      "condition": "camera30",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_A_seed0",
+      "condition": "cube_color",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_A_seed0",
+      "condition": "id",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_A_seed1",
+      "condition": "camera30",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_A_seed1",
+      "condition": "cube_color",
+      "success_at_end": 0.4
+    },
+    {
+      "run": "N016_A_seed1",
+      "condition": "id",
+      "success_at_end": 0.2
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "condition": "camera30",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "condition": "cube_color",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_F-GT_seed0",
+      "condition": "id",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_F-GT_seed1",
+      "condition": "id",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_R_seed0",
+      "condition": "camera30",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_R_seed0",
+      "condition": "cube_color",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_R_seed0",
+      "condition": "id",
+      "success_at_end": 0.2
+    },
+    {
+      "run": "N016_R_seed1",
+      "condition": "camera30",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N016_R_seed1",
+      "condition": "cube_color",
+      "success_at_end": 0.2
+    },
+    {
+      "run": "N016_R_seed1",
+      "condition": "id",
+      "success_at_end": 0.0
+    },
+    {
+      "run": "N064_A_seed0",
+      "condition": "id",
+      "success_at_end": 0.2
+    },
+    {
+      "run": "N064_R_seed0",
+      "condition": "id",
+      "success_at_end": 0.2
+    },
+    {
+      "run": "N064_R_seed1",
+      "condition": "id",
+      "success_at_end": 0.0
+    }
+  ]
+}

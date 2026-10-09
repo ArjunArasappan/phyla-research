@@ -1,6 +1,6 @@
 # Experiment 2 GPU pilot results
 
-These are measured frozen VAE reconstructions of 17-frame motion windows from exact SAPIEN scripted-box/link trajectories. One scene seed per archetype and paired fixed/orbit cameras; this debug-density pilot does not establish a statistically general model ranking. Both VAEs are frozen; no T5, DiT, training, or diffusion generation is loaded.
+These are measured frozen VAE reconstructions of 17-frame motion windows from exact SAPIEN scripted-box/link trajectories. One scene seed per archetype and paired fixed/orbit cameras; this bounded pilot does not establish a statistically general model ranking. Both VAEs are frozen; no T5, DiT, training, or diffusion generation is loaded.
 
 All methods/codecs share calibration-only bounds (12 separate scene clips), a 64×64 initial query grid upsampled bilinearly to 256×256, and deterministic posterior mode. Query frame is excluded from main physical averages. Errors below are **macro means across clips**; tracker nonfinite coordinates are excluded from conditional EPE and their coverage is reported separately. Supplied GT depth/cameras are privileged geometry inputs.
 
