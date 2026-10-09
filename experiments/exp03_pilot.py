@@ -7,7 +7,7 @@ from flomo.train import export_bundle
 ROOT=pathlib.Path(os.environ.get("PHYLA_RUN_ROOT","/mnt/nvme/scratch/phyla-ubuntu"));CONTROL=ROOT/"control/exp03"
 CUTOFF=datetime.datetime.fromisoformat("2026-10-09T04:40:00+00:00").timestamp()
 MANIFEST=ROOT/"runs/exp03/pilot/manifest.json"
-def state(name,phase,**kw):atomic_json(CONTROL/"jobs"/(name+".json"),{"job":name,"state":phase,"pid":os.getpid(),"gpu":os.environ.get("CUDA_VISIBLE_DEVICES"),"updated":time.time(),**kw})
+def state(name,state_value,**kw):atomic_json(CONTROL/"jobs"/(name+".json"),{"job":name,"state":state_value,"pid":os.getpid(),"gpu":os.environ.get("CUDA_VISIBLE_DEVICES"),"updated":time.time(),**kw})
 def train_queue(args):
  for row in json.loads(MANIFEST.read_text())["runs"]:
   if row["arm"]!=args.arm or (args.n and row["N"]!=args.n):continue
