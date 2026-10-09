@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read-only monitoring for the three experiment workers and GPU jobs."""
 import json, subprocess, argparse
+from collections import Counter
 from pathlib import Path
 from datetime import datetime, timezone
 ROOT=Path('/mnt/nvme/scratch/phyla-ubuntu')
@@ -10,6 +11,16 @@ for name in ('exp01','exp02','exp03'):
  f=ROOT/'control'/name/'status.json'
  try: state=json.loads(f.read_text())
  except (OSError,ValueError) as e: state={'state':'status_unavailable','error':str(e)}
+ jobs=[]
+ for job_file in sorted((ROOT/'control'/name/'jobs').glob('*.json')):
+  try:
+   job=json.loads(job_file.read_text())
+   jobs.append({'job':job.get('job',job_file.stem),'state':job.get('state','unknown'),'error':job.get('error'),'updated':job.get('updated',job.get('finished'))})
+  except (OSError,ValueError):
+   jobs.append({'job':job_file.stem,'state':'unreadable'})
+ if jobs:
+  state['job_counts']=dict(Counter(job['state'] for job in jobs))
+  state['failed_jobs']=[job for job in jobs if job['state'] in ('failed','unreadable')]
  report['experiments'][name]=state
 try:
  report['gpus']=subprocess.run(['nvidia-smi','--query-gpu=index,memory.used,utilization.gpu','--format=csv,noheader'],text=True,capture_output=True,check=True).stdout.strip().splitlines()
