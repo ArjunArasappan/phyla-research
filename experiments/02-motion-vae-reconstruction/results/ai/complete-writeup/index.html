@@ -1,0 +1,5366 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{max-width:1200px;margin:28px auto;padding:0 22px;font:16px/1.55 system-ui;color:#182333}table{border-collapse:collapse;display:block;overflow:auto}td,th{padding:8px;border:1px solid #ccd4dd}img,video{max-width:100%;height:auto}video{display:block;margin:12px 0;max-height:540px}pre{white-space:pre-wrap}a{color:#175ba3}</style><h1>Experiment 2: completed motion-label VAE reconstruction study</h1>
+<p><strong>Experimental record:</strong> 276 measured frozen VAE reconstruction jobs, completed on 2026-10-08. This writeup contains the experimental setup, motivation, working hypotheses, recorded measurements and visualizations.</p>
+<h2>Motivation</h2>
+<p>FloMo-style supervision represents cumulative 3D point displacement as an RGB video. Experiment 2 measures that representation through the frozen video VAEs associated with Wan and LTX. Its measurements cover the conversion from 3D tracks to RGB, the encoder/decoder roundtrip, and the inverse conversion to 3D displacement. GT and tracker-generated labels are evaluated using the same calibration mapping.</p>
+<h2>Working hypotheses</h2>
+<p>These were working hypotheses for the study; no formal statistical hypothesis tests were performed.</p>
+<ol>
+<li>Range clipping and grid rasterization produce measurable displacement errors before VAE encoding.</li>
+<li>The two native frozen codecs produce different physical reconstruction errors on identical motion-label inputs.</li>
+<li>Reconstruction error relative to a label source and error relative to simulator GT are different measured quantities.</li>
+<li>Encoding 33 rather than 17 frames can change reconstruction of the shared first 17 frames.</li>
+</ol>
+<h2>Experimental setup</h2>
+<h3>Data and job matrix</h3>
+<p>Clips came from SAPIEN 3.0.3 simulation with exact rigid-body/material-point trajectories, known camera intrinsics and poses, and stored initial query identities. Six scene archetypes were used: static scene, translating object, rigid rotation, scripted articulated links, occlusion and return, and depth/speed/out-of-view stress. Each archetype had a fixed-camera and orbit-camera clip. Sampling was 20 Hz; the underlying clips contained 33 frames.</p>
+<table>
+<thead>
+<tr>
+  <th>Run group</th>
+  <th>Label sources and clip selection</th>
+  <th style="text-align:right">Query grid</th>
+  <th style="text-align:right">Codec input frames</th>
+  <th style="text-align:right">Completed jobs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Debug supplied-geometry study</td>
+  <td>Seven sources × twelve clips × two VAEs</td>
+  <td style="text-align:right">16×16</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">168</td>
+</tr>
+<tr>
+  <td>Temporal-context control</td>
+  <td>GT × twelve clips × two VAEs</td>
+  <td style="text-align:right">16×16</td>
+  <td style="text-align:right">33</td>
+  <td style="text-align:right">24</td>
+</tr>
+<tr>
+  <td>Practical shared-front study</td>
+  <td>Two sources × twelve clips × two VAEs</td>
+  <td style="text-align:right">16×16</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">48</td>
+</tr>
+<tr>
+  <td>Textured followup</td>
+  <td>GT on twelve clips; three trackers on two selected clips; two VAEs</td>
+  <td style="text-align:right">64×64</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">36</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td></td>
+  <td style="text-align:right"></td>
+  <td style="text-align:right"></td>
+  <td style="text-align:right"><strong>276</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The debug scenes used plain colored geometry. The textured followup used textured surfaces and a larger initial query grid. The two textured tracker clips were object translation/orbit and occlusion-and-return/orbit. GT results in that followup use all twelve clips; tracker rows use two clips.</p>
+<p>The seven debug label sources were exact GT, an independently generated three-channel zero-flow control, GT 2D queries lifted with front-surface GT depth, CoTracker3 with GT geometry, DELTA with GT geometry, and SpaTrackerV2 with GT geometry in BF16 and corrected FP32 math modes. The supplied-geometry regimes used known simulator depth/camera information.</p>
+<p>The practical regimes used the same cached predicted depth/intrinsics/camera frontend. A single median initial GT-depth scalar was applied during evaluation and held fixed over time. These are explicitly initial-GT-scale diagnostics. They were stored and reported separately from supplied-GT-geometry runs.</p>
+<h3>Motion representation and calibration</h3>
+<p>The target was cumulative displacement in the initial camera coordinate system, in meters. The three channels were dx, dy and dz at fixed initial query-grid positions. A bilinear rasterizer with <code>align_corners=False</code> produced 256×256 images. Invalid query slots were filled with the computed zero-displacement RGB color; validity masks were retained.</p>
+<p>One shared channel mapping used the 1st/99th percentiles of twelve separate GT calibration clips. Calibration drew 10,000 samples per nonempty foreground/background group per clip, excluding the query frame and using the remaining 32 frames. The same frozen bounds were used for every source, both VAEs, and the textured followup.</p>
+<table>
+<thead>
+<tr>
+  <th>Channel</th>
+  <th style="text-align:right">Lower bound (m)</th>
+  <th style="text-align:right">Upper bound (m)</th>
+  <th style="text-align:right">Zero-displacement RGB value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>dx / R</td>
+  <td style="text-align:right">−0.00618003</td>
+  <td style="text-align:right">1.78750002</td>
+  <td style="text-align:right">0.00344545</td>
+</tr>
+<tr>
+  <td>dy / G</td>
+  <td style="text-align:right">−0.27625635</td>
+  <td style="text-align:right">0.10148724</td>
+  <td style="text-align:right">0.73133299</td>
+</tr>
+<tr>
+  <td>dz / B</td>
+  <td style="text-align:right">−0.34161991</td>
+  <td style="text-align:right">0.65030634</td>
+  <td style="text-align:right">0.34440051</td>
+</tr>
+</tbody>
+</table>
+<p>Float arrays were used for scoring. Display images and GIFs are previews. The inverse sampler recovered displacements at the original grid positions. A no-VAE render/inverse-render control was recorded for every source.</p>
+<h3>Frozen codecs and hardware</h3>
+<p>The codecs were the Wan2.2 TI2V-5B VAE and the LTX-Video 2B v0.9.6 non-distilled VAE. Both remained frozen. Encoding used deterministic posterior mode with native latent normalization and its inverse on decoding. LTX diagnostic decoding used timestep zero and no stochastic decoder noise. Raw pre-clamp and clamped RGB were both saved.</p>
+<p>The runs used NVIDIA B300 SXM6 AC GPUs, Torch 2.12.0+cu130 and CUDA 13.0. VAE arithmetic used BF16 autocast. The VAE-only workers loaded the encoder/decoder components.</p>
+<table>
+<thead>
+<tr>
+  <th>Native codec at 17×256×256 input</th>
+  <th>Latent shape [C,T,H,W]</th>
+  <th style="text-align:right">Latent elements</th>
+  <th style="text-align:right">Saved tensor payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Wan</td>
+  <td>[48,5,16,16]</td>
+  <td style="text-align:right">61,440</td>
+  <td style="text-align:right">245,760 bytes, float32</td>
+</tr>
+<tr>
+  <td>LTX</td>
+  <td>[128,3,8,8]</td>
+  <td style="text-align:right">24,576</td>
+  <td style="text-align:right">49,152 bytes, BF16</td>
+</tr>
+</tbody>
+</table>
+<p>These shapes and payload sizes were read from actual saved GT metrics. The latent-element ratio was 2.5× and the saved tensor-payload ratio 5×. Runs used native compression rates; no equal latent-element budget was applied. Payload values exclude serialization overhead and are not entropy-coded bitrates.</p>
+<h3>Metrics, masks and saved outputs</h3>
+<p>All reported EPE values are Euclidean displacement errors in millimeters, first averaged over the scored queries/frames of a clip and then averaged across clips. Main motion scores exclude frame zero. Scoring includes initially GT-valid queries with finite source predictions, including coordinates through occlusion when available. Coverage is reported over all 17 frames. Foreground results use the saved initial foreground query mask.</p>
+<ul>
+<li><strong>Raw flow EPE:</strong> source displacement versus simulator GT.</li>
+<li><strong>Range EPE:</strong> clipped source versus raw source.</li>
+<li><strong>Raster EPE:</strong> no-VAE inverse-rendered flow versus clipped source.</li>
+<li><strong>Codec self-EPE:</strong> decoded displacement versus no-VAE inverse-rendered flow.</li>
+<li><strong>Decoded-to-GT EPE:</strong> decoded displacement versus simulator GT, including preceding representation steps.</li>
+</ul>
+<p>Raw/clipped flow, source RGB, raw/clamped decoded RGB, recovered flow, masks, deterministic latent tensors and per-job metrics were saved. Vector error identities were checked at ≤1e-6 m, and saved decoder outputs were checked for finiteness. Scientific files have SHA256 ledgers. The earlier SpaTrackerV2 FP32 branch with a failed attention kernel was excluded; the corrected FP32 math branch used the recorded fail-closed SDPA patch.</p>
+<h2>Recorded results</h2>
+<h3>Debug supplied-geometry study — 168 jobs</h3>
+<table>
+<thead>
+<tr>
+  <th>Label source</th>
+  <th style="text-align:right">Clips</th>
+  <th style="text-align:right">Raw flow EPE (mm)</th>
+  <th style="text-align:right">Range / raster EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX codec self-EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX decoded-to-GT EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX foreground EPE (mm)</th>
+  <th style="text-align:right">Finite coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Exact simulator GT</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0.000</td>
+  <td style="text-align:right">0.000 / 0.565</td>
+  <td style="text-align:right">4.009 / 6.243</td>
+  <td style="text-align:right">4.466 / 6.664</td>
+  <td style="text-align:right">13.517 / 21.793</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>Zero-flow control</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">13.211</td>
+  <td style="text-align:right">0.000 / 0.000</td>
+  <td style="text-align:right">3.535 / 5.223</td>
+  <td style="text-align:right">16.478 / 18.383</td>
+  <td style="text-align:right">179.865 / 184.655</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>GT 2D queries + front-surface GT depth</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">20.289</td>
+  <td style="text-align:right">10.745 / 1.179</td>
+  <td style="text-align:right">4.925 / 8.904</td>
+  <td style="text-align:right">12.187 / 14.645</td>
+  <td style="text-align:right">37.829 / 47.010</td>
+  <td style="text-align:right">97.400%</td>
+</tr>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">95.076</td>
+  <td style="text-align:right">9.900 / 1.626</td>
+  <td style="text-align:right">7.609 / 13.067</td>
+  <td style="text-align:right">84.922 / 81.705</td>
+  <td style="text-align:right">52.340 / 56.681</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">74.220</td>
+  <td style="text-align:right">2.385 / 1.228</td>
+  <td style="text-align:right">6.135 / 9.345</td>
+  <td style="text-align:right">72.651 / 70.857</td>
+  <td style="text-align:right">34.541 / 37.804</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry, BF16</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">93.016</td>
+  <td style="text-align:right">0.315 / 1.385</td>
+  <td style="text-align:right">6.988 / 11.593</td>
+  <td style="text-align:right">92.168 / 87.574</td>
+  <td style="text-align:right">148.841 / 150.859</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry, FP32 math</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">93.242</td>
+  <td style="text-align:right">0.274 / 1.359</td>
+  <td style="text-align:right">6.689 / 11.494</td>
+  <td style="text-align:right">92.327 / 87.805</td>
+  <td style="text-align:right">149.417 / 151.249</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+</tbody>
+</table>
+<h3>Practical shared-front study — 48 jobs</h3>
+<p>All rows below use twelve clips and the single fixed initial GT-depth scale described above.</p>
+<table>
+<thead>
+<tr>
+  <th>Label source</th>
+  <th style="text-align:right">Clips</th>
+  <th style="text-align:right">Raw flow EPE (mm)</th>
+  <th style="text-align:right">Range / raster EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX codec self-EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX decoded-to-GT EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX foreground EPE (mm)</th>
+  <th style="text-align:right">Finite coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 + shared predicted geometry</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">149.076</td>
+  <td style="text-align:right">64.673 / 1.543</td>
+  <td style="text-align:right">10.063 / 15.379</td>
+  <td style="text-align:right">93.616 / 90.971</td>
+  <td style="text-align:right">158.109 / 161.743</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + shared predicted geometry</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">83.633</td>
+  <td style="text-align:right">7.748 / 0.792</td>
+  <td style="text-align:right">6.637 / 9.826</td>
+  <td style="text-align:right">79.988 / 78.787</td>
+  <td style="text-align:right">188.644 / 191.854</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+</tbody>
+</table>
+<h3>Textured64 followup — 36 jobs</h3>
+<p>GT rows use twelve clips; each tracker row uses the two selected orbit-camera clips. The original calibration bounds were retained.</p>
+<table>
+<thead>
+<tr>
+  <th>Label source</th>
+  <th style="text-align:right">Clips</th>
+  <th style="text-align:right">Raw flow EPE (mm)</th>
+  <th style="text-align:right">Range / raster EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX codec self-EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX decoded-to-GT EPE (mm)</th>
+  <th style="text-align:right">Wan / LTX foreground EPE (mm)</th>
+  <th style="text-align:right">Finite coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Exact simulator GT</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0.000</td>
+  <td style="text-align:right">0.100 / 0.569</td>
+  <td style="text-align:right">3.721 / 6.046</td>
+  <td style="text-align:right">4.277 / 6.522</td>
+  <td style="text-align:right">12.807 / 17.652</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">38.293</td>
+  <td style="text-align:right">13.085 / 2.781</td>
+  <td style="text-align:right">7.124 / 11.468</td>
+  <td style="text-align:right">25.829 / 24.481</td>
+  <td style="text-align:right">40.296 / 45.859</td>
+  <td style="text-align:right">99.523%</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">30.337</td>
+  <td style="text-align:right">0.170 / 1.508</td>
+  <td style="text-align:right">4.644 / 7.890</td>
+  <td style="text-align:right">29.894 / 29.319</td>
+  <td style="text-align:right">26.259 / 27.986</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry, FP32 math</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">20.824</td>
+  <td style="text-align:right">0.095 / 2.318</td>
+  <td style="text-align:right">4.504 / 7.608</td>
+  <td style="text-align:right">21.204 / 21.894</td>
+  <td style="text-align:right">96.400 / 98.451</td>
+  <td style="text-align:right">100.000%</td>
+</tr>
+</tbody>
+</table>
+<h3>Paired GT codec measurements</h3>
+<p>Positive paired difference is LTX EPE minus Wan EPE. The ranges below are empirical per-clip extrema.</p>
+<table>
+<thead>
+<tr>
+  <th>Condition</th>
+  <th>Metric</th>
+  <th style="text-align:right">Mean paired difference (mm)</th>
+  <th style="text-align:right">Median difference (mm)</th>
+  <th style="text-align:right">Observed difference range (mm)</th>
+  <th style="text-align:right">Wan / LTX lower-error counts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>debug_g16</td>
+  <td>overall</td>
+  <td style="text-align:right">2.197</td>
+  <td style="text-align:right">2.146</td>
+  <td style="text-align:right">1.687–2.840</td>
+  <td style="text-align:right">12 / 0</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>foreground</td>
+  <td style="text-align:right">8.276</td>
+  <td style="text-align:right">5.825</td>
+  <td style="text-align:right">2.103–18.864</td>
+  <td style="text-align:right">12 / 0</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>overall</td>
+  <td style="text-align:right">2.245</td>
+  <td style="text-align:right">2.284</td>
+  <td style="text-align:right">1.849–2.508</td>
+  <td style="text-align:right">12 / 0</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>foreground</td>
+  <td style="text-align:right">4.845</td>
+  <td style="text-align:right">4.997</td>
+  <td style="text-align:right">2.060–7.085</td>
+  <td style="text-align:right">12 / 0</td>
+</tr>
+</tbody>
+</table>
+<p>Fixed/orbit GT codec scores were exactly equal within each of the six archetype families for both metrics and conditions. The twelve camera-labelled records therefore repeat six archetype results. There was one scene seed per archetype; no population confidence intervals were calculated.</p>
+<p><img loading="lazy" src="../offline-analysis/paired-gt-codec-errors.png" alt="Measured paired GT errors across clips and foreground masks" /></p>
+<h3>Temporal-context control — 24 jobs</h3>
+<p>The 17- and 33-frame runs shared the first seventeen inputs. The following table scores only that shared window, excluding the query frame.</p>
+<table>
+<thead>
+<tr>
+  <th>Codec</th>
+  <th style="text-align:right">Clips</th>
+  <th style="text-align:right">17-frame decoded-to-GT EPE (mm)</th>
+  <th style="text-align:right">33-frame shared-first17 EPE (mm)</th>
+  <th style="text-align:right">Output displacement difference (mm)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Wan</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">4.4665</td>
+  <td style="text-align:right">4.4665</td>
+  <td style="text-align:right">0.0000</td>
+</tr>
+<tr>
+  <td>LTX</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">6.6637</td>
+  <td style="text-align:right">6.4488</td>
+  <td style="text-align:right">1.7065</td>
+</tr>
+</tbody>
+</table>
+<h3>Recorded GT encode/decode timing and allocation</h3>
+<p>These are medians over the twelve GT clips in each 17-frame condition. The timed region covers encoding/decoding with synchronization; model loading and artifact writing are outside it. Allocation is the recorded peak allocated CUDA memory.</p>
+<table>
+<thead>
+<tr>
+  <th>Condition</th>
+  <th>Codec</th>
+  <th style="text-align:right">Median encode/decode time (s)</th>
+  <th style="text-align:right">Peak allocation (GB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>pilot-v2</td>
+  <td>wan</td>
+  <td style="text-align:right">0.0939</td>
+  <td style="text-align:right">4.199</td>
+</tr>
+<tr>
+  <td>pilot-v2</td>
+  <td>ltx</td>
+  <td style="text-align:right">0.0240</td>
+  <td style="text-align:right">2.790</td>
+</tr>
+<tr>
+  <td>textured64-bounded</td>
+  <td>wan</td>
+  <td style="text-align:right">0.0933</td>
+  <td style="text-align:right">4.199</td>
+</tr>
+<tr>
+  <td>textured64-bounded</td>
+  <td>ltx</td>
+  <td style="text-align:right">0.0234</td>
+  <td style="text-align:right">2.790</td>
+</tr>
+</tbody>
+</table>
+<h2>Visual records and interactive maps</h2>
+<p><a href="../interactive/gt-wan-ltx-frame-browser.html">Open the synchronized GT / Wan / LTX frame browser</a></p>
+<p>The browser shows all seventeen measured frames of the GT object-translation/orbit clip, with source RGB, saved Wan/LTX reconstruction and physical-error maps. Its slider and playback are synchronized. Clicking either map selects a persistent initial query ID and displays its GT/Wan/LTX dx,dy,dz values. Map limits are fixed across time and codecs. The two source NPZ members were streamed from the verified local archive and checked against the saved SHA256 ledger.</p>
+<h3>Motion-RGB sequence</h3>
+<p><img loading="lazy" src="../animations/object_translation_orbit-motion-rgb.gif" alt="Measured source and reconstructed motion RGB" /></p>
+<h3>Recovered 3D paths</h3>
+<p>The trails use the same GT initial position plus each source/decoded displacement, with fixed query IDs and axis limits. Display playback is 10 fps; source sampling is 20 Hz.</p>
+<p><img loading="lazy" src="../animations/object_translation_orbit-3d-paths.gif" alt="Measured GT raw-label and decoded 3D paths" /></p>
+<h3>Frame comparison maps</h3>
+<p><img loading="lazy" src="../pilot-v2/object_translation_orbit.png" alt="Debug object-translation/orbit comparisons" /></p>
+<p><img loading="lazy" src="../textured64-bounded/object_translation_orbit.png" alt="Textured64 object-translation/orbit comparisons" /></p>
+<p>Additional measured animations: <a href="../animations/occlusion_and_return_orbit-motion-rgb.gif">occlusion motion RGB</a> · <a href="../animations/occlusion_and_return_orbit-3d-paths.gif">occlusion 3D paths</a> · <a href="../animations/depth_speed_out_of_view_stress_orbit-motion-rgb.gif">stress motion RGB</a> · <a href="../animations/depth_speed_out_of_view_stress_orbit-3d-paths.gif">stress 3D paths</a>.</p>
+<h2>Measurement files</h2>
+<ul>
+<li><a href="../pilot-v2/per-clip.csv">Debug per-clip CSV</a></li>
+<li><a href="../practical-shared-front/per-clip.csv">Practical per-clip CSV</a></li>
+<li><a href="../textured64-bounded/per-clip.csv">Textured per-clip CSV</a></li>
+<li><a href="../offline-analysis/paired-gt-errors.csv">Paired GT observations</a></li>
+<li><a href="../context33/paired-first17.csv">Temporal-context paired observations</a></li>
+<li><a href="../offline-analysis/latent-shape-evidence.json">Native latent-shape evidence</a></li>
+<li><a href="../interactive/frame-browser-provenance.json">Interactive-browser provenance</a></li>
+</ul>
+<p>The numerical tables retain the original study groups, clip counts, calibration bounds and scoring masks. The data record contains no formal inferential test results.</p>
+<h2>Analysis of the measured pilot</h2>
+<h3>Motion-codec fidelity under native compression</h3>
+<p>For exact GT motion, Wan records lower decoded-to-GT EPE than LTX in both the debug study (4.466 versus 6.664 mm) and textured followup (4.277 versus 6.522 mm). Foreground errors are larger than the overall scores: 13.517/21.793 mm in debug and 12.807/17.652 mm in textured scenes. In these measurements, scene-wide averages dilute errors on moving material. The paired tables retain that distinction rather than treating the overall score as object-motion fidelity.</p>
+<p>This is a native-codec comparison, not a rate-distortion comparison at equal capacity. At the same 17-frame resolution, Wan has 61,440 latent elements versus LTX's 24,576. Saved tensor payloads also differ in dtype. Wan's smaller measured distortion therefore does not prove superiority at equal bitrate or latent budget. Actual file payloads are not entropy-coded bitrates.</p>
+<h3>Separate tracking, representation and codec errors</h3>
+<p>The experiment retains raw tracker error, range clipping, raster inversion, codec self-error and final decoded-to-GT error. Their vector decomposition is checked, but the scalar norms do not add: clipping or codec bias can sometimes offset part of an existing tracker error. Consequently, a decoded-to-GT score smaller than raw-source error is not evidence that a VAE recovered missing material identity or corrected tracking generally. GT-input runs provide the clearest codec-only diagnostic; tracker-input runs measure the full pipeline.</p>
+<p>The shared calibration bounds are highly asymmetric, and zero motion is not middle gray. Physical inversion must use the saved per-channel bounds. Invalid slots and initially stationary background points also affect spatial compression; visual smoothness or RGB error alone is insufficient to judge physical flow fidelity.</p>
+<h3>Temporal context, runtime and sampling</h3>
+<p>Extending GT input from 17 to 33 frames leaves Wan's shared-first17 decoded output unchanged in this control; LTX changes it by 1.7065 mm on average, with shared-window EPE changing from 6.6637 to 6.4488 mm. This is specific to the saved deterministic codec settings, not a general claim about predictive temporal reasoning. Recorded median encode/decode time is approximately 0.094 s for Wan and 0.024 s for LTX, with allocated peaks of 4.199 and 2.790 GB. These B300 measurements exclude loading and artifact I/O.</p>
+<p>The twelve paired GT records repeat six archetype results across fixed/orbit cameras; they are not twelve independent motion samples. Tracker rows in the textured followup use only two clips, whereas GT rows use twelve. Neither those rows nor shared-front diagnostics should be pooled into one unqualified average. No population confidence intervals are inferred.</p>
+<h3>What remains untested</h3>
+<p>Codec reconstruction of pseudo-RGB flow does not establish text-conditioned prediction quality, action learning benefits or OOD policy performance. Equal-rate codec sweeps, broader assets/motion amplitudes, multiple calibration/test seeds, clipping sensitivity, object-balanced metrics and downstream controlled LoRA experiments are needed to test those claims. The present report documents the completed codec measurements and their saved visual evidence.</p>
+<h2>Complete saved media catalog</h2>
+<p>Every existing media file from this experiment is listed below. Galleries preserve the original debug/textured and geometry-regime names. Interactive point selection is available in the linked demo; the remaining clips are saved recordings or maps.</p>
+<h3>Videos</h3>
+<ul>
+<li><a href="../animations/depth_speed_out_of_view_stress_orbit-3d-paths.mp4">animations/depth_speed_out_of_view_stress_orbit-3d-paths.mp4</a><video controls preload="none" src="../animations/depth_speed_out_of_view_stress_orbit-3d-paths.mp4"></video></li>
+<li><a href="../animations/depth_speed_out_of_view_stress_orbit-motion-rgb.mp4">animations/depth_speed_out_of_view_stress_orbit-motion-rgb.mp4</a><video controls preload="none" src="../animations/depth_speed_out_of_view_stress_orbit-motion-rgb.mp4"></video></li>
+<li><a href="../animations/object_translation_orbit-3d-paths.mp4">animations/object_translation_orbit-3d-paths.mp4</a><video controls preload="none" src="../animations/object_translation_orbit-3d-paths.mp4"></video></li>
+<li><a href="../animations/object_translation_orbit-motion-rgb.mp4">animations/object_translation_orbit-motion-rgb.mp4</a><video controls preload="none" src="../animations/object_translation_orbit-motion-rgb.mp4"></video></li>
+<li><a href="../animations/occlusion_and_return_orbit-3d-paths.mp4">animations/occlusion_and_return_orbit-3d-paths.mp4</a><video controls preload="none" src="../animations/occlusion_and_return_orbit-3d-paths.mp4"></video></li>
+<li><a href="../animations/occlusion_and_return_orbit-motion-rgb.mp4">animations/occlusion_and_return_orbit-motion-rgb.mp4</a><video controls preload="none" src="../animations/occlusion_and_return_orbit-motion-rgb.mp4"></video></li>
+</ul>
+<h3>Animated comparisons</h3>
+<p><img loading="lazy" src="../animations/depth_speed_out_of_view_stress_orbit-3d-paths.gif" alt=" animations/depth_speed_out_of_view_stress_orbit-3d-paths.gif " /></p>
+<p><img loading="lazy" src="../animations/depth_speed_out_of_view_stress_orbit-motion-rgb.gif" alt=" animations/depth_speed_out_of_view_stress_orbit-motion-rgb.gif " /></p>
+<p><img loading="lazy" src="../animations/object_translation_orbit-3d-paths.gif" alt=" animations/object_translation_orbit-3d-paths.gif " /></p>
+<p><img loading="lazy" src="../animations/object_translation_orbit-motion-rgb.gif" alt=" animations/object_translation_orbit-motion-rgb.gif " /></p>
+<p><img loading="lazy" src="../animations/occlusion_and_return_orbit-3d-paths.gif" alt=" animations/occlusion_and_return_orbit-3d-paths.gif " /></p>
+<p><img loading="lazy" src="../animations/occlusion_and_return_orbit-motion-rgb.gif" alt=" animations/occlusion_and_return_orbit-motion-rgb.gif " /></p>
+<h3>Saved figures and comparison maps</h3>
+<p><img loading="lazy" src="../offline-analysis/paired-gt-codec-errors.png" alt=" offline-analysis/paired-gt-codec-errors.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/articulated_links_fixed.png" alt=" pilot-v2/articulated_links_fixed.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/articulated_links_orbit.png" alt=" pilot-v2/articulated_links_orbit.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/depth_speed_out_of_view_stress_fixed.png" alt=" pilot-v2/depth_speed_out_of_view_stress_fixed.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/depth_speed_out_of_view_stress_orbit.png" alt=" pilot-v2/depth_speed_out_of_view_stress_orbit.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/object_translation_fixed.png" alt=" pilot-v2/object_translation_fixed.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/object_translation_orbit.png" alt=" pilot-v2/object_translation_orbit.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/occlusion_and_return_fixed.png" alt=" pilot-v2/occlusion_and_return_fixed.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/occlusion_and_return_orbit.png" alt=" pilot-v2/occlusion_and_return_orbit.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/rigid_rotation_fixed.png" alt=" pilot-v2/rigid_rotation_fixed.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/rigid_rotation_orbit.png" alt=" pilot-v2/rigid_rotation_orbit.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/static_scene_fixed.png" alt=" pilot-v2/static_scene_fixed.png " /></p>
+<p><img loading="lazy" src="../pilot-v2/static_scene_orbit.png" alt=" pilot-v2/static_scene_orbit.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/articulated_links_fixed.png" alt=" practical-shared-front/articulated_links_fixed.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/articulated_links_orbit.png" alt=" practical-shared-front/articulated_links_orbit.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/depth_speed_out_of_view_stress_fixed.png" alt=" practical-shared-front/depth_speed_out_of_view_stress_fixed.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/depth_speed_out_of_view_stress_orbit.png" alt=" practical-shared-front/depth_speed_out_of_view_stress_orbit.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/object_translation_fixed.png" alt=" practical-shared-front/object_translation_fixed.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/object_translation_orbit.png" alt=" practical-shared-front/object_translation_orbit.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/occlusion_and_return_fixed.png" alt=" practical-shared-front/occlusion_and_return_fixed.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/occlusion_and_return_orbit.png" alt=" practical-shared-front/occlusion_and_return_orbit.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/rigid_rotation_fixed.png" alt=" practical-shared-front/rigid_rotation_fixed.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/rigid_rotation_orbit.png" alt=" practical-shared-front/rigid_rotation_orbit.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/static_scene_fixed.png" alt=" practical-shared-front/static_scene_fixed.png " /></p>
+<p><img loading="lazy" src="../practical-shared-front/static_scene_orbit.png" alt=" practical-shared-front/static_scene_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/articulated_links_fixed.png" alt=" textured64-bounded/articulated_links_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/articulated_links_orbit.png" alt=" textured64-bounded/articulated_links_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/depth_speed_out_of_view_stress_fixed.png" alt=" textured64-bounded/depth_speed_out_of_view_stress_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/depth_speed_out_of_view_stress_orbit.png" alt=" textured64-bounded/depth_speed_out_of_view_stress_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/object_translation_fixed.png" alt=" textured64-bounded/object_translation_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/object_translation_orbit.png" alt=" textured64-bounded/object_translation_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/occlusion_and_return_fixed.png" alt=" textured64-bounded/occlusion_and_return_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/occlusion_and_return_orbit.png" alt=" textured64-bounded/occlusion_and_return_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/rigid_rotation_fixed.png" alt=" textured64-bounded/rigid_rotation_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/rigid_rotation_orbit.png" alt=" textured64-bounded/rigid_rotation_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/static_scene_fixed.png" alt=" textured64-bounded/static_scene_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-bounded/static_scene_orbit.png" alt=" textured64-bounded/static_scene_orbit.png " /></p>
+<p>Video provenance: Experiment 2 MP4 files are H.264 viewing copies of the original saved GIF animations, with even-dimension padding. They add no new model inference and preserve the original display timing; original GIFs remain included.</p>
+<h2>Full measured tables</h2>
+<h3>context33/paired-first17.csv</h3>
+<p><a href="../context33/paired-first17.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>clip</th>
+  <th>codec</th>
+  <th>short17_epe_m</th>
+  <th>long33_first17_epe_m</th>
+  <th>shared_first17_reconstruction_difference_m</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>ltx</td>
+  <td>0.007592324968365321</td>
+  <td>0.007492544229253632</td>
+  <td>0.0020087220030129515</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>wan</td>
+  <td>0.005075627762798918</td>
+  <td>0.005075627762798918</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>ltx</td>
+  <td>0.007592324968365321</td>
+  <td>0.007492544229253632</td>
+  <td>0.0020087220030129515</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>wan</td>
+  <td>0.005075627762798918</td>
+  <td>0.005075627762798918</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>ltx</td>
+  <td>0.008218398506891962</td>
+  <td>0.007725134431560673</td>
+  <td>0.002231318048116245</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>wan</td>
+  <td>0.005377903180290042</td>
+  <td>0.005377903180290042</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>ltx</td>
+  <td>0.008218398506891962</td>
+  <td>0.007725134431560673</td>
+  <td>0.002231318048116245</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>wan</td>
+  <td>0.005377903180290042</td>
+  <td>0.005377903180290042</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>ltx</td>
+  <td>0.005984605259138936</td>
+  <td>0.0057915417705189315</td>
+  <td>0.0014569191316555962</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>wan</td>
+  <td>0.003993338205927963</td>
+  <td>0.003993338205927963</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>ltx</td>
+  <td>0.005984605259138936</td>
+  <td>0.0057915417705189315</td>
+  <td>0.0014569191316555962</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>wan</td>
+  <td>0.003993338205927963</td>
+  <td>0.003993338205927963</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>ltx</td>
+  <td>0.006657687634077854</td>
+  <td>0.006188865713330415</td>
+  <td>0.002043957650257567</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>wan</td>
+  <td>0.0048096571765429835</td>
+  <td>0.0048096571765429835</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>ltx</td>
+  <td>0.006657687634077854</td>
+  <td>0.006188865713330415</td>
+  <td>0.002043957650257567</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>wan</td>
+  <td>0.0048096571765429835</td>
+  <td>0.0048096571765429835</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>ltx</td>
+  <td>0.006308936599514592</td>
+  <td>0.006121841337551158</td>
+  <td>0.001575807625761404</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>wan</td>
+  <td>0.004008842195921923</td>
+  <td>0.004008842195921923</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>ltx</td>
+  <td>0.006308936599514592</td>
+  <td>0.006121841337551158</td>
+  <td>0.001575807625761404</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>wan</td>
+  <td>0.004008842195921923</td>
+  <td>0.004008842195921923</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>ltx</td>
+  <td>0.00522016168220535</td>
+  <td>0.005373086282796004</td>
+  <td>0.0009219899125968275</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>wan</td>
+  <td>0.0035334085687964076</td>
+  <td>0.0035334085687964076</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>ltx</td>
+  <td>0.00522016168220535</td>
+  <td>0.005373086282796004</td>
+  <td>0.0009219899125968275</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>wan</td>
+  <td>0.0035334085687964076</td>
+  <td>0.0035334085687964076</td>
+  <td>0.0</td>
+</tr>
+</tbody>
+</table>
+<h3>offline-analysis/paired-gt-errors.csv</h3>
+<p><a href="../offline-analysis/paired-gt-errors.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>condition</th>
+  <th>clip</th>
+  <th>archetype</th>
+  <th>camera</th>
+  <th>metric</th>
+  <th>wan_mm</th>
+  <th>ltx_mm</th>
+  <th>delta_ltx_minus_wan_mm</th>
+  <th>winner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>debug_g16</td>
+  <td>articulated_links_fixed</td>
+  <td>articulated_links</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>5.075627762798918</td>
+  <td>7.592324968365321</td>
+  <td>2.5166972055664028</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>articulated_links_fixed</td>
+  <td>articulated_links</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>23.124705193436675</td>
+  <td>37.55928075423868</td>
+  <td>14.434575560802003</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>articulated_links_orbit</td>
+  <td>articulated_links</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>5.075627762798918</td>
+  <td>7.592324968365321</td>
+  <td>2.5166972055664028</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>articulated_links_orbit</td>
+  <td>articulated_links</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>23.124705193436675</td>
+  <td>37.55928075423868</td>
+  <td>14.434575560802003</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>5.377903180290042</td>
+  <td>8.218398506891962</td>
+  <td>2.8404953266019195</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>29.20246319382074</td>
+  <td>48.06629231267719</td>
+  <td>18.86382911885645</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>5.377903180290042</td>
+  <td>8.218398506891962</td>
+  <td>2.8404953266019195</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>29.20246319382074</td>
+  <td>48.06629231267719</td>
+  <td>18.86382911885645</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>object_translation_fixed</td>
+  <td>object_translation</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>3.993338205927963</td>
+  <td>5.984605259138935</td>
+  <td>1.9912670532109722</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>object_translation_fixed</td>
+  <td>object_translation</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>6.499096452430848</td>
+  <td>9.105687740950582</td>
+  <td>2.606591288519734</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>object_translation_orbit</td>
+  <td>object_translation</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>3.993338205927963</td>
+  <td>5.984605259138935</td>
+  <td>1.9912670532109722</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>object_translation_orbit</td>
+  <td>object_translation</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>6.499096452430848</td>
+  <td>9.105687740950582</td>
+  <td>2.606591288519734</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>occlusion_and_return</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>4.809657176542983</td>
+  <td>6.657687634077854</td>
+  <td>1.848030457534871</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>occlusion_and_return</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>10.201157146553271</td>
+  <td>13.28406492520345</td>
+  <td>3.0829077786501795</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>occlusion_and_return</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>4.809657176542983</td>
+  <td>6.657687634077854</td>
+  <td>1.848030457534871</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>occlusion_and_return</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>10.201157146553271</td>
+  <td>13.28406492520345</td>
+  <td>3.0829077786501795</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>rigid_rotation_fixed</td>
+  <td>rigid_rotation</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>4.008842195921923</td>
+  <td>6.308936599514592</td>
+  <td>2.300094403592669</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>rigid_rotation_fixed</td>
+  <td>rigid_rotation</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>8.31456214040903</td>
+  <td>16.882071584709458</td>
+  <td>8.567509444300427</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>rigid_rotation_orbit</td>
+  <td>rigid_rotation</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>4.008842195921923</td>
+  <td>6.308936599514592</td>
+  <td>2.300094403592669</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>rigid_rotation_orbit</td>
+  <td>rigid_rotation</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>8.31456214040903</td>
+  <td>16.882071584709458</td>
+  <td>8.567509444300427</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>static_scene_fixed</td>
+  <td>static_scene</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>3.5334085687964074</td>
+  <td>5.220161682205349</td>
+  <td>1.6867531134089417</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>static_scene_fixed</td>
+  <td>static_scene</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>3.760046035165923</td>
+  <td>5.862577378712121</td>
+  <td>2.102531343546198</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>static_scene_orbit</td>
+  <td>static_scene</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>3.5334085687964074</td>
+  <td>5.220161682205349</td>
+  <td>1.6867531134089417</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>debug_g16</td>
+  <td>static_scene_orbit</td>
+  <td>static_scene</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>3.760046035165923</td>
+  <td>5.862577378712121</td>
+  <td>2.102531343546198</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>articulated_links_fixed</td>
+  <td>articulated_links</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>4.99556832894862</td>
+  <td>7.309396911185741</td>
+  <td>2.3138285822371207</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>articulated_links_fixed</td>
+  <td>articulated_links</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>25.23305527245439</td>
+  <td>30.28777371789441</td>
+  <td>5.05471844544002</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>articulated_links_orbit</td>
+  <td>articulated_links</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>4.99556832894862</td>
+  <td>7.309396911185741</td>
+  <td>2.3138285822371207</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>articulated_links_orbit</td>
+  <td>articulated_links</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>25.23305527245439</td>
+  <td>30.28777371789441</td>
+  <td>5.05471844544002</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>5.174593544075212</td>
+  <td>7.455385179330717</td>
+  <td>2.280791635255505</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>20.4103452389762</td>
+  <td>27.495588071556146</td>
+  <td>7.085242832579947</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>5.174593544075212</td>
+  <td>7.455385179330717</td>
+  <td>2.280791635255505</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>depth_speed_out_of_view_stress</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>20.4103452389762</td>
+  <td>27.495588071556146</td>
+  <td>7.085242832579947</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>object_translation_fixed</td>
+  <td>object_translation</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>3.5927355750681804</td>
+  <td>6.100691529000126</td>
+  <td>2.5079559539319454</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>object_translation_fixed</td>
+  <td>object_translation</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>6.863792028739696</td>
+  <td>10.439012269987797</td>
+  <td>3.5752202412481013</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>object_translation_orbit</td>
+  <td>object_translation</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>3.5927355750681804</td>
+  <td>6.100691529000126</td>
+  <td>2.5079559539319454</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>object_translation_orbit</td>
+  <td>object_translation</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>6.863792028739696</td>
+  <td>10.439012269987797</td>
+  <td>3.5752202412481013</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>occlusion_and_return</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>4.356430757150332</td>
+  <td>6.5877151628774895</td>
+  <td>2.2312844057271572</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>occlusion_and_return</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>9.62545265614128</td>
+  <td>14.564099712315905</td>
+  <td>4.938647056174625</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>occlusion_and_return</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>4.356430757150332</td>
+  <td>6.5877151628774895</td>
+  <td>2.2312844057271572</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>occlusion_and_return</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>9.62545265614128</td>
+  <td>14.564099712315905</td>
+  <td>4.938647056174625</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>rigid_rotation_fixed</td>
+  <td>rigid_rotation</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>4.220110232867849</td>
+  <td>6.507447352768797</td>
+  <td>2.2873371199009487</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>rigid_rotation_fixed</td>
+  <td>rigid_rotation</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>11.328413874786964</td>
+  <td>17.684015556273373</td>
+  <td>6.355601681486409</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>rigid_rotation_orbit</td>
+  <td>rigid_rotation</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>4.220110232867849</td>
+  <td>6.507447352768797</td>
+  <td>2.2873371199009487</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>rigid_rotation_orbit</td>
+  <td>rigid_rotation</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>11.328413874786964</td>
+  <td>17.684015556273373</td>
+  <td>6.355601681486409</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>static_scene_fixed</td>
+  <td>static_scene</td>
+  <td>fixed</td>
+  <td>overall</td>
+  <td>3.3229414092717264</td>
+  <td>5.172359449347271</td>
+  <td>1.8494180400755442</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>static_scene_fixed</td>
+  <td>static_scene</td>
+  <td>fixed</td>
+  <td>foreground</td>
+  <td>3.3801595304417735</td>
+  <td>5.440020373098421</td>
+  <td>2.0598608426566476</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>static_scene_orbit</td>
+  <td>static_scene</td>
+  <td>orbit</td>
+  <td>overall</td>
+  <td>3.3229414092717264</td>
+  <td>5.172359449347271</td>
+  <td>1.8494180400755442</td>
+  <td>Wan</td>
+</tr>
+<tr>
+  <td>textured_g64</td>
+  <td>static_scene_orbit</td>
+  <td>static_scene</td>
+  <td>orbit</td>
+  <td>foreground</td>
+  <td>3.3801595304417735</td>
+  <td>5.440020373098421</td>
+  <td>2.0598608426566476</td>
+  <td>Wan</td>
+</tr>
+</tbody>
+</table>
+<h3>pilot-v2/per-clip.csv</h3>
+<p><a href="../pilot-v2/per-clip.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>clip</th>
+  <th>source</th>
+  <th>codec</th>
+  <th>tracking_epe_m</th>
+  <th>range_epe_m</th>
+  <th>raster_epe_m</th>
+  <th>codec_self_epe_m</th>
+  <th>decoded_gt_epe_m</th>
+  <th>foreground_decoded_gt_epe_m</th>
+  <th>background_decoded_gt_epe_m</th>
+  <th>finite_coverage</th>
+  <th>inference_seconds</th>
+  <th>peak_gpu_gb</th>
+  <th>decoder_overshoot_fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.06270377234996427</td>
+  <td>0.0009197315713126128</td>
+  <td>0.0015914652172314466</td>
+  <td>0.010835652577395672</td>
+  <td>0.059530297047309444</td>
+  <td>0.07082172320531802</td>
+  <td>0.05880181794034115</td>
+  <td>1.0</td>
+  <td>3.2350877119997676</td>
+  <td>2.789756416</td>
+  <td>0.04827432071461397</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.06270377234996427</td>
+  <td>0.0009197315713126128</td>
+  <td>0.0015914652172314466</td>
+  <td>0.006874189346771908</td>
+  <td>0.060481553610099215</td>
+  <td>0.05575997756538634</td>
+  <td>0.06078617141943552</td>
+  <td>1.0</td>
+  <td>2.745816743999967</td>
+  <td>4.19947776</td>
+  <td>0.0018412272135416667</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.06964269213245504</td>
+  <td>0.00011571400726538603</td>
+  <td>0.0017528370041809756</td>
+  <td>0.010643207520596991</td>
+  <td>0.06762439512719481</td>
+  <td>0.04593636061100838</td>
+  <td>0.06902362316049716</td>
+  <td>1.0</td>
+  <td>3.1694871560002866</td>
+  <td>2.789756416</td>
+  <td>0.06023780972349877</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.06964269213245504</td>
+  <td>0.00011571400726538603</td>
+  <td>0.0017528370041809756</td>
+  <td>0.006937079464758318</td>
+  <td>0.06884390703306258</td>
+  <td>0.0351986301687592</td>
+  <td>0.071014570056566</td>
+  <td>1.0</td>
+  <td>2.7144370249998246</td>
+  <td>4.19947776</td>
+  <td>0.0025583902994791665</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007005657562168579</td>
+  <td>0.007010419006162941</td>
+  <td>0.007592324968365321</td>
+  <td>0.03755928075423868</td>
+  <td>0.005658972982179942</td>
+  <td>1.0</td>
+  <td>0.9533235139997487</td>
+  <td>2.789756416</td>
+  <td>0.07193860820695466</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007005657562168579</td>
+  <td>0.004510329486682916</td>
+  <td>0.005075627762798918</td>
+  <td>0.023124705193436675</td>
+  <td>0.003911171154370675</td>
+  <td>1.0</td>
+  <td>0.8639630799998486</td>
+  <td>4.19947776</td>
+  <td>0.0012688730277267157</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.020291009424510575</td>
+  <td>0.012169902835244386</td>
+  <td>0.0010870675497559373</td>
+  <td>0.00914194857320902</td>
+  <td>0.014635655791380736</td>
+  <td>0.07711354336137713</td>
+  <td>0.010604824335251938</td>
+  <td>1.0</td>
+  <td>0.02319599299971742</td>
+  <td>2.789756416</td>
+  <td>0.07643426633348652</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.020291009424510575</td>
+  <td>0.012169902835244386</td>
+  <td>0.0010870675497559373</td>
+  <td>0.004881358913904046</td>
+  <td>0.012139055583593893</td>
+  <td>0.06240164753261217</td>
+  <td>0.008896307715915295</td>
+  <td>1.0</td>
+  <td>0.09345030100030272</td>
+  <td>4.19947776</td>
+  <td>0.001677868412990196</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.1032045122302246</td>
+  <td>1.2675755539076459e-05</td>
+  <td>0.0019618854506359526</td>
+  <td>0.013777971838527024</td>
+  <td>0.09583025801891719</td>
+  <td>0.16295095871335444</td>
+  <td>0.0914998902321793</td>
+  <td>1.0</td>
+  <td>0.9456988809997711</td>
+  <td>2.789756416</td>
+  <td>0.04180190142463235</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.1032045122302246</td>
+  <td>1.2675755539076459e-05</td>
+  <td>0.0019618854506359526</td>
+  <td>0.008202381020159587</td>
+  <td>0.10081209036371407</td>
+  <td>0.15524188312210763</td>
+  <td>0.09730049083091448</td>
+  <td>1.0</td>
+  <td>2.341264143999979</td>
+  <td>4.19947776</td>
+  <td>0.001060037051930147</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.10343210225320579</td>
+  <td>5.077311829099375e-06</td>
+  <td>0.0019685654440190913</td>
+  <td>0.013623601171579017</td>
+  <td>0.09603710037467193</td>
+  <td>0.1671954861568266</td>
+  <td>0.09144623677582325</td>
+  <td>1.0</td>
+  <td>0.023518854000030842</td>
+  <td>2.789756416</td>
+  <td>0.04264023724724265</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.10343210225320579</td>
+  <td>5.077311829099375e-06</td>
+  <td>0.0019685654440190913</td>
+  <td>0.007951729564297322</td>
+  <td>0.10120273447490201</td>
+  <td>0.15953850934863972</td>
+  <td>0.09743913609595119</td>
+  <td>1.0</td>
+  <td>0.0926031779999903</td>
+  <td>4.19947776</td>
+  <td>0.000945745729932598</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.0172339825202364</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.022405972004980082</td>
+  <td>0.2892725839727984</td>
+  <td>0.005188771232862769</td>
+  <td>1.0</td>
+  <td>0.023504884000431048</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.0172339825202364</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.020450076643642894</td>
+  <td>0.28296625150469634</td>
+  <td>0.0035135492332523466</td>
+  <td>1.0</td>
+  <td>0.09383115499986161</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.16457290524481377</td>
+  <td>0.002135970369360593</td>
+  <td>0.001916798698301747</td>
+  <td>0.017356308149002936</td>
+  <td>0.153218995282087</td>
+  <td>0.04721849415893753</td>
+  <td>0.1600577372900321</td>
+  <td>1.0</td>
+  <td>0.024312925999765866</td>
+  <td>2.789756416</td>
+  <td>0.04103237974877451</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.16457290524481377</td>
+  <td>0.002135970369360593</td>
+  <td>0.001916798698301747</td>
+  <td>0.010743253425394053</td>
+  <td>0.15972276398474558</td>
+  <td>0.03564996485501885</td>
+  <td>0.16772746070279243</td>
+  <td>1.0</td>
+  <td>0.09375260999968305</td>
+  <td>4.19947776</td>
+  <td>0.0013287114162071078</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.2436215687736146</td>
+  <td>0.00016464086983240011</td>
+  <td>0.0013364742280626719</td>
+  <td>0.018069554541479682</td>
+  <td>0.23055125300896928</td>
+  <td>0.04497095336479373</td>
+  <td>0.242524175566658</td>
+  <td>1.0</td>
+  <td>0.023666240999773436</td>
+  <td>2.789756416</td>
+  <td>0.04118795955882353</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.2436215687736146</td>
+  <td>0.00016464086983240011</td>
+  <td>0.0013364742280626719</td>
+  <td>0.010411747068599113</td>
+  <td>0.2387103391600772</td>
+  <td>0.04611171629028681</td>
+  <td>0.2511360567645798</td>
+  <td>1.0</td>
+  <td>0.09332255899971642</td>
+  <td>4.19947776</td>
+  <td>0.0009292901731004901</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007005657562168579</td>
+  <td>0.007010419006162941</td>
+  <td>0.007592324968365321</td>
+  <td>0.03755928075423868</td>
+  <td>0.005658972982179942</td>
+  <td>1.0</td>
+  <td>0.04776711099930253</td>
+  <td>2.789756416</td>
+  <td>0.07193860820695466</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007005657562168579</td>
+  <td>0.004510329486682916</td>
+  <td>0.005075627762798918</td>
+  <td>0.023124705193436675</td>
+  <td>0.003911171154370675</td>
+  <td>1.0</td>
+  <td>0.0944873380003628</td>
+  <td>4.19947776</td>
+  <td>0.0012688730277267157</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.020350530952211506</td>
+  <td>0.009581305778452329</td>
+  <td>0.0015213207817053056</td>
+  <td>0.01055428318684364</td>
+  <td>0.015403301841364885</td>
+  <td>0.0455945940439929</td>
+  <td>0.013333411427901367</td>
+  <td>0.9478609625668449</td>
+  <td>0.024973517000034917</td>
+  <td>2.789756416</td>
+  <td>0.08637192670036764</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.020350530952211506</td>
+  <td>0.009581305778452329</td>
+  <td>0.0015213207817053056</td>
+  <td>0.005867434657865768</td>
+  <td>0.012508862237223604</td>
+  <td>0.03015935114537601</td>
+  <td>0.011298759087655577</td>
+  <td>0.9478609625668449</td>
+  <td>0.09366740800032858</td>
+  <td>4.19947776</td>
+  <td>0.001289218079810049</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.18803267796807008</td>
+  <td>2.599245238922198e-06</td>
+  <td>0.0024558857485000372</td>
+  <td>0.01866593385464684</td>
+  <td>0.17467782543699997</td>
+  <td>0.11388873123198046</td>
+  <td>0.17859970248248508</td>
+  <td>1.0</td>
+  <td>0.024491168000167818</td>
+  <td>2.789756416</td>
+  <td>0.037297267539828434</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.18803267796807008</td>
+  <td>2.599245238922198e-06</td>
+  <td>0.0024558857485000372</td>
+  <td>0.011400376704272705</td>
+  <td>0.1833532399929089</td>
+  <td>0.10932215764375403</td>
+  <td>0.18812943885414468</td>
+  <td>1.0</td>
+  <td>0.09380027899987908</td>
+  <td>4.19947776</td>
+  <td>0.0009490368412990196</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.18729926317853382</td>
+  <td>5.721264284202886e-06</td>
+  <td>0.002404993404021493</td>
+  <td>0.019384222614006436</td>
+  <td>0.17327232955628633</td>
+  <td>0.11556032414281328</td>
+  <td>0.1769956847442523</td>
+  <td>1.0</td>
+  <td>0.023382480999316613</td>
+  <td>2.789756416</td>
+  <td>0.03592816521139706</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.18729926317853382</td>
+  <td>5.721264284202886e-06</td>
+  <td>0.002404993404021493</td>
+  <td>0.011676831591244347</td>
+  <td>0.18247765780746417</td>
+  <td>0.11048068978123107</td>
+  <td>0.18712262348657596</td>
+  <td>1.0</td>
+  <td>0.09264253599940275</td>
+  <td>4.19947776</td>
+  <td>0.0009565166398590686</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.0172339825202364</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.022405972004980082</td>
+  <td>0.2892725839727984</td>
+  <td>0.005188771232862769</td>
+  <td>1.0</td>
+  <td>0.023600341999554075</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.0172339825202364</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.020450076643642894</td>
+  <td>0.28296625150469634</td>
+  <td>0.0035135492332523466</td>
+  <td>1.0</td>
+  <td>0.09781820799980778</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.08748093587659113</td>
+  <td>0.016445306187311635</td>
+  <td>0.003116257428110639</td>
+  <td>0.014632827016876529</td>
+  <td>0.07157295543334179</td>
+  <td>0.11132933532599898</td>
+  <td>0.069346598159353</td>
+  <td>1.0</td>
+  <td>0.02401326900053391</td>
+  <td>2.789756416</td>
+  <td>0.07053689395680147</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.08748093587659113</td>
+  <td>0.016445306187311635</td>
+  <td>0.003116257428110639</td>
+  <td>0.008180171652979185</td>
+  <td>0.07132565203828983</td>
+  <td>0.08727824635231454</td>
+  <td>0.07043230675670445</td>
+  <td>1.0</td>
+  <td>0.09350298800018209</td>
+  <td>4.19947776</td>
+  <td>0.008535048540900736</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.04594534750872666</td>
+  <td>5.074611236164911e-05</td>
+  <td>0.002527599565301456</td>
+  <td>0.009270114881761386</td>
+  <td>0.04647276041298831</td>
+  <td>0.04502304322124141</td>
+  <td>0.04655394457572614</td>
+  <td>1.0</td>
+  <td>0.02408013900003425</td>
+  <td>2.789756416</td>
+  <td>0.08124258003982843</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.04594534750872666</td>
+  <td>5.074611236164911e-05</td>
+  <td>0.002527599565301456</td>
+  <td>0.005482122204068773</td>
+  <td>0.045837081146968085</td>
+  <td>0.03240663137212603</td>
+  <td>0.046589186334359246</td>
+  <td>1.0</td>
+  <td>0.09266185999968002</td>
+  <td>4.19947776</td>
+  <td>0.0032839307598039216</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0011943326213085825</td>
+  <td>0.007081267558890811</td>
+  <td>0.008218398506891962</td>
+  <td>0.04806629231267719</td>
+  <td>0.00598691645376799</td>
+  <td>1.0</td>
+  <td>0.02416867400006595</td>
+  <td>2.789756416</td>
+  <td>0.06543656891467524</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0011943326213085825</td>
+  <td>0.004394541457455436</td>
+  <td>0.005377903180290042</td>
+  <td>0.029202463193820742</td>
+  <td>0.004043727819532325</td>
+  <td>1.0</td>
+  <td>0.12404324100043596</td>
+  <td>4.19947776</td>
+  <td>0.001304776060814951</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.022916719209651062</td>
+  <td>0.013079225078036036</td>
+  <td>0.0016827532766756897</td>
+  <td>0.009634826479818922</td>
+  <td>0.018268820740156996</td>
+  <td>0.09010348063202453</td>
+  <td>0.014246079786212413</td>
+  <td>1.0</td>
+  <td>0.02357029699942359</td>
+  <td>2.789756416</td>
+  <td>0.08261527267156862</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.022916719209651062</td>
+  <td>0.013079225078036036</td>
+  <td>0.0016827532766756897</td>
+  <td>0.005148583039998089</td>
+  <td>0.014960027054336475</td>
+  <td>0.06813830469448902</td>
+  <td>0.011982043506487933</td>
+  <td>1.0</td>
+  <td>0.09351570000035281</td>
+  <td>4.19947776</td>
+  <td>0.0026203230315563725</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.07168227309959496</td>
+  <td>8.39406588277074e-05</td>
+  <td>0.0011262184870844925</td>
+  <td>0.010026418414259494</td>
+  <td>0.06752830066205605</td>
+  <td>0.41463569347024026</td>
+  <td>0.048090286664797734</td>
+  <td>1.0</td>
+  <td>0.023608735999914643</td>
+  <td>2.789756416</td>
+  <td>0.04112064137178309</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.07168227309959496</td>
+  <td>8.39406588277074e-05</td>
+  <td>0.0011262184870844925</td>
+  <td>0.005813921075181718</td>
+  <td>0.07130870970309071</td>
+  <td>0.41174682691212855</td>
+  <td>0.0522441751393846</td>
+  <td>1.0</td>
+  <td>0.09402108999984193</td>
+  <td>4.19947776</td>
+  <td>0.001021740483302696</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.07313334238931832</td>
+  <td>4.4838284586810253e-05</td>
+  <td>0.001118935262786702</td>
+  <td>0.01023719382727511</td>
+  <td>0.06830122919687003</td>
+  <td>0.4129838079245423</td>
+  <td>0.048999004788120366</td>
+  <td>1.0</td>
+  <td>0.023754162999466644</td>
+  <td>2.789756416</td>
+  <td>0.04391808603324142</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.07313334238931832</td>
+  <td>4.4838284586810253e-05</td>
+  <td>0.001118935262786702</td>
+  <td>0.0057268174399072915</td>
+  <td>0.07286074591686276</td>
+  <td>0.41143501464752746</td>
+  <td>0.053900586867945535</td>
+  <td>1.0</td>
+  <td>0.092919976000303</td>
+  <td>4.19947776</td>
+  <td>0.001014260684742647</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.022731985509740725</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.027940112095298723</td>
+  <td>0.4343528124159038</td>
+  <td>0.005181000877344842</td>
+  <td>1.0</td>
+  <td>0.02364238900008786</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.022731985509740725</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.026039529368592638</td>
+  <td>0.42825351868201356</td>
+  <td>0.0035155459670410654</td>
+  <td>1.0</td>
+  <td>0.09534477600027458</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.18902414029141354</td>
+  <td>0.01032088061869708</td>
+  <td>0.0032432244598846675</td>
+  <td>0.022433560761812958</td>
+  <td>0.16853994487993462</td>
+  <td>0.10368005328633866</td>
+  <td>0.172172098809176</td>
+  <td>1.0</td>
+  <td>0.02392158800012112</td>
+  <td>2.789756416</td>
+  <td>0.044745650945925246</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.18902414029141354</td>
+  <td>0.01032088061869708</td>
+  <td>0.0032432244598846675</td>
+  <td>0.012657958436092194</td>
+  <td>0.17548012693446588</td>
+  <td>0.10322830886526946</td>
+  <td>0.17952622874634092</td>
+  <td>1.0</td>
+  <td>0.0979798109992771</td>
+  <td>4.19947776</td>
+  <td>0.002118278952205882</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.10762417827331539</td>
+  <td>0.0012723764880458034</td>
+  <td>0.002604905299009426</td>
+  <td>0.013312655802664356</td>
+  <td>0.10287656864101218</td>
+  <td>0.04372831522447928</td>
+  <td>0.10618887083233801</td>
+  <td>1.0</td>
+  <td>0.02362506899953587</td>
+  <td>2.789756416</td>
+  <td>0.04613898782169118</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.10762417827331539</td>
+  <td>0.0012723764880458034</td>
+  <td>0.002604905299009426</td>
+  <td>0.008059581697057467</td>
+  <td>0.10628196764792171</td>
+  <td>0.03412170281028065</td>
+  <td>0.11032294247882962</td>
+  <td>1.0</td>
+  <td>0.09288076699976955</td>
+  <td>4.19947776</td>
+  <td>0.001327813840379902</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0011943326213085825</td>
+  <td>0.007081267558890811</td>
+  <td>0.008218398506891962</td>
+  <td>0.04806629231267719</td>
+  <td>0.00598691645376799</td>
+  <td>1.0</td>
+  <td>0.024456273000396322</td>
+  <td>2.789756416</td>
+  <td>0.06543656891467524</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0011943326213085825</td>
+  <td>0.004394541457455436</td>
+  <td>0.005377903180290042</td>
+  <td>0.029202463193820742</td>
+  <td>0.004043727819532325</td>
+  <td>1.0</td>
+  <td>0.09542512700045336</td>
+  <td>4.19947776</td>
+  <td>0.001304776060814951</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.024736520613137022</td>
+  <td>0.010807996611628156</td>
+  <td>0.0020115642767249515</td>
+  <td>0.01175398208805569</td>
+  <td>0.019290772126309644</td>
+  <td>0.103869262307294</td>
+  <td>0.014260081260526192</td>
+  <td>0.9478609625668449</td>
+  <td>0.02427195499967638</td>
+  <td>2.789756416</td>
+  <td>0.09033203125</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.024736520613137022</td>
+  <td>0.010807996611628156</td>
+  <td>0.0020115642767249515</td>
+  <td>0.005909451826379717</td>
+  <td>0.015239681504101996</td>
+  <td>0.07448252738395167</td>
+  <td>0.011715943459203876</td>
+  <td>0.9478609625668449</td>
+  <td>0.09352118500009965</td>
+  <td>4.19947776</td>
+  <td>0.001747580135569853</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.29211401016103483</td>
+  <td>1.4014570104226356e-05</td>
+  <td>0.003281964821460048</td>
+  <td>0.019525663107021335</td>
+  <td>0.2785602783460059</td>
+  <td>0.3576760811322735</td>
+  <td>0.2741297933899749</td>
+  <td>1.0</td>
+  <td>0.023397889000079886</td>
+  <td>2.789756416</td>
+  <td>0.04121817794500613</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.29211401016103483</td>
+  <td>1.4014570104226356e-05</td>
+  <td>0.003281964821460048</td>
+  <td>0.012332410549220718</td>
+  <td>0.2859869795978872</td>
+  <td>0.3566643761905169</td>
+  <td>0.2820290453886999</td>
+  <td>1.0</td>
+  <td>0.09377438199953758</td>
+  <td>4.19947776</td>
+  <td>0.000969082701439951</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.2956653589505932</td>
+  <td>2.3410158588155877e-05</td>
+  <td>0.0033087148027555946</td>
+  <td>0.019202664145478124</td>
+  <td>0.2820873526446343</td>
+  <td>0.3547779980661548</td>
+  <td>0.2780166765010291</td>
+  <td>1.0</td>
+  <td>0.023504211000727082</td>
+  <td>2.789756416</td>
+  <td>0.03871334300321691</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.2956653589505932</td>
+  <td>2.3410158588155877e-05</td>
+  <td>0.0033087148027555946</td>
+  <td>0.012073785996277994</td>
+  <td>0.2888548954734522</td>
+  <td>0.3565922977948147</td>
+  <td>0.2850616009434559</td>
+  <td>1.0</td>
+  <td>0.09266235499944742</td>
+  <td>4.19947776</td>
+  <td>0.000990923713235294</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.022731985509740725</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.027940112095298723</td>
+  <td>0.4343528124159038</td>
+  <td>0.005181000877344842</td>
+  <td>1.0</td>
+  <td>0.023517877000813314</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.022731985509740725</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.026039529368592638</td>
+  <td>0.42825351868201356</td>
+  <td>0.0035155459670410654</td>
+  <td>1.0</td>
+  <td>0.0955144930003371</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.024578541432768417</td>
+  <td>0.00029839378427158093</td>
+  <td>0.0007221802874799409</td>
+  <td>0.006749878871575823</td>
+  <td>0.02339003965350806</td>
+  <td>0.009600543727928316</td>
+  <td>0.024871555744686052</td>
+  <td>1.0</td>
+  <td>0.024253358000351</td>
+  <td>2.789756416</td>
+  <td>0.06289942124310662</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.024578541432768417</td>
+  <td>0.00029839378427158093</td>
+  <td>0.0007221802874799409</td>
+  <td>0.004723902042949752</td>
+  <td>0.02466121132099695</td>
+  <td>0.007568687414182892</td>
+  <td>0.0264975981870183</td>
+  <td>1.0</td>
+  <td>0.09357211200040183</td>
+  <td>4.19947776</td>
+  <td>0.003058040843290441</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.03554083440896503</td>
+  <td>2.459982373584896e-06</td>
+  <td>0.000701787384680945</td>
+  <td>0.0066668144863205984</td>
+  <td>0.036005585739290934</td>
+  <td>0.025144982997783748</td>
+  <td>0.03717242735614708</td>
+  <td>1.0</td>
+  <td>0.024170310000044992</td>
+  <td>2.789756416</td>
+  <td>0.05123542336856618</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.03554083440896503</td>
+  <td>2.459982373584896e-06</td>
+  <td>0.000701787384680945</td>
+  <td>0.005477028910376677</td>
+  <td>0.037038229092797664</td>
+  <td>0.021764537473252667</td>
+  <td>0.03867920422547606</td>
+  <td>1.0</td>
+  <td>0.09308302799945523</td>
+  <td>4.19947776</td>
+  <td>0.0013164445465686275</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003421131543096453</td>
+  <td>0.005762664811289386</td>
+  <td>0.005984605259138936</td>
+  <td>0.009105687740950582</td>
+  <td>0.0056492823478699146</td>
+  <td>1.0</td>
+  <td>0.02381103600055212</td>
+  <td>2.789756416</td>
+  <td>0.07062635234757966</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003421131543096453</td>
+  <td>0.003757550844426741</td>
+  <td>0.003993338205927963</td>
+  <td>0.006499096452430848</td>
+  <td>0.0037241245100226934</td>
+  <td>1.0</td>
+  <td>0.09534884999993665</td>
+  <td>4.19947776</td>
+  <td>0.0012359619140625</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.00023683579141461805</td>
+  <td>0.0</td>
+  <td>0.00034090335293052154</td>
+  <td>0.005786870271705104</td>
+  <td>0.00603886101734949</td>
+  <td>0.010075846217051475</td>
+  <td>0.00560513533473688</td>
+  <td>1.0</td>
+  <td>0.024613419999695907</td>
+  <td>2.789756416</td>
+  <td>0.07011922200520833</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.00023683579141461805</td>
+  <td>0.0</td>
+  <td>0.00034090335293052154</td>
+  <td>0.0038696874106392497</td>
+  <td>0.004077434594458126</td>
+  <td>0.007337564323581675</td>
+  <td>0.003727172722734109</td>
+  <td>1.0</td>
+  <td>0.09327638300055696</td>
+  <td>4.19947776</td>
+  <td>0.0012874229281556373</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.06196585429325639</td>
+  <td>0.0001290000615895156</td>
+  <td>0.0011327356011092283</td>
+  <td>0.008362568924227029</td>
+  <td>0.05952663207075276</td>
+  <td>0.07872457148207981</td>
+  <td>0.05746404353895728</td>
+  <td>1.0</td>
+  <td>0.023799261000021943</td>
+  <td>2.789756416</td>
+  <td>0.041018317727481615</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.06196585429325639</td>
+  <td>0.0001290000615895156</td>
+  <td>0.0011327356011092283</td>
+  <td>0.006420738639547982</td>
+  <td>0.0638562208470146</td>
+  <td>0.07819379324492094</td>
+  <td>0.06231582050674366</td>
+  <td>1.0</td>
+  <td>0.09511318799923174</td>
+  <td>4.19947776</td>
+  <td>0.0012937059589460784</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.06103544340565321</td>
+  <td>7.3517061971517195e-06</td>
+  <td>0.001103423952230037</td>
+  <td>0.008068433951718126</td>
+  <td>0.05888634903015669</td>
+  <td>0.07775063275073656</td>
+  <td>0.056859607803978675</td>
+  <td>1.0</td>
+  <td>0.02371429300001182</td>
+  <td>2.789756416</td>
+  <td>0.03972042308134191</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.06103544340565321</td>
+  <td>7.3517061971517195e-06</td>
+  <td>0.001103423952230037</td>
+  <td>0.006348186835033876</td>
+  <td>0.06309666811373355</td>
+  <td>0.07734116405736167</td>
+  <td>0.06156626772309581</td>
+  <td>1.0</td>
+  <td>0.09262856500026828</td>
+  <td>4.19947776</td>
+  <td>0.0012395522173713235</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.009439506485341793</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.0052381456135744894</td>
+  <td>0.014512160919614214</td>
+  <td>0.1015187042759047</td>
+  <td>0.005164350476376395</td>
+  <td>1.0</td>
+  <td>0.023330965000241122</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.009439506485341793</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.003544437438949087</td>
+  <td>0.012577047901572925</td>
+  <td>0.09698759363100552</td>
+  <td>0.0035081462942785136</td>
+  <td>1.0</td>
+  <td>0.09404255400022521</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.15330601116465475</td>
+  <td>0.02318066916036512</td>
+  <td>0.0014073886032756225</td>
+  <td>0.01549999545923518</td>
+  <td>0.12477282282238744</td>
+  <td>0.03274937809895409</td>
+  <td>0.13465963919763232</td>
+  <td>1.0</td>
+  <td>0.02406282299943996</td>
+  <td>2.789756416</td>
+  <td>0.046597649069393385</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.15330601116465475</td>
+  <td>0.02318066916036512</td>
+  <td>0.0014073886032756225</td>
+  <td>0.009169328407404437</td>
+  <td>0.1316628879711165</td>
+  <td>0.034574637291012573</td>
+  <td>0.14209385705244995</td>
+  <td>1.0</td>
+  <td>0.09398790699924575</td>
+  <td>4.19947776</td>
+  <td>0.0041940726485906864</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.12564600742030974</td>
+  <td>0.003307223994594131</td>
+  <td>0.0009422755874703446</td>
+  <td>0.008167899383376682</td>
+  <td>0.12200710950686039</td>
+  <td>0.06473065540256928</td>
+  <td>0.12816077812963547</td>
+  <td>1.0</td>
+  <td>0.02353472899994813</td>
+  <td>2.789756416</td>
+  <td>0.041353711894914214</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.12564600742030974</td>
+  <td>0.003307223994594131</td>
+  <td>0.0009422755874703446</td>
+  <td>0.007633665775522889</td>
+  <td>0.1248741810593824</td>
+  <td>0.06356120088883098</td>
+  <td>0.1314615260363838</td>
+  <td>1.0</td>
+  <td>0.09269182800017006</td>
+  <td>4.19947776</td>
+  <td>0.003237556008731618</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003421131543096453</td>
+  <td>0.005762664811289386</td>
+  <td>0.005984605259138936</td>
+  <td>0.009105687740950582</td>
+  <td>0.0056492823478699146</td>
+  <td>1.0</td>
+  <td>0.025012944000081916</td>
+  <td>2.789756416</td>
+  <td>0.07062635234757966</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003421131543096453</td>
+  <td>0.003757550844426741</td>
+  <td>0.003993338205927963</td>
+  <td>0.006499096452430848</td>
+  <td>0.0037241245100226934</td>
+  <td>1.0</td>
+  <td>0.09565973600001598</td>
+  <td>4.19947776</td>
+  <td>0.0012359619140625</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.042366910224968746</td>
+  <td>0.030476959080800496</td>
+  <td>0.0012622074455136284</td>
+  <td>0.010039432051415258</td>
+  <td>0.015368769698046465</td>
+  <td>0.03222857300995457</td>
+  <td>0.013440875751440151</td>
+  <td>0.9486391571553995</td>
+  <td>0.024902993999603495</td>
+  <td>2.789756416</td>
+  <td>0.08889620911841299</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.042366910224968746</td>
+  <td>0.030476959080800496</td>
+  <td>0.0012622074455136284</td>
+  <td>0.005545279152681023</td>
+  <td>0.013305514268149705</td>
+  <td>0.03117114264013819</td>
+  <td>0.011262605691253825</td>
+  <td>0.9486391571553995</td>
+  <td>0.09339416900002107</td>
+  <td>4.19947776</td>
+  <td>0.002189187442555147</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.122396917334068</td>
+  <td>0.0</td>
+  <td>0.0018815583189071615</td>
+  <td>0.011336393519646775</td>
+  <td>0.11765739211972971</td>
+  <td>0.13487458738778274</td>
+  <td>0.11580761080993889</td>
+  <td>1.0</td>
+  <td>0.02316037599939591</td>
+  <td>2.789756416</td>
+  <td>0.03361960018382353</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.122396917334068</td>
+  <td>0.0</td>
+  <td>0.0018815583189071615</td>
+  <td>0.008743178881859482</td>
+  <td>0.12329116937358443</td>
+  <td>0.1364993383502657</td>
+  <td>0.12187210989675094</td>
+  <td>1.0</td>
+  <td>0.09375358100078302</td>
+  <td>4.19947776</td>
+  <td>0.0010444790709252451</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.12226581947482006</td>
+  <td>0.0</td>
+  <td>0.0018571396581448804</td>
+  <td>0.011004120123461603</td>
+  <td>0.11785756269140805</td>
+  <td>0.1360830981637532</td>
+  <td>0.11589944731008173</td>
+  <td>1.0</td>
+  <td>0.02365638100036449</td>
+  <td>2.789756416</td>
+  <td>0.034142288507199754</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.12226581947482006</td>
+  <td>0.0</td>
+  <td>0.0018571396581448804</td>
+  <td>0.008086924050076702</td>
+  <td>0.12293795010158147</td>
+  <td>0.13767303144678927</td>
+  <td>0.12135484218845999</td>
+  <td>1.0</td>
+  <td>0.09311354600049526</td>
+  <td>4.19947776</td>
+  <td>0.0010040881587009803</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.009439506485341793</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.0052381456135744894</td>
+  <td>0.014512160919614214</td>
+  <td>0.1015187042759047</td>
+  <td>0.005164350476376395</td>
+  <td>1.0</td>
+  <td>0.023670145999858505</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.009439506485341793</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.003544437438949087</td>
+  <td>0.012577047901572925</td>
+  <td>0.09698759363100552</td>
+  <td>0.0035081462942785136</td>
+  <td>1.0</td>
+  <td>0.09322529900055088</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.045142274924863876</td>
+  <td>0.016901640563061766</td>
+  <td>0.001658946450892336</td>
+  <td>0.010185319193023887</td>
+  <td>0.029309689386991845</td>
+  <td>0.06137382750461291</td>
+  <td>0.02456977331743047</td>
+  <td>1.0</td>
+  <td>0.024386205000155314</td>
+  <td>2.789756416</td>
+  <td>0.08996282839307598</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.045142274924863876</td>
+  <td>0.016901640563061766</td>
+  <td>0.001658946450892336</td>
+  <td>0.005460514249378126</td>
+  <td>0.02878401962392135</td>
+  <td>0.05937800171788729</td>
+  <td>0.02426143096655247</td>
+  <td>1.0</td>
+  <td>0.09333657299976039</td>
+  <td>4.19947776</td>
+  <td>0.005872838637408088</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.004600120096438722</td>
+  <td>0.0</td>
+  <td>0.0008932801843787064</td>
+  <td>0.006045374710213917</td>
+  <td>0.008087342847487097</td>
+  <td>0.015525388551684394</td>
+  <td>0.006987805656431843</td>
+  <td>1.0</td>
+  <td>0.02459300999998959</td>
+  <td>2.789756416</td>
+  <td>0.07416459625842524</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.004600120096438722</td>
+  <td>0.0</td>
+  <td>0.0008932801843787064</td>
+  <td>0.0038900910127211627</td>
+  <td>0.006564858753333275</td>
+  <td>0.014878734045659961</td>
+  <td>0.005335851101424111</td>
+  <td>1.0</td>
+  <td>0.09269116899940855</td>
+  <td>4.19947776</td>
+  <td>0.0011764227175245097</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0008130444806978543</td>
+  <td>0.006272083564337508</td>
+  <td>0.006657687634077854</td>
+  <td>0.01328406492520345</td>
+  <td>0.0056781362084332015</td>
+  <td>1.0</td>
+  <td>0.023258442000042123</td>
+  <td>2.789756416</td>
+  <td>0.06682870902267157</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0008130444806978543</td>
+  <td>0.004091161120825967</td>
+  <td>0.0048096571765429835</td>
+  <td>0.010201157146553272</td>
+  <td>0.004012652833150158</td>
+  <td>1.0</td>
+  <td>0.09307060899936914</td>
+  <td>4.19947776</td>
+  <td>0.0012245926202512254</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.027583277286981737</td>
+  <td>0.015212407421716327</td>
+  <td>0.0013676041818107007</td>
+  <td>0.008962682661863938</td>
+  <td>0.018720717078272706</td>
+  <td>0.06739119579584045</td>
+  <td>0.011525950659154</td>
+  <td>1.0</td>
+  <td>0.023987818000023253</td>
+  <td>2.789756416</td>
+  <td>0.08122462852328431</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.027583277286981737</td>
+  <td>0.015212407421716327</td>
+  <td>0.0013676041818107007</td>
+  <td>0.004900701048125144</td>
+  <td>0.01655062503901683</td>
+  <td>0.06380853962693</td>
+  <td>0.009564672447760098</td>
+  <td>1.0</td>
+  <td>0.09333147199959058</td>
+  <td>4.19947776</td>
+  <td>0.0014427035462622549</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.027698673428313853</td>
+  <td>6.819849416691189e-05</td>
+  <td>0.0002783813433580555</td>
+  <td>0.00730850287498215</td>
+  <td>0.029110192716702836</td>
+  <td>0.1775140144105497</td>
+  <td>0.007172236466308079</td>
+  <td>1.0</td>
+  <td>0.023133717999371584</td>
+  <td>2.789756416</td>
+  <td>0.0630481196384804</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.027698673428313853</td>
+  <td>6.819849416691189e-05</td>
+  <td>0.0002783813433580555</td>
+  <td>0.003467466916753623</td>
+  <td>0.02899389358101887</td>
+  <td>0.17442249807746452</td>
+  <td>0.007495752046761689</td>
+  <td>1.0</td>
+  <td>0.09309951399973215</td>
+  <td>4.19947776</td>
+  <td>0.0013152477787990197</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.027169960405767822</td>
+  <td>2.664906567202486e-06</td>
+  <td>0.00025869793534948206</td>
+  <td>0.007132346641261405</td>
+  <td>0.028797182428981643</td>
+  <td>0.17846785371308038</td>
+  <td>0.006671952760897482</td>
+  <td>1.0</td>
+  <td>0.023676646000239998</td>
+  <td>2.789756416</td>
+  <td>0.056409050436580885</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.027169960405767822</td>
+  <td>2.664906567202486e-06</td>
+  <td>0.00025869793534948206</td>
+  <td>0.003230276488922718</td>
+  <td>0.028510050488801036</td>
+  <td>0.17434564320537163</td>
+  <td>0.006951745478525378</td>
+  <td>1.0</td>
+  <td>0.09284521599965956</td>
+  <td>4.19947776</td>
+  <td>0.0010615330116421568</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.023544034084559164</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.02875184662178123</td>
+  <td>0.1885489084243047</td>
+  <td>0.005129672268364716</td>
+  <td>1.0</td>
+  <td>0.023917411000184075</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.023544034084559164</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.02664805241198978</td>
+  <td>0.18319341554611704</td>
+  <td>0.003506563948684012</td>
+  <td>1.0</td>
+  <td>0.09312719199988351</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.13651750029711796</td>
+  <td>0.03206655386850175</td>
+  <td>0.002740236814010747</td>
+  <td>0.01749328695716149</td>
+  <td>0.0997066481745349</td>
+  <td>0.08356003643147239</td>
+  <td>0.10209353860611803</td>
+  <td>1.0</td>
+  <td>0.024030847999711114</td>
+  <td>2.789756416</td>
+  <td>0.059317794500612746</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.13651750029711796</td>
+  <td>0.03206655386850175</td>
+  <td>0.002740236814010747</td>
+  <td>0.00907849564413831</td>
+  <td>0.10466045566108796</td>
+  <td>0.08361627633104646</td>
+  <td>0.10777133434465933</td>
+  <td>1.0</td>
+  <td>0.09994403600012447</td>
+  <td>4.19947776</td>
+  <td>0.007625205844056373</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.06887716678987564</td>
+  <td>0.01860188893161566</td>
+  <td>0.001528825957843707</td>
+  <td>0.008858581545262863</td>
+  <td>0.054395217134767415</td>
+  <td>0.04475866904642617</td>
+  <td>0.05581975033043526</td>
+  <td>1.0</td>
+  <td>0.02367978700021922</td>
+  <td>2.789756416</td>
+  <td>0.08220986758961397</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.06887716678987564</td>
+  <td>0.01860188893161566</td>
+  <td>0.001528825957843707</td>
+  <td>0.005844206026016184</td>
+  <td>0.05580098398710282</td>
+  <td>0.044255533933840824</td>
+  <td>0.0575077026906285</td>
+  <td>1.0</td>
+  <td>0.09298544800003583</td>
+  <td>4.19947776</td>
+  <td>0.013218300015318627</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0008130444806978543</td>
+  <td>0.006272083564337508</td>
+  <td>0.006657687634077854</td>
+  <td>0.01328406492520345</td>
+  <td>0.0056781362084332015</td>
+  <td>1.0</td>
+  <td>0.023091838999789616</td>
+  <td>2.789756416</td>
+  <td>0.06682870902267157</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0008130444806978543</td>
+  <td>0.004091161120825967</td>
+  <td>0.0048096571765429835</td>
+  <td>0.010201157146553272</td>
+  <td>0.004012652833150158</td>
+  <td>1.0</td>
+  <td>0.09301478199995472</td>
+  <td>4.19947776</td>
+  <td>0.0012245926202512254</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.04121232785748686</td>
+  <td>0.017172328959568096</td>
+  <td>0.002172809212652437</td>
+  <td>0.011270611516460093</td>
+  <td>0.027304586876814883</td>
+  <td>0.08823895497428846</td>
+  <td>0.017685232191665252</td>
+  <td>0.9478609625668449</td>
+  <td>0.022805163999692013</td>
+  <td>2.789756416</td>
+  <td>0.08707921645220588</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.04121232785748686</td>
+  <td>0.017172328959568096</td>
+  <td>0.002172809212652437</td>
+  <td>0.006067935891567002</td>
+  <td>0.02538152336860688</td>
+  <td>0.08966739594212342</td>
+  <td>0.01523308614283991</td>
+  <td>0.9478609625668449</td>
+  <td>0.0933228349995261</td>
+  <td>4.19947776</td>
+  <td>0.002159567440257353</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.052097754223666186</td>
+  <td>0.0004579017214851002</td>
+  <td>0.0015833820498386913</td>
+  <td>0.010725694108510198</td>
+  <td>0.04686514878423052</td>
+  <td>0.1318796834353063</td>
+  <td>0.034297782792332365</td>
+  <td>1.0</td>
+  <td>0.023476862000279652</td>
+  <td>2.789756416</td>
+  <td>0.0500787473192402</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.052097754223666186</td>
+  <td>0.0004579017214851002</td>
+  <td>0.0015833820498386913</td>
+  <td>0.00584424812709492</td>
+  <td>0.05167146699264164</td>
+  <td>0.1290846356808671</td>
+  <td>0.04022778118655614</td>
+  <td>1.0</td>
+  <td>0.09343701600027998</td>
+  <td>4.19947776</td>
+  <td>0.0011399213005514705</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.05227617581581014</td>
+  <td>0.0005236969223143674</td>
+  <td>0.001545606572328958</td>
+  <td>0.010640109018144375</td>
+  <td>0.04686798117751776</td>
+  <td>0.13194375208345346</td>
+  <td>0.03429156286968379</td>
+  <td>1.0</td>
+  <td>0.02356467600020551</td>
+  <td>2.789756416</td>
+  <td>0.05023941339231005</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.05227617581581014</td>
+  <td>0.0005236969223143674</td>
+  <td>0.001545606572328958</td>
+  <td>0.005196847307753968</td>
+  <td>0.05170924465433751</td>
+  <td>0.1297779290976919</td>
+  <td>0.04016865651923295</td>
+  <td>1.0</td>
+  <td>0.09268454099947121</td>
+  <td>4.19947776</td>
+  <td>0.0011046166513480392</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.023544034084559164</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.02875184662178123</td>
+  <td>0.1885489084243047</td>
+  <td>0.005129672268364716</td>
+  <td>1.0</td>
+  <td>0.023989669000002323</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.023544034084559164</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.02664805241198978</td>
+  <td>0.18319341554611704</td>
+  <td>0.003506563948684012</td>
+  <td>1.0</td>
+  <td>0.09299879799982591</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.015877708197511987</td>
+  <td>0.0017563040960477806</td>
+  <td>0.0005588202803562883</td>
+  <td>0.00631502028810169</td>
+  <td>0.015157155536467617</td>
+  <td>0.07453047304831159</td>
+  <td>0.010290490166644345</td>
+  <td>1.0</td>
+  <td>0.024265906999971776</td>
+  <td>2.789756416</td>
+  <td>0.09689570408241421</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.015877708197511987</td>
+  <td>0.0017563040960477806</td>
+  <td>0.0005588202803562883</td>
+  <td>0.0039666083616287885</td>
+  <td>0.013946037030194206</td>
+  <td>0.073527660258021</td>
+  <td>0.009062297421355944</td>
+  <td>1.0</td>
+  <td>0.10069862500040472</td>
+  <td>4.19947776</td>
+  <td>0.006731519512101716</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.012536886738762128</td>
+  <td>2.2977815674631998e-05</td>
+  <td>0.0007296232327619205</td>
+  <td>0.006518240411480888</td>
+  <td>0.01417382255370044</td>
+  <td>0.02932682034668207</td>
+  <td>0.012931773554275718</td>
+  <td>1.0</td>
+  <td>0.023590924999552954</td>
+  <td>2.789756416</td>
+  <td>0.06638650333180147</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.012536886738762128</td>
+  <td>2.2977815674631998e-05</td>
+  <td>0.0007296232327619205</td>
+  <td>0.004020175074516509</td>
+  <td>0.013044963327748264</td>
+  <td>0.02689498701697939</td>
+  <td>0.011909715484368663</td>
+  <td>1.0</td>
+  <td>0.09259382400068716</td>
+  <td>4.19947776</td>
+  <td>0.0013071695963541667</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003394664330362086</td>
+  <td>0.0061086417787484</td>
+  <td>0.006308936599514592</td>
+  <td>0.016882071584709456</td>
+  <td>0.005442286190892062</td>
+  <td>1.0</td>
+  <td>0.02320968499952869</td>
+  <td>2.789756416</td>
+  <td>0.06803355497472427</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003394664330362086</td>
+  <td>0.0037685335310023486</td>
+  <td>0.004008842195921923</td>
+  <td>0.008314562140409031</td>
+  <td>0.0036559143316197006</td>
+  <td>1.0</td>
+  <td>0.09335343899965665</td>
+  <td>4.19947776</td>
+  <td>0.001289218079810049</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.0012384674107313337</td>
+  <td>0.0</td>
+  <td>0.00043971265815836346</td>
+  <td>0.0062163607248815955</td>
+  <td>0.007211753002925285</td>
+  <td>0.015017565106384606</td>
+  <td>0.006571932338707308</td>
+  <td>1.0</td>
+  <td>0.02403970700015634</td>
+  <td>2.789756416</td>
+  <td>0.07133035098805147</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.0012384674107313337</td>
+  <td>0.0</td>
+  <td>0.00043971265815836346</td>
+  <td>0.0039105209426764515</td>
+  <td>0.005112856495247263</td>
+  <td>0.008419929774055538</td>
+  <td>0.004841784915017078</td>
+  <td>1.0</td>
+  <td>0.0932916079991628</td>
+  <td>4.19947776</td>
+  <td>0.0012709673713235295</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.01373673989652808</td>
+  <td>0.00040020211820250773</td>
+  <td>0.0002871388835693386</td>
+  <td>0.007175161026578414</td>
+  <td>0.013033110026889668</td>
+  <td>0.08846096702261347</td>
+  <td>0.0068504987977319794</td>
+  <td>1.0</td>
+  <td>0.023609777999809012</td>
+  <td>2.789756416</td>
+  <td>0.06328926834405638</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.01373673989652808</td>
+  <td>0.00040020211820250773</td>
+  <td>0.0002871388835693386</td>
+  <td>0.0036087449013789</td>
+  <td>0.01424993820417812</td>
+  <td>0.08466952602325148</td>
+  <td>0.00847784084195899</td>
+  <td>1.0</td>
+  <td>0.09352757499982545</td>
+  <td>4.19947776</td>
+  <td>0.0017801920572916667</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.01320863749639891</td>
+  <td>0.00015153684040397462</td>
+  <td>0.00024245862893443684</td>
+  <td>0.007263414504806365</td>
+  <td>0.01244090229265985</td>
+  <td>0.08821389024276252</td>
+  <td>0.006230001641012091</td>
+  <td>1.0</td>
+  <td>0.023559936999845377</td>
+  <td>2.789756416</td>
+  <td>0.05945961148131127</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.01320863749639891</td>
+  <td>0.00015153684040397462</td>
+  <td>0.00024245862893443684</td>
+  <td>0.003175809182953934</td>
+  <td>0.013891824956174796</td>
+  <td>0.08485061141530148</td>
+  <td>0.008075530984115231</td>
+  <td>1.0</td>
+  <td>0.09277898999971512</td>
+  <td>4.19947776</td>
+  <td>0.0012221990847120097</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.006318177715559713</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.011464977889073098</td>
+  <td>0.088373811437731</td>
+  <td>0.005160975139183105</td>
+  <td>1.0</td>
+  <td>0.023034345999803918</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.006318177715559713</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.009622152173929753</td>
+  <td>0.08402899741497097</td>
+  <td>0.003523230432860801</td>
+  <td>1.0</td>
+  <td>0.09306297300008737</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.13089364468189743</td>
+  <td>0.00578379566790597</td>
+  <td>0.0011138857883882059</td>
+  <td>0.014520951106811673</td>
+  <td>0.11843281468377374</td>
+  <td>0.05917026114986749</td>
+  <td>0.12329040103901197</td>
+  <td>1.0</td>
+  <td>0.024103412999465945</td>
+  <td>2.789756416</td>
+  <td>0.04973288143382353</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.13089364468189743</td>
+  <td>0.00578379566790597</td>
+  <td>0.0011138857883882059</td>
+  <td>0.008719394677908979</td>
+  <td>0.124998220081999</td>
+  <td>0.05826544267770014</td>
+  <td>0.1304681198692366</td>
+  <td>1.0</td>
+  <td>0.09901003300001321</td>
+  <td>4.19947776</td>
+  <td>0.003411087335324755</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.12087138719229958</td>
+  <td>0.003619665474230494</td>
+  <td>0.0009097094589512808</td>
+  <td>0.011271128132328098</td>
+  <td>0.11460951560506971</td>
+  <td>0.07250433903903074</td>
+  <td>0.1180607595858926</td>
+  <td>1.0</td>
+  <td>0.023845455999435217</td>
+  <td>2.789756416</td>
+  <td>0.04259266572840074</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.12087138719229958</td>
+  <td>0.003619665474230494</td>
+  <td>0.0009097094589512808</td>
+  <td>0.007011164892325103</td>
+  <td>0.12001468402331779</td>
+  <td>0.07003149183395509</td>
+  <td>0.124111666989659</td>
+  <td>1.0</td>
+  <td>0.09281622999969841</td>
+  <td>4.19947776</td>
+  <td>0.0033240224800857843</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003394664330362086</td>
+  <td>0.0061086417787484</td>
+  <td>0.006308936599514592</td>
+  <td>0.016882071584709456</td>
+  <td>0.005442286190892062</td>
+  <td>1.0</td>
+  <td>0.023377007999442867</td>
+  <td>2.789756416</td>
+  <td>0.06803355497472427</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0003394664330362086</td>
+  <td>0.0037685335310023486</td>
+  <td>0.004008842195921923</td>
+  <td>0.008314562140409031</td>
+  <td>0.0036559143316197006</td>
+  <td>1.0</td>
+  <td>0.0928000570002041</td>
+  <td>4.19947776</td>
+  <td>0.001289218079810049</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.021297281739868588</td>
+  <td>0.009949835630905603</td>
+  <td>0.0012456248055716314</td>
+  <td>0.0090487332905312</td>
+  <td>0.014620617807053286</td>
+  <td>0.01789492645595311</td>
+  <td>0.014335119505241859</td>
+  <td>0.9478609625668449</td>
+  <td>0.023782322999977623</td>
+  <td>2.789756416</td>
+  <td>0.0885168337354473</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.021297281739868588</td>
+  <td>0.009949835630905603</td>
+  <td>0.0012456248055716314</td>
+  <td>0.004842921640099037</td>
+  <td>0.01206172916392766</td>
+  <td>0.009008269812460477</td>
+  <td>0.01232797085124905</td>
+  <td>0.9478609625668449</td>
+  <td>0.09292690300026152</td>
+  <td>4.19947776</td>
+  <td>0.0013622209137561275</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.1137580013626429</td>
+  <td>0.0008640156167640464</td>
+  <td>0.0013085055470977193</td>
+  <td>0.012661514775062688</td>
+  <td>0.10540275119462104</td>
+  <td>0.11673628375030091</td>
+  <td>0.10447377311628661</td>
+  <td>1.0</td>
+  <td>0.024191267000787775</td>
+  <td>2.789756416</td>
+  <td>0.0401760924096201</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.1137580013626429</td>
+  <td>0.0008640156167640464</td>
+  <td>0.0013085055470977193</td>
+  <td>0.007556247991746455</td>
+  <td>0.11252984836855222</td>
+  <td>0.11755778554076386</td>
+  <td>0.11211772237082994</td>
+  <td>1.0</td>
+  <td>0.09569925899995724</td>
+  <td>4.19947776</td>
+  <td>0.0011479994829963235</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.11470642687815595</td>
+  <td>0.000927560623632885</td>
+  <td>0.001290102827696061</td>
+  <td>0.012591696862250173</td>
+  <td>0.10650138215909971</td>
+  <td>0.11811613421473073</td>
+  <td>0.10554935330208076</td>
+  <td>1.0</td>
+  <td>0.02395074299965927</td>
+  <td>2.789756416</td>
+  <td>0.040354410807291664</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.11470642687815595</td>
+  <td>0.000927560623632885</td>
+  <td>0.001290102827696061</td>
+  <td>0.007083860279002182</td>
+  <td>0.11320684972920364</td>
+  <td>0.11742283956601529</td>
+  <td>0.11286127679176007</td>
+  <td>1.0</td>
+  <td>0.09274638700026117</td>
+  <td>4.19947776</td>
+  <td>0.001190783930759804</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.006318177715559713</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.011464977889073098</td>
+  <td>0.088373811437731</td>
+  <td>0.005160975139183105</td>
+  <td>1.0</td>
+  <td>0.023153226999966137</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.006318177715559713</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.009622152173929753</td>
+  <td>0.08402899741497097</td>
+  <td>0.003523230432860801</td>
+  <td>1.0</td>
+  <td>0.09309974600000714</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.006334662804410377</td>
+  <td>0.0007934248494689889</td>
+  <td>0.00023632855479249263</td>
+  <td>0.005449765244612036</td>
+  <td>0.007562199114450631</td>
+  <td>0.005974979043498018</td>
+  <td>0.007664600409350799</td>
+  <td>1.0</td>
+  <td>0.02406470799996896</td>
+  <td>2.789756416</td>
+  <td>0.08837591433057598</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.006334662804410377</td>
+  <td>0.0007934248494689889</td>
+  <td>0.00023632855479249263</td>
+  <td>0.0033242491128740205</td>
+  <td>0.0062363902512360845</td>
+  <td>0.003991997969570797</td>
+  <td>0.006381189753279007</td>
+  <td>1.0</td>
+  <td>0.09753632899992226</td>
+  <td>4.19947776</td>
+  <td>0.005410886278339461</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.0050970326530066215</td>
+  <td>0.0</td>
+  <td>9.827721362433894e-05</td>
+  <td>0.0050531577263152735</td>
+  <td>0.007062748924588693</td>
+  <td>0.007388993756273311</td>
+  <td>0.007041700870931621</td>
+  <td>1.0</td>
+  <td>0.023710657999799878</td>
+  <td>2.789756416</td>
+  <td>0.08430720310585171</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.0050970326530066215</td>
+  <td>0.0</td>
+  <td>9.827721362433894e-05</td>
+  <td>0.003314662487217883</td>
+  <td>0.0059032452654989125</td>
+  <td>0.006305763313556671</td>
+  <td>0.005877276359172606</td>
+  <td>1.0</td>
+  <td>0.09303553399968223</td>
+  <td>4.19947776</td>
+  <td>0.001418768190870098</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.00522016168220535</td>
+  <td>0.0058625773787121215</td>
+  <td>0.005178715508237171</td>
+  <td>1.0</td>
+  <td>0.023080191000190098</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.0035334085687964076</td>
+  <td>0.003760046035165923</td>
+  <td>0.003518786796772568</td>
+  <td>1.0</td>
+  <td>0.09269642799972644</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.00522016168220535</td>
+  <td>0.0058625773787121215</td>
+  <td>0.005178715508237171</td>
+  <td>1.0</td>
+  <td>0.024393235000388813</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.0035334085687964076</td>
+  <td>0.003760046035165923</td>
+  <td>0.003518786796772568</td>
+  <td>1.0</td>
+  <td>0.09337819200027297</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.003906798832328312</td>
+  <td>0.0003417902204973595</td>
+  <td>0.00018697367410139805</td>
+  <td>0.006092310914051502</td>
+  <td>0.006197052039353081</td>
+  <td>0.006055050909697754</td>
+  <td>0.006206213402556651</td>
+  <td>1.0</td>
+  <td>0.023714556000413722</td>
+  <td>2.789756416</td>
+  <td>0.0712429869408701</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.003906798832328312</td>
+  <td>0.0003417902204973595</td>
+  <td>0.00018697367410139805</td>
+  <td>0.0033439953993304695</td>
+  <td>0.005239886045387169</td>
+  <td>0.003968742031588169</td>
+  <td>0.005321895336600008</td>
+  <td>1.0</td>
+  <td>0.09390487699965888</td>
+  <td>4.19947776</td>
+  <td>0.0018104104434742646</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.0028098278818425356</td>
+  <td>3.40160131048778e-05</td>
+  <td>0.00014292901216707597</td>
+  <td>0.0058325228009890534</td>
+  <td>0.005902409439133052</td>
+  <td>0.006359565493976921</td>
+  <td>0.005872915500110867</td>
+  <td>1.0</td>
+  <td>0.023913940000056755</td>
+  <td>2.789756416</td>
+  <td>0.0711511350145527</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.0028098278818425356</td>
+  <td>3.40160131048778e-05</td>
+  <td>0.00014292901216707597</td>
+  <td>0.003281000192110846</td>
+  <td>0.004717514064809853</td>
+  <td>0.0038053219210351886</td>
+  <td>0.004776365170859831</td>
+  <td>1.0</td>
+  <td>0.0933831000002101</td>
+  <td>4.19947776</td>
+  <td>0.0014789057712928922</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.00522016168220535</td>
+  <td>0.0058625773787121215</td>
+  <td>0.005178715508237171</td>
+  <td>1.0</td>
+  <td>0.02307384899995668</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.0035334085687964076</td>
+  <td>0.003760046035165923</td>
+  <td>0.003518786796772568</td>
+  <td>1.0</td>
+  <td>0.09265311799936171</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.12447739794273374</td>
+  <td>0.008198416841671953</td>
+  <td>0.001205718565876597</td>
+  <td>0.015333535934067267</td>
+  <td>0.1092703031547093</td>
+  <td>0.020159412592239193</td>
+  <td>0.11501939286841706</td>
+  <td>1.0</td>
+  <td>0.0245817929999248</td>
+  <td>2.789756416</td>
+  <td>0.05292466107536765</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.12447739794273374</td>
+  <td>0.008198416841671953</td>
+  <td>0.001205718565876597</td>
+  <td>0.008409046423675971</td>
+  <td>0.11710069469329903</td>
+  <td>0.02524654696615164</td>
+  <td>0.12302676874021178</td>
+  <td>1.0</td>
+  <td>0.10322326999994402</td>
+  <td>4.19947776</td>
+  <td>0.0038030287798713237</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.05063344869964048</td>
+  <td>0.0014598693788601931</td>
+  <td>0.0007129688522200673</td>
+  <td>0.008262887776805205</td>
+  <td>0.046417833391238866</td>
+  <td>0.01460724552888621</td>
+  <td>0.04847012938235839</td>
+  <td>1.0</td>
+  <td>0.02345822000006592</td>
+  <td>2.789756416</td>
+  <td>0.061452229817708336</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.05063344869964048</td>
+  <td>0.0014598693788601931</td>
+  <td>0.0007129688522200673</td>
+  <td>0.005543592698105565</td>
+  <td>0.04889319201973856</td>
+  <td>0.01896649262596303</td>
+  <td>0.05082394681933698</td>
+  <td>1.0</td>
+  <td>0.09279957699982333</td>
+  <td>4.19947776</td>
+  <td>0.0022639854281556373</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.00522016168220535</td>
+  <td>0.0058625773787121215</td>
+  <td>0.005178715508237171</td>
+  <td>1.0</td>
+  <td>0.024105296000016097</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.0035334085687964076</td>
+  <td>0.003760046035165923</td>
+  <td>0.003518786796772568</td>
+  <td>1.0</td>
+  <td>0.09287278400006471</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>ltx</td>
+  <td>0.0212373713628134</td>
+  <td>0.010484878507201638</td>
+  <td>0.0010165312754211106</td>
+  <td>0.009215002960304083</td>
+  <td>0.013651924574007658</td>
+  <td>0.01073203580490961</td>
+  <td>0.01385210977081781</td>
+  <td>0.9478609625668449</td>
+  <td>0.024086487000204215</td>
+  <td>2.789756416</td>
+  <td>0.09376974666819853</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>gt_uv_gt_front_depth</td>
+  <td>wan</td>
+  <td>0.0212373713628134</td>
+  <td>0.010484878507201638</td>
+  <td>0.0010165312754211106</td>
+  <td>0.004623708999034156</td>
+  <td>0.011376174940860852</td>
+  <td>0.005593794150039435</td>
+  <td>0.011772610260210153</td>
+  <td>0.9478609625668449</td>
+  <td>0.09350728600020375</td>
+  <td>4.19947776</td>
+  <td>0.0019402597464767157</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>ltx</td>
+  <td>0.06559286500349147</td>
+  <td>0.0014056310348237414</td>
+  <td>0.0011301010540160812</td>
+  <td>0.013452029647336</td>
+  <td>0.05649848876649449</td>
+  <td>0.026911881919089626</td>
+  <td>0.05840730211148836</td>
+  <td>1.0</td>
+  <td>0.023572721000164165</td>
+  <td>2.789756416</td>
+  <td>0.04015125947840074</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_gt_geometry_bf16</td>
+  <td>wan</td>
+  <td>0.06559286500349147</td>
+  <td>0.0014056310348237414</td>
+  <td>0.0011301010540160812</td>
+  <td>0.007121807978695613</td>
+  <td>0.06471693650612562</td>
+  <td>0.028724694404774372</td>
+  <td>0.06703901664169667</td>
+  <td>1.0</td>
+  <td>0.09417972400024155</td>
+  <td>4.19947776</td>
+  <td>0.0012416465609681373</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.0659057610836188</td>
+  <td>0.0015661803984337232</td>
+  <td>0.0010681689577679112</td>
+  <td>0.01294878194091236</td>
+  <td>0.05670368832148429</td>
+  <td>0.027535996028842206</td>
+  <td>0.05858547492100958</td>
+  <td>1.0</td>
+  <td>0.024566651999521127</td>
+  <td>2.789756416</td>
+  <td>0.04221538468903186</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.0659057610836188</td>
+  <td>0.0015661803984337232</td>
+  <td>0.0010681689577679112</td>
+  <td>0.006434389583895673</td>
+  <td>0.0644587224370834</td>
+  <td>0.029740887459531747</td>
+  <td>0.06669858275821576</td>
+  <td>1.0</td>
+  <td>0.0933109070001592</td>
+  <td>4.19947776</td>
+  <td>0.0013765821269914216</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>zero</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005220160404893241</td>
+  <td>0.00522016168220535</td>
+  <td>0.0058625773787121215</td>
+  <td>0.005178715508237171</td>
+  <td>1.0</td>
+  <td>0.02309483199951501</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>zero</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.00353341261636979</td>
+  <td>0.0035334085687964076</td>
+  <td>0.003760046035165923</td>
+  <td>0.003518786796772568</td>
+  <td>1.0</td>
+  <td>0.09304495500055054</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+</tbody>
+</table>
+<h3>practical-shared-front/per-clip.csv</h3>
+<p><a href="../practical-shared-front/per-clip.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>clip</th>
+  <th>source</th>
+  <th>codec</th>
+  <th>tracking_epe_m</th>
+  <th>range_epe_m</th>
+  <th>raster_epe_m</th>
+  <th>codec_self_epe_m</th>
+  <th>decoded_gt_epe_m</th>
+  <th>foreground_decoded_gt_epe_m</th>
+  <th>background_decoded_gt_epe_m</th>
+  <th>finite_coverage</th>
+  <th>inference_seconds</th>
+  <th>peak_gpu_gb</th>
+  <th>decoder_overshoot_fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.43420910789348116</td>
+  <td>0.29962823587148085</td>
+  <td>0.0021712314189736254</td>
+  <td>0.02535036923363881</td>
+  <td>0.18836358280186444</td>
+  <td>0.36251536485301233</td>
+  <td>0.1771279839598549</td>
+  <td>1.0</td>
+  <td>7.845168288999957</td>
+  <td>2.789756416</td>
+  <td>0.10143773696001838</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.43420910789348116</td>
+  <td>0.29962823587148085</td>
+  <td>0.0021712314189736254</td>
+  <td>0.018875700901560436</td>
+  <td>0.18698796941744514</td>
+  <td>0.3527147534423611</td>
+  <td>0.17629591883519252</td>
+  <td>1.0</td>
+  <td>8.141552414000216</td>
+  <td>4.19947776</td>
+  <td>0.023711559819240197</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.05646619058962124</td>
+  <td>0.00011830792518043326</td>
+  <td>0.0010015176136115263</td>
+  <td>0.013877418261107416</td>
+  <td>0.050410393587328114</td>
+  <td>0.19015369638447513</td>
+  <td>0.04139469663267347</td>
+  <td>1.0</td>
+  <td>0.02401467199979379</td>
+  <td>2.789756416</td>
+  <td>0.05196934120327819</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.05646619058962124</td>
+  <td>0.00011830792518043326</td>
+  <td>0.0010015176136115263</td>
+  <td>0.008038369825596687</td>
+  <td>0.0540069298306016</td>
+  <td>0.17997386925676517</td>
+  <td>0.045880030512784595</td>
+  <td>1.0</td>
+  <td>0.10001762400042935</td>
+  <td>4.19947776</td>
+  <td>0.001815496706495098</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.5334573510185144</td>
+  <td>0.3604894728847363</td>
+  <td>0.0023507564848731333</td>
+  <td>0.03349491747474848</td>
+  <td>0.23147334570256384</td>
+  <td>0.3587280796376844</td>
+  <td>0.22326336286803994</td>
+  <td>1.0</td>
+  <td>0.024241269000413013</td>
+  <td>2.789756416</td>
+  <td>0.11554912492340687</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.5334573510185144</td>
+  <td>0.3604894728847363</td>
+  <td>0.0023507564848731333</td>
+  <td>0.020867092042891937</td>
+  <td>0.23491678244747613</td>
+  <td>0.35886159138512486</td>
+  <td>0.22692034316117624</td>
+  <td>1.0</td>
+  <td>0.10041710099994816</td>
+  <td>4.19947776</td>
+  <td>0.020408181583180147</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.06726322316025013</td>
+  <td>0.005232243394747264</td>
+  <td>0.0008731725614860817</td>
+  <td>0.01240643897220303</td>
+  <td>0.0610293960415641</td>
+  <td>0.24623183717518898</td>
+  <td>0.04908085145229798</td>
+  <td>1.0</td>
+  <td>0.024263997999696585</td>
+  <td>2.789756416</td>
+  <td>0.05994220808440564</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.06726322316025013</td>
+  <td>0.005232243394747264</td>
+  <td>0.0008731725614860817</td>
+  <td>0.009132520378339986</td>
+  <td>0.06252843444465642</td>
+  <td>0.2427775928896327</td>
+  <td>0.050899456480464414</td>
+  <td>1.0</td>
+  <td>0.10058177500013699</td>
+  <td>4.19947776</td>
+  <td>0.010036992091758578</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.11906377146347684</td>
+  <td>0.03989917123684835</td>
+  <td>0.0027096276558275455</td>
+  <td>0.015907816708058558</td>
+  <td>0.07693950359008925</td>
+  <td>0.32045746925884394</td>
+  <td>0.06330249751263897</td>
+  <td>1.0</td>
+  <td>0.03877011599979596</td>
+  <td>2.789756416</td>
+  <td>0.08444902008655024</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.11906377146347684</td>
+  <td>0.03989917123684835</td>
+  <td>0.0027096276558275455</td>
+  <td>0.00961291618670253</td>
+  <td>0.07903797588574558</td>
+  <td>0.3052998253800931</td>
+  <td>0.06636731231406211</td>
+  <td>1.0</td>
+  <td>0.09993185499934043</td>
+  <td>4.19947776</td>
+  <td>0.012099920534620098</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.0824459946458639</td>
+  <td>0.0007977443478221844</td>
+  <td>0.0012809171653964742</td>
+  <td>0.010775329511338869</td>
+  <td>0.07670682212090515</td>
+  <td>0.425270235194879</td>
+  <td>0.057187270988762626</td>
+  <td>1.0</td>
+  <td>0.024077901000055135</td>
+  <td>2.789756416</td>
+  <td>0.0472256529564951</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.0824459946458639</td>
+  <td>0.0007977443478221844</td>
+  <td>0.0012809171653964742</td>
+  <td>0.006789266084948118</td>
+  <td>0.08058508344013651</td>
+  <td>0.42121358772150497</td>
+  <td>0.06150988720037989</td>
+  <td>1.0</td>
+  <td>0.1002446249995046</td>
+  <td>4.19947776</td>
+  <td>0.0015210918351715686</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.13962769412582254</td>
+  <td>0.016758750980040305</td>
+  <td>0.0029974245501837235</td>
+  <td>0.02137972275370156</td>
+  <td>0.11609762784448463</td>
+  <td>0.2768993615987951</td>
+  <td>0.10709273075424323</td>
+  <td>1.0</td>
+  <td>0.024135239999850455</td>
+  <td>2.789756416</td>
+  <td>0.05372051164215686</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.13962769412582254</td>
+  <td>0.016758750980040305</td>
+  <td>0.0029974245501837235</td>
+  <td>0.015855495674417183</td>
+  <td>0.12082201355585204</td>
+  <td>0.2647029681612131</td>
+  <td>0.1127646800979518</td>
+  <td>1.0</td>
+  <td>0.09975522400054615</td>
+  <td>4.19947776</td>
+  <td>0.0022065405752144606</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.5166521902104013</td>
+  <td>0.06911450388712681</td>
+  <td>0.0022954976937488623</td>
+  <td>0.019130904026280413</td>
+  <td>0.4903002522265396</td>
+  <td>0.625007708363411</td>
+  <td>0.4827566346828749</td>
+  <td>1.0</td>
+  <td>0.02415149599983124</td>
+  <td>2.789756416</td>
+  <td>0.07321885052849264</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.5166521902104013</td>
+  <td>0.06911450388712681</td>
+  <td>0.0022954976937488623</td>
+  <td>0.013543106432109401</td>
+  <td>0.49361856655680025</td>
+  <td>0.6217635002482903</td>
+  <td>0.4864424502700768</td>
+  <td>1.0</td>
+  <td>0.10042916400016111</td>
+  <td>4.19947776</td>
+  <td>0.03651757333792892</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.04072081935988092</td>
+  <td>0.0014959017041577165</td>
+  <td>0.0006472542528054767</td>
+  <td>0.007919731743102239</td>
+  <td>0.038600525267157904</td>
+  <td>0.09555591007992081</td>
+  <td>0.032481351692232964</td>
+  <td>1.0</td>
+  <td>0.02482861899989075</td>
+  <td>2.789756416</td>
+  <td>0.07607374004289216</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.04072081935988092</td>
+  <td>0.0014959017041577165</td>
+  <td>0.0006472542528054767</td>
+  <td>0.005532541690434753</td>
+  <td>0.03936025088489338</td>
+  <td>0.09226307332745469</td>
+  <td>0.03367647657288267</td>
+  <td>1.0</td>
+  <td>0.10005154899954505</td>
+  <td>4.19947776</td>
+  <td>0.006191777248008579</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.04687403963194269</td>
+  <td>0.0021906037692852845</td>
+  <td>0.000634130118442015</td>
+  <td>0.006263740162115515</td>
+  <td>0.04524533526720963</td>
+  <td>0.1440712046338957</td>
+  <td>0.034627679880706176</td>
+  <td>1.0</td>
+  <td>0.02405685900066601</td>
+  <td>2.789756416</td>
+  <td>0.07765706380208333</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.04687403963194269</td>
+  <td>0.0021906037692852845</td>
+  <td>0.000634130118442015</td>
+  <td>0.005143985209376987</td>
+  <td>0.04523554590805829</td>
+  <td>0.1430926824577738</td>
+  <td>0.034721969253956625</td>
+  <td>1.0</td>
+  <td>0.10078034300022409</td>
+  <td>4.19947776</td>
+  <td>0.014918009440104166</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.10257853960358762</td>
+  <td>0.004341679532254643</td>
+  <td>0.000939947518662527</td>
+  <td>0.01298080387426958</td>
+  <td>0.09240202612186858</td>
+  <td>0.09888359126453418</td>
+  <td>0.09170565961893758</td>
+  <td>1.0</td>
+  <td>0.024340222999853722</td>
+  <td>2.789756416</td>
+  <td>0.06133434819240196</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.10257853960358762</td>
+  <td>0.004341679532254643</td>
+  <td>0.000939947518662527</td>
+  <td>0.009433076944499868</td>
+  <td>0.09691921322286741</td>
+  <td>0.09782882530297583</td>
+  <td>0.0968214863051698</td>
+  <td>1.0</td>
+  <td>0.10080954399927577</td>
+  <td>4.19947776</td>
+  <td>0.0029404584099264708</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.051127296471702985</td>
+  <td>0.0044312122787884085</td>
+  <td>0.0006056800265040852</td>
+  <td>0.00919343967080965</td>
+  <td>0.04511549004161835</td>
+  <td>0.11258430673246249</td>
+  <td>0.037866774198800385</td>
+  <td>1.0</td>
+  <td>0.024194973999328795</td>
+  <td>2.789756416</td>
+  <td>0.06313309015012254</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.051127296471702985</td>
+  <td>0.0044312122787884085</td>
+  <td>0.0006056800265040852</td>
+  <td>0.007213693935159373</td>
+  <td>0.04797730354917722</td>
+  <td>0.10915316997854078</td>
+  <td>0.04140468980056791</td>
+  <td>1.0</td>
+  <td>0.10043938900071225</td>
+  <td>4.19947776</td>
+  <td>0.007845710305606617</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.058992598370062224</td>
+  <td>0.016298092985918604</td>
+  <td>0.0015924363188316547</td>
+  <td>0.01204551928830775</td>
+  <td>0.03973430973593108</td>
+  <td>0.11986502503539471</td>
+  <td>0.027888899648184286</td>
+  <td>1.0</td>
+  <td>0.024186892999750853</td>
+  <td>2.789756416</td>
+  <td>0.07254686542585784</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.058992598370062224</td>
+  <td>0.016298092985918604</td>
+  <td>0.0015924363188316547</td>
+  <td>0.005894903331802271</td>
+  <td>0.04149062384748037</td>
+  <td>0.11690102206582331</td>
+  <td>0.030342999763029673</td>
+  <td>1.0</td>
+  <td>0.10005037200062361</td>
+  <td>4.19947776</td>
+  <td>0.0028115066827512254</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.033614824326959496</td>
+  <td>0.00022028253464889008</td>
+  <td>0.0003595600172074361</td>
+  <td>0.007906077552518126</td>
+  <td>0.03376187556303127</td>
+  <td>0.18833334261646303</td>
+  <td>0.010912180433393535</td>
+  <td>1.0</td>
+  <td>0.02396470900021086</td>
+  <td>2.789756416</td>
+  <td>0.07463731952742034</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.033614824326959496</td>
+  <td>0.00022028253464889008</td>
+  <td>0.0003595600172074361</td>
+  <td>0.004695980283994082</td>
+  <td>0.03325157102448475</td>
+  <td>0.1833490710023649</td>
+  <td>0.011063244940798115</td>
+  <td>1.0</td>
+  <td>0.09991730800084042</td>
+  <td>4.19947776</td>
+  <td>0.0037784950405943627</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.11735515750224645</td>
+  <td>0.025147317706190872</td>
+  <td>0.0024364132035220656</td>
+  <td>0.015885055195612854</td>
+  <td>0.08870421667546761</td>
+  <td>0.13625038688383487</td>
+  <td>0.08167565238379593</td>
+  <td>1.0</td>
+  <td>0.024167160999240878</td>
+  <td>2.789756416</td>
+  <td>0.07367302389705882</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.11735515750224645</td>
+  <td>0.025147317706190872</td>
+  <td>0.0024364132035220656</td>
+  <td>0.010715224771417889</td>
+  <td>0.09287730501731377</td>
+  <td>0.13660376971612578</td>
+  <td>0.0864133928444459</td>
+  <td>1.0</td>
+  <td>0.10058886000024359</td>
+  <td>4.19947776</td>
+  <td>0.008554496017156863</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.06594389431320179</td>
+  <td>0.005077406723240997</td>
+  <td>0.0010933343839903435</td>
+  <td>0.009548533204066378</td>
+  <td>0.06401077853485353</td>
+  <td>0.16572542795825634</td>
+  <td>0.048974699924437454</td>
+  <td>1.0</td>
+  <td>0.02417520000017248</td>
+  <td>2.789756416</td>
+  <td>0.05491428749234069</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.06594389431320179</td>
+  <td>0.005077406723240997</td>
+  <td>0.0010933343839903435</td>
+  <td>0.006772499870289708</td>
+  <td>0.06336693303813308</td>
+  <td>0.1627649798575907</td>
+  <td>0.048673308725691526</td>
+  <td>1.0</td>
+  <td>0.10060254400013946</td>
+  <td>4.19947776</td>
+  <td>0.004466038124234069</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.022666389731417047</td>
+  <td>0.0014063474663998932</td>
+  <td>0.0005204553729234578</td>
+  <td>0.006230172789525797</td>
+  <td>0.02250085680243727</td>
+  <td>0.0792784440452585</td>
+  <td>0.0178469562087634</td>
+  <td>1.0</td>
+  <td>0.024078492000626284</td>
+  <td>2.789756416</td>
+  <td>0.09249369303385417</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.022666389731417047</td>
+  <td>0.0014063474663998932</td>
+  <td>0.0005204553729234578</td>
+  <td>0.004244181401062697</td>
+  <td>0.021357037748373366</td>
+  <td>0.07818473976287908</td>
+  <td>0.016699029386528633</td>
+  <td>1.0</td>
+  <td>0.10021311400032573</td>
+  <td>4.19947776</td>
+  <td>0.0057657279220281864</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.02297305213550256</td>
+  <td>3.799062489468435e-05</td>
+  <td>0.000250024494347667</td>
+  <td>0.006943289201245395</td>
+  <td>0.023928105493737997</td>
+  <td>0.08954624418982501</td>
+  <td>0.018549569535042342</td>
+  <td>1.0</td>
+  <td>0.024199147999752313</td>
+  <td>2.789756416</td>
+  <td>0.06666834214154412</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.02297305213550256</td>
+  <td>3.799062489468435e-05</td>
+  <td>0.000250024494347667</td>
+  <td>0.003993908398952929</td>
+  <td>0.023284829355002434</td>
+  <td>0.08552090293829698</td>
+  <td>0.01818351184817501</td>
+  <td>1.0</td>
+  <td>0.10001192999970954</td>
+  <td>4.19947776</td>
+  <td>0.0014705283969056373</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.1080370539253664</td>
+  <td>0.0043321365325511355</td>
+  <td>0.0009105606687579209</td>
+  <td>0.014362308318958987</td>
+  <td>0.09604978567272074</td>
+  <td>0.06557276243793406</td>
+  <td>0.0985479023313098</td>
+  <td>1.0</td>
+  <td>0.024247915000159992</td>
+  <td>2.789756416</td>
+  <td>0.04432349111519608</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.1080370539253664</td>
+  <td>0.0043321365325511355</td>
+  <td>0.0009105606687579209</td>
+  <td>0.008465843976158712</td>
+  <td>0.10329681415868337</td>
+  <td>0.06452150051844226</td>
+  <td>0.10647511855542446</td>
+  <td>1.0</td>
+  <td>0.10065471400048409</td>
+  <td>4.19947776</td>
+  <td>0.002465042413449755</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.029860831516075277</td>
+  <td>0.002416080489417778</td>
+  <td>0.0004798245105857021</td>
+  <td>0.008308585652338222</td>
+  <td>0.02790095890479972</td>
+  <td>0.09033551242209267</td>
+  <td>0.02278337255092325</td>
+  <td>1.0</td>
+  <td>0.02422187699994538</td>
+  <td>2.789756416</td>
+  <td>0.06105370615042892</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.029860831516075277</td>
+  <td>0.002416080489417778</td>
+  <td>0.0004798245105857021</td>
+  <td>0.005254813805231311</td>
+  <td>0.027953526759680766</td>
+  <td>0.08949655170198058</td>
+  <td>0.02290901651850865</td>
+  <td>1.0</td>
+  <td>0.09998109200023464</td>
+  <td>4.19947776</td>
+  <td>0.0070983288334865195</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.008362451780055525</td>
+  <td>0.0005065617400704826</td>
+  <td>0.0002566394989068284</td>
+  <td>0.005222888195788198</td>
+  <td>0.009425957329763661</td>
+  <td>0.0076093309713426115</td>
+  <td>0.009543159030306954</td>
+  <td>1.0</td>
+  <td>0.024070073000075354</td>
+  <td>2.789756416</td>
+  <td>0.08452591241574754</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.008362451780055525</td>
+  <td>0.0005065617400704826</td>
+  <td>0.0002566394989068284</td>
+  <td>0.003618495175337989</td>
+  <td>0.008011342617416766</td>
+  <td>0.006524119544993646</td>
+  <td>0.008107292493056969</td>
+  <td>1.0</td>
+  <td>0.0997340849999091</td>
+  <td>4.19947776</td>
+  <td>0.004009172028186275</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.008461955040429067</td>
+  <td>2.375251201694041e-05</td>
+  <td>0.00014608747316622017</td>
+  <td>0.005426174158984124</td>
+  <td>0.009931985674826508</td>
+  <td>0.009469955183831738</td>
+  <td>0.009961794093600365</td>
+  <td>1.0</td>
+  <td>0.024095423000289884</td>
+  <td>2.789756416</td>
+  <td>0.08048023897058823</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.008461955040429067</td>
+  <td>2.375251201694041e-05</td>
+  <td>0.00014608747316622017</td>
+  <td>0.003671273242382122</td>
+  <td>0.00902460379889785</td>
+  <td>0.00889353392131715</td>
+  <td>0.009033059920032087</td>
+  <td>1.0</td>
+  <td>0.10077344599994831</td>
+  <td>4.19947776</td>
+  <td>0.0012248918121936275</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.10384575140775301</td>
+  <td>0.005773952652652199</td>
+  <td>0.0009808103537029952</td>
+  <td>0.013766806327106884</td>
+  <td>0.09135905984083821</td>
+  <td>0.0193005484386898</td>
+  <td>0.09600799606033165</td>
+  <td>1.0</td>
+  <td>0.0244172279999475</td>
+  <td>2.789756416</td>
+  <td>0.05162616804534314</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.10384575140775301</td>
+  <td>0.005773952652652199</td>
+  <td>0.0009808103537029952</td>
+  <td>0.007636370198268612</td>
+  <td>0.09831002842412641</td>
+  <td>0.022898697021323088</td>
+  <td>0.10317527561140405</td>
+  <td>1.0</td>
+  <td>0.1004913110000416</td>
+  <td>4.19947776</td>
+  <td>0.0034739176432291665</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>ltx</td>
+  <td>0.021913879365416864</td>
+  <td>0.0033112538001274297</td>
+  <td>0.0004901089980770962</td>
+  <td>0.008136032577280993</td>
+  <td>0.0171079879118683</td>
+  <td>0.015517087363353948</td>
+  <td>0.017210626656933743</td>
+  <td>1.0</td>
+  <td>0.024260839999442396</td>
+  <td>2.789756416</td>
+  <td>0.05942490521599265</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>wan</td>
+  <td>0.021913879365416864</td>
+  <td>0.0033112538001274297</td>
+  <td>0.0004901089980770962</td>
+  <td>0.005392987599090005</td>
+  <td>0.019022355698609012</td>
+  <td>0.015724027375115912</td>
+  <td>0.019235151074318245</td>
+  <td>1.0</td>
+  <td>0.10082491499997559</td>
+  <td>4.19947776</td>
+  <td>0.007768518784466912</td>
+</tr>
+</tbody>
+</table>
+<h3>textured64-bounded/per-clip.csv</h3>
+<p><a href="../textured64-bounded/per-clip.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>clip</th>
+  <th>source</th>
+  <th>codec</th>
+  <th>tracking_epe_m</th>
+  <th>range_epe_m</th>
+  <th>raster_epe_m</th>
+  <th>codec_self_epe_m</th>
+  <th>decoded_gt_epe_m</th>
+  <th>foreground_decoded_gt_epe_m</th>
+  <th>background_decoded_gt_epe_m</th>
+  <th>finite_coverage</th>
+  <th>inference_seconds</th>
+  <th>peak_gpu_gb</th>
+  <th>decoder_overshoot_fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.00032664241171904534</td>
+  <td>0.000771113041976154</td>
+  <td>0.00661477948232922</td>
+  <td>0.007309396911185741</td>
+  <td>0.03028777371789441</td>
+  <td>0.005671427077713637</td>
+  <td>1.0</td>
+  <td>0.9778490099997725</td>
+  <td>2.789756416</td>
+  <td>0.07022543514476103</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.00032664241171904534</td>
+  <td>0.000771113041976154</td>
+  <td>0.004122541017263835</td>
+  <td>0.00499556832894862</td>
+  <td>0.02523305527245439</td>
+  <td>0.0035529776099614474</td>
+  <td>1.0</td>
+  <td>0.901432456999828</td>
+  <td>4.19947776</td>
+  <td>0.0014621510225183824</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.00032664241171904534</td>
+  <td>0.000771113041976154</td>
+  <td>0.00661477948232922</td>
+  <td>0.007309396911185741</td>
+  <td>0.03028777371789441</td>
+  <td>0.005671427077713637</td>
+  <td>1.0</td>
+  <td>0.023361785999441054</td>
+  <td>2.789756416</td>
+  <td>0.07022543514476103</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.00032664241171904534</td>
+  <td>0.000771113041976154</td>
+  <td>0.004122541017263835</td>
+  <td>0.00499556832894862</td>
+  <td>0.02523305527245439</td>
+  <td>0.0035529776099614474</td>
+  <td>1.0</td>
+  <td>0.09360097099852283</td>
+  <td>4.19947776</td>
+  <td>0.0014621510225183824</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0012723814605055024</td>
+  <td>0.006666352129250901</td>
+  <td>0.007455385179330717</td>
+  <td>0.027495588071556144</td>
+  <td>0.005637283738057574</td>
+  <td>1.0</td>
+  <td>0.023388043999148067</td>
+  <td>2.789756416</td>
+  <td>0.06470384784773284</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0012723814605055024</td>
+  <td>0.004140731140243797</td>
+  <td>0.005174593544075212</td>
+  <td>0.0204103452389762</td>
+  <td>0.0037923649177310434</td>
+  <td>1.0</td>
+  <td>0.0934402630009572</td>
+  <td>4.19947776</td>
+  <td>0.0014205633425245097</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0012723814605055024</td>
+  <td>0.006666352129250901</td>
+  <td>0.007455385179330717</td>
+  <td>0.027495588071556144</td>
+  <td>0.005637283738057574</td>
+  <td>1.0</td>
+  <td>0.023242625000420958</td>
+  <td>2.789756416</td>
+  <td>0.06470384784773284</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0012723814605055024</td>
+  <td>0.004140731140243797</td>
+  <td>0.005174593544075212</td>
+  <td>0.0204103452389762</td>
+  <td>0.0037923649177310434</td>
+  <td>1.0</td>
+  <td>0.09335511300014332</td>
+  <td>4.19947776</td>
+  <td>0.0014205633425245097</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0002964285155076822</td>
+  <td>0.005838732328243025</td>
+  <td>0.006100691529000126</td>
+  <td>0.010439012269987797</td>
+  <td>0.00571461668939577</td>
+  <td>1.0</td>
+  <td>0.024761712000326952</td>
+  <td>2.789756416</td>
+  <td>0.07149011948529412</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0002964285155076822</td>
+  <td>0.0033495101340885176</td>
+  <td>0.0035927355750681803</td>
+  <td>0.006863792028739696</td>
+  <td>0.0033016384729667543</td>
+  <td>1.0</td>
+  <td>0.09320167800069612</td>
+  <td>4.19947776</td>
+  <td>0.0012694714116115197</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.028573651761218597</td>
+  <td>0.007530671987902814</td>
+  <td>0.0021738846932625676</td>
+  <td>0.010604961961323427</td>
+  <td>0.019464272210803494</td>
+  <td>0.019916678850036396</td>
+  <td>0.019423836240078034</td>
+  <td>0.9962488538164439</td>
+  <td>0.023709996999969007</td>
+  <td>2.789756416</td>
+  <td>0.06655165728400736</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.028573651761218597</td>
+  <td>0.007530671987902814</td>
+  <td>0.0021738846932625676</td>
+  <td>0.006849884467033001</td>
+  <td>0.02138453568061847</td>
+  <td>0.015532568272378287</td>
+  <td>0.021907582785336378</td>
+  <td>0.9962488538164439</td>
+  <td>0.09373045999927854</td>
+  <td>4.19947776</td>
+  <td>0.0030023911420036763</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.028243859986312892</td>
+  <td>0.00028440529131605504</td>
+  <td>0.0012678959865966369</td>
+  <td>0.007835375937886429</td>
+  <td>0.027414294166927044</td>
+  <td>0.023991110670050293</td>
+  <td>0.027718929323799303</td>
+  <td>1.0</td>
+  <td>0.02339656699950865</td>
+  <td>2.789756416</td>
+  <td>0.05358497769224877</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.028243859986312892</td>
+  <td>0.00028440529131605504</td>
+  <td>0.0012678959865966369</td>
+  <td>0.004634118014203604</td>
+  <td>0.027689128921250993</td>
+  <td>0.022263609699932768</td>
+  <td>0.028171955477469122</td>
+  <td>1.0</td>
+  <td>0.09348239199971431</td>
+  <td>4.19947776</td>
+  <td>0.0019800522748161763</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0002964285155076822</td>
+  <td>0.005838732328243025</td>
+  <td>0.006100691529000126</td>
+  <td>0.010439012269987797</td>
+  <td>0.00571461668939577</td>
+  <td>1.0</td>
+  <td>0.023565797999253846</td>
+  <td>2.789756416</td>
+  <td>0.07149011948529412</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0002964285155076822</td>
+  <td>0.0033495101340885176</td>
+  <td>0.0035927355750681803</td>
+  <td>0.006863792028739696</td>
+  <td>0.0033016384729667543</td>
+  <td>1.0</td>
+  <td>0.09370944100010092</td>
+  <td>4.19947776</td>
+  <td>0.0012694714116115197</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.014896925192329002</td>
+  <td>9.523431789640286e-05</td>
+  <td>0.0015680146318251533</td>
+  <td>0.00719272057216557</td>
+  <td>0.016116380020111353</td>
+  <td>0.08266594417324438</td>
+  <td>0.010194016543520817</td>
+  <td>1.0</td>
+  <td>0.024030021999351447</td>
+  <td>2.789756416</td>
+  <td>0.06615433038449754</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.014896925192329002</td>
+  <td>9.523431789640286e-05</td>
+  <td>0.0015680146318251533</td>
+  <td>0.004298621967808332</td>
+  <td>0.015563346352787224</td>
+  <td>0.07921264781626813</td>
+  <td>0.009899082385100908</td>
+  <td>1.0</td>
+  <td>0.09312776899969322</td>
+  <td>4.19947776</td>
+  <td>0.0014160754633884803</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007330735326922309</td>
+  <td>0.005967963447413464</td>
+  <td>0.006587715162877489</td>
+  <td>0.014564099712315905</td>
+  <td>0.005540572296581685</td>
+  <td>1.0</td>
+  <td>0.023351220001131878</td>
+  <td>2.789756416</td>
+  <td>0.07157389322916667</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007330735326922309</td>
+  <td>0.0036782151181421053</td>
+  <td>0.0043564307571503326</td>
+  <td>0.00962545265614128</td>
+  <td>0.003664711512712299</td>
+  <td>1.0</td>
+  <td>0.0932831760001136</td>
+  <td>4.19947776</td>
+  <td>0.0012560077742034314</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.04801178376716934</td>
+  <td>0.018638362145973548</td>
+  <td>0.003387517996495703</td>
+  <td>0.012331335116500215</td>
+  <td>0.0294977046727977</td>
+  <td>0.07180098646434584</td>
+  <td>0.023905213696750804</td>
+  <td>0.9942131580425867</td>
+  <td>0.022971303998929216</td>
+  <td>2.789756416</td>
+  <td>0.06718744016161152</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>wan</td>
+  <td>0.04801178376716934</td>
+  <td>0.018638362145973548</td>
+  <td>0.003387517996495703</td>
+  <td>0.007398297390012217</td>
+  <td>0.030274222273798324</td>
+  <td>0.06505978385010137</td>
+  <td>0.025675573398971186</td>
+  <td>0.9942131580425867</td>
+  <td>0.09324036699945282</td>
+  <td>4.19947776</td>
+  <td>0.003073299632352941</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>ltx</td>
+  <td>0.032429520296062164</td>
+  <td>5.615946926888605e-05</td>
+  <td>0.0017475859977603638</td>
+  <td>0.007945372257434137</td>
+  <td>0.031224155177767367</td>
+  <td>0.031981188189865124</td>
+  <td>0.03112477158946929</td>
+  <td>1.0</td>
+  <td>0.023341943000559695</td>
+  <td>2.789756416</td>
+  <td>0.05608323041130515</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>wan</td>
+  <td>0.032429520296062164</td>
+  <td>5.615946926888605e-05</td>
+  <td>0.0017475859977603638</td>
+  <td>0.004654717096379224</td>
+  <td>0.0320981618535841</td>
+  <td>0.03025398735963854</td>
+  <td>0.0323402657984943</td>
+  <td>1.0</td>
+  <td>0.09358767300000181</td>
+  <td>4.19947776</td>
+  <td>0.0018714455997242646</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007330735326922309</td>
+  <td>0.005967963447413464</td>
+  <td>0.006587715162877489</td>
+  <td>0.014564099712315905</td>
+  <td>0.005540572296581685</td>
+  <td>1.0</td>
+  <td>0.023289988001124584</td>
+  <td>2.789756416</td>
+  <td>0.07157389322916667</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0007330735326922309</td>
+  <td>0.0036782151181421053</td>
+  <td>0.0043564307571503326</td>
+  <td>0.00962545265614128</td>
+  <td>0.003664711512712299</td>
+  <td>1.0</td>
+  <td>0.09324039000057383</td>
+  <td>4.19947776</td>
+  <td>0.0012560077742034314</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>ltx</td>
+  <td>0.026750818852022774</td>
+  <td>9.507243454797904e-05</td>
+  <td>0.00306874132488098</td>
+  <td>0.00802296442695945</td>
+  <td>0.027671610801943605</td>
+  <td>0.11423666640947128</td>
+  <td>0.016307316629804645</td>
+  <td>1.0</td>
+  <td>0.02353203299935558</td>
+  <td>2.789756416</td>
+  <td>0.06852034026501226</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>wan</td>
+  <td>0.026750818852022774</td>
+  <td>9.507243454797904e-05</td>
+  <td>0.00306874132488098</td>
+  <td>0.004709719735033148</td>
+  <td>0.026844362543008517</td>
+  <td>0.11358726637524523</td>
+  <td>0.015456720386750536</td>
+  <td>1.0</td>
+  <td>0.09356525399925886</td>
+  <td>4.19947776</td>
+  <td>0.0016042671951593138</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.00027037901856320003</td>
+  <td>0.0003380350879574287</td>
+  <td>0.006016916745776242</td>
+  <td>0.006507447352768797</td>
+  <td>0.017684015556273372</td>
+  <td>0.005469500279995924</td>
+  <td>1.0</td>
+  <td>0.02317942499939818</td>
+  <td>2.789756416</td>
+  <td>0.0674884272556679</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.00027037901856320003</td>
+  <td>0.0003380350879574287</td>
+  <td>0.003709319660563402</td>
+  <td>0.004220110232867848</td>
+  <td>0.011328413874786964</td>
+  <td>0.0035599753128127635</td>
+  <td>1.0</td>
+  <td>0.09305063099964173</td>
+  <td>4.19947776</td>
+  <td>0.0013942344515931373</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.00027037901856320003</td>
+  <td>0.0003380350879574287</td>
+  <td>0.006016916745776242</td>
+  <td>0.006507447352768797</td>
+  <td>0.017684015556273372</td>
+  <td>0.005469500279995924</td>
+  <td>1.0</td>
+  <td>0.023221932000524248</td>
+  <td>2.789756416</td>
+  <td>0.0674884272556679</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.00027037901856320003</td>
+  <td>0.0003380350879574287</td>
+  <td>0.003709319660563402</td>
+  <td>0.004220110232867848</td>
+  <td>0.011328413874786964</td>
+  <td>0.0035599753128127635</td>
+  <td>1.0</td>
+  <td>0.09337269800016657</td>
+  <td>4.19947776</td>
+  <td>0.0013942344515931373</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005172359341195225</td>
+  <td>0.005172359449347271</td>
+  <td>0.005440020373098421</td>
+  <td>0.005146913780850888</td>
+  <td>1.0</td>
+  <td>0.02327040899945132</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.003322946926125327</td>
+  <td>0.0033229414092717266</td>
+  <td>0.0033801595304417736</td>
+  <td>0.003317501865378377</td>
+  <td>1.0</td>
+  <td>0.09301537099963753</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>gt</td>
+  <td>ltx</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.005172359341195225</td>
+  <td>0.005172359449347271</td>
+  <td>0.005440020373098421</td>
+  <td>0.005146913780850888</td>
+  <td>1.0</td>
+  <td>0.024040537000473705</td>
+  <td>2.789756416</td>
+  <td>0.058461507161458336</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>gt</td>
+  <td>wan</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.6804538706085413e-08</td>
+  <td>0.003322946926125327</td>
+  <td>0.0033229414092717266</td>
+  <td>0.0033801595304417736</td>
+  <td>0.003317501865378377</td>
+  <td>1.0</td>
+  <td>0.09309256999949866</td>
+  <td>4.19947776</td>
+  <td>0.0013314041436887254</td>
+</tr>
+</tbody>
+</table>

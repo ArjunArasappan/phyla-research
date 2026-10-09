@@ -1,0 +1,5612 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{max-width:1200px;margin:28px auto;padding:0 22px;font:16px/1.55 system-ui;color:#182333}table{border-collapse:collapse;display:block;overflow:auto}td,th{padding:8px;border:1px solid #ccd4dd}img,video{max-width:100%;height:auto}video{display:block;margin:12px 0;max-height:540px}pre{white-space:pre-wrap}a{color:#175ba3}</style><h1>Experiment 1: simulator 3D material tracking — complete results and analysis</h1>
+<h2>Motivation and hypotheses</h2>
+<p>This experiment measures frozen tracker outputs against simulator material-point trajectories, with known camera motion and object poses. The tracked quantities are cumulative 3D displacement, visibility, and physical derivatives. The saved tracks also supply inputs to the separate motion-image VAE reconstruction experiment.</p>
+<p>The hypotheses specified for measurement are: (H1) fixed and moving cameras produce different errors on paired object trajectories; (H2) frozen 3D trackers and 2D tracking followed by depth lifting produce different 3D displacement errors; (H3) measurements differ between visible scene points and visible foreground objects; and (H4) changing the number of jointly queried points changes predictions at the same material IDs. Measured observations and their practical limits are discussed in the analysis below.</p>
+<h2>Experimental setup and data</h2>
+<p>Data were collected on October 9, 2026 UTC (October 8 Pacific) using actual SAPIEN 3.0.3 rendering. Each clip has 33 RGB frames, 256 × 256 pixels, at 20 Hz; frame 0 to frame 32 spans 1.6 seconds. Axial camera depth, camera intrinsics, camera-to-world transforms, actor poses, material IDs, exact material trajectories, and visibility are saved with every GT bundle. Rigid box surfaces form the scene assets. Object motion and camera paths are scripted; the linked-box condition uses prescribed rigid-link poses rather than a native robot joint simulation.</p>
+<p>There are six conditions, each rendered with a fixed camera and an orbiting camera:</p>
+<ol>
+<li>Static scene.</li>
+<li>Object translation.</li>
+<li>Rigid rotation.</li>
+<li>Scripted articulated links.</li>
+<li>Occlusion and return.</li>
+<li>Depth, speed, and out-of-view stress.</li>
+</ol>
+<p>The executed data regimes are:</p>
+<table>
+<thead>
+<tr>
+  <th>Regime</th>
+  <th>Test clips</th>
+  <th>Separate calibration clips</th>
+  <th>Query slots</th>
+  <th>Appearance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Primary textured64</td>
+  <td>12</td>
+  <td>12</td>
+  <td>64 × 64 = 4,096</td>
+  <td>Seeded surface textures</td>
+</tr>
+<tr>
+  <td>Matched textured16</td>
+  <td>12</td>
+  <td>0</td>
+  <td>16 × 16 = 256, exact dense material-ID subset</td>
+  <td>Same primary RGB frames</td>
+</tr>
+<tr>
+  <td>Original debug16</td>
+  <td>12</td>
+  <td>12</td>
+  <td>16 × 16 = 256</td>
+  <td>Uniform-color surfaces</td>
+</tr>
+</tbody>
+</table>
+<p>This totals 60 saved GT bundles. Calibration seeds are distinct from the test seeds. The primary test has one seed per scene condition, paired between camera modes. Initially invalid grid slots remain invalid; the first listed primary test clip has 2,104 valid material queries. The static-scene primary clip has 2,131. Calibration clips were published for Experiment 2; they are not included in the tracker test averages below.</p>
+<h2>Ground-truth construction and coordinate convention</h2>
+<p>A query originates at frame 0. Its camera ray passes through the renderer pixel center, using <code>(u + 0.5, v + 0.5)</code> and the saved intrinsics. Exact ray-box intersection determines the first visible material surface and its actor-local coordinate. Applying each saved actor pose to that same local coordinate produces its trajectory. GT material identity and position continue through occlusion and departure from the image. Visibility is computed separately from in-frame, positive-depth and first-surface ray checks.</p>
+<p>Let <code>P_t</code> be the material point in world coordinates and <code>R_0</code> the initial camera-to-world rotation. The canonical saved target is <code>D_t = R_0ᵀ(P_t − P_0)</code>, in meters. Axes are initial-camera x right, y down and z forward. This is a fixed initial-camera basis; it is not a time-varying camera-coordinate position. Static world material points have zero canonical flow even when the camera moves.</p>
+<p>Saved GT validation records include initial reprojection errors, static-background flow, renderer-versus-exact depth errors, valid-query counts and GT visibility fractions. Initial reprojection maximum is approximately <code>2.5914 × 10⁻⁷</code> pixels and static-background flow maximum is exactly zero. Per-bundle measured values and SHA256 hashes are in the <a href="../textured64-pilot/artifact-ledger.json">artifact ledger</a>.</p>
+<h2>Frozen methods and supplied inputs</h2>
+<p>All tracker weights are frozen. There is no tracker fine-tuning, diffusion training, policy training or robot policy evaluation in Experiment 1.</p>
+<table>
+<thead>
+<tr>
+  <th>Method</th>
+  <th>Saved checkpoint</th>
+  <th>Geometry supplied for the primary measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 offline</td>
+  <td><code>scaled_offline.pth</code></td>
+  <td>Predicted 2D tracks lifted with rendered GT axial depth, GT intrinsics and GT camera poses</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 Offline</td>
+  <td><code>SpatialTrackerV2-Offline</code></td>
+  <td>Rendered GT depth, GT intrinsics and GT camera poses</td>
+</tr>
+<tr>
+  <td>DELTA sparse 3D predictor</td>
+  <td><code>densetrack3d.pth</code></td>
+  <td>Rendered GT depth and GT intrinsics; predicted camera-space points transformed with GT camera poses</td>
+</tr>
+</tbody>
+</table>
+<p>CoTracker lifting samples the front-surface depth at its predicted image location. Nonpositive or missing depth creates missing geometry rather than an accepted 3D prediction. Raw tracker arrays and raw visibility outputs are retained separately from canonical flow. DELTA checkpoint loading recorded zero missing and zero unexpected parameter keys.</p>
+<p>Three controls are included: zero 3D motion; GT image coordinates lifted using rendered nearest front depth; and GT image coordinates intersected with the exact front ray. The front-depth controls sample the current visible surface; they do not receive the hidden tracked material's depth during occlusion.</p>
+<p>The compute node had eight NVIDIA B300 GPUs; Experiment 1 used physical GPUs 0 and 1. The verified CUDA runtime used Torch 2.12 / CUDA 13.0. Tracker and rendering environments were isolated. The corrected SpaTracker run uses a float32 outer inference path with supported SDPA/math fallback; some internal attention computations retain their upstream precision. This is one architecture, not an additional independent tracker.</p>
+<h2>Metric definitions</h2>
+<p>Frame 0 is excluded from displacement-error averages. Visible EPE is the mean Euclidean error <code>‖D̂_t − D_t‖₂</code> over GT-visible eligible queries with finite predictions. Its companion <strong>coverage</strong> is the fraction of GT-visible eligible queries with finite geometry. <strong>PCK at 1 cm</strong> is the fraction of all GT-visible eligible queries whose 3D flow error is below 1 cm; missing predictions count as failures. Tracker-reported visibility does not replace GT visibility in this mask.</p>
+<p>Each clip is averaged first; the tables then average clip means with equal clip weight. Fixed and orbit columns each contain six clips. The overall columns contain twelve. The visible scene metric gives every eligible visible point equal weight within a clip. Foreground-point EPE restricts to foreground materials. Foreground-object macro EPE instead gives each foreground actor equal weight within a clip before averaging clips.</p>
+<p>Axis MAE uses all valid finite trajectory samples after frame 0, including occluded and out-of-view materials. Velocity error uses finite consecutive valid samples and <code>Δt = 0.05 s</code>; acceleration error uses finite triples. These derivative masks are not the visible-only EPE mask.</p>
+<h2>Primary textured64 measurements</h2>
+<table>
+<thead>
+<tr>
+  <th>Method</th>
+  <th>Fixed EPE cm</th>
+  <th>Orbit EPE cm</th>
+  <th>Overall EPE cm</th>
+  <th>PCK &lt;1 cm %</th>
+  <th>Visible coverage %</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td>0.627</td>
+  <td>2.637</td>
+  <td>1.632</td>
+  <td>64.71</td>
+  <td>99.947</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td>0.708</td>
+  <td>5.189</td>
+  <td>2.949</td>
+  <td>51.72</td>
+  <td>100.000</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry (corrected float32 outer / SDPA)</td>
+  <td>2.379</td>
+  <td>3.336</td>
+  <td>2.857</td>
+  <td>88.87</td>
+  <td>100.000</td>
+</tr>
+<tr>
+  <td>GT UV + exact front ray</td>
+  <td>0.000</td>
+  <td>0.000</td>
+  <td>0.000</td>
+  <td>100.00</td>
+  <td>100.000</td>
+</tr>
+<tr>
+  <td>GT UV + rendered front depth</td>
+  <td>0.036</td>
+  <td>0.512</td>
+  <td>0.274</td>
+  <td>96.06</td>
+  <td>99.960</td>
+</tr>
+<tr>
+  <td>Zero motion</td>
+  <td>1.897</td>
+  <td>1.931</td>
+  <td>1.914</td>
+  <td>95.96</td>
+  <td>100.000</td>
+</tr>
+</tbody>
+</table>
+<p>Full precision source: <a href="../textured64-pilot/per_clip.csv">per-clip measurements</a>.</p>
+<table>
+<thead>
+<tr>
+  <th>Method</th>
+  <th>Foreground-point EPE cm</th>
+  <th>Foreground-object macro EPE cm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td>1.862</td>
+  <td>3.893</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td>4.767</td>
+  <td>6.401</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry (corrected float32 outer / SDPA)</td>
+  <td>22.000</td>
+  <td>21.282</td>
+</tr>
+<tr>
+  <td>GT UV + exact front ray</td>
+  <td>0.000</td>
+  <td>0.000</td>
+</tr>
+<tr>
+  <td>GT UV + rendered front depth</td>
+  <td>0.708</td>
+  <td>0.667</td>
+</tr>
+<tr>
+  <td>Zero motion</td>
+  <td>25.141</td>
+  <td>22.289</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+  <th>Method</th>
+  <th>dx MAE cm</th>
+  <th>dy MAE cm</th>
+  <th>dz MAE cm</th>
+  <th>Velocity EPE m/s</th>
+  <th>Acceleration EPE m/s²</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td>1.614</td>
+  <td>0.463</td>
+  <td>2.568</td>
+  <td>0.1455</td>
+  <td>4.5680</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td>1.231</td>
+  <td>0.599</td>
+  <td>2.534</td>
+  <td>0.0633</td>
+  <td>1.2711</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry (corrected float32 outer / SDPA)</td>
+  <td>2.806</td>
+  <td>0.600</td>
+  <td>1.349</td>
+  <td>0.0658</td>
+  <td>0.9202</td>
+</tr>
+</tbody>
+</table>
+<p>Foreground and derivative source: <a href="../textured64-pilot/foreground_and_physical_metrics.csv">foreground and physical measurements</a>.</p>
+<h3>Per-condition visible EPE</h3>
+<p>All numbers below are centimeters, with the same finite-conditional visible mask.</p>
+<table>
+<thead>
+<tr>
+  <th>Clip</th>
+  <th>CoTracker3 + GT</th>
+  <th>DELTA + GT</th>
+  <th>SpaTrackerV2 + GT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>1.325</td>
+  <td>0.677</td>
+  <td>3.072</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>3.546</td>
+  <td>3.641</td>
+  <td>4.708</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.722</td>
+  <td>1.390</td>
+  <td>4.997</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>2.846</td>
+  <td>4.565</td>
+  <td>6.593</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>0.659</td>
+  <td>0.582</td>
+  <td>2.162</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>2.838</td>
+  <td>4.729</td>
+  <td>2.541</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.498</td>
+  <td>0.452</td>
+  <td>3.206</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>2.641</td>
+  <td>4.588</td>
+  <td>3.913</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>0.431</td>
+  <td>0.629</td>
+  <td>0.728</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>2.103</td>
+  <td>8.264</td>
+  <td>1.734</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>0.127</td>
+  <td>0.519</td>
+  <td>0.106</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>1.849</td>
+  <td>5.351</td>
+  <td>0.527</td>
+</tr>
+</tbody>
+</table>
+<h3>Measured plots and scene videos</h3>
+<p><img loading="lazy" src="../textured64-pilot/visible_geometry.png" alt="Visible flow error and coverage" /></p>
+<p><img loading="lazy" src="../textured64-pilot/translation_orbit_time.png" alt="Object-translation orbit error over time" /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/object_translation_orbit.png" alt="Saved object-translation orbit comparison frame" /></p>
+<p><a href="../interactive/index.html">Open the synchronized interactive 3D material-track comparison</a>. The standalone viewer uses the saved object-translation/orbit primary clip, all initially valid foreground queries and 250 deterministic background queries (423 total). Four panels show GT, CoTracker3, SpaTrackerV2 and DELTA at the same frame, material IDs and view. A shared frame slider, view rotation, GT visibility filter, foreground filter and cumulative-flow arrows are available. Positions are initial GT camera-space positions plus canonical cumulative flow, in meters. Prediction colors show flow EPE on a fixed 0–20 cm scale. Viewer subset scores are explicitly separate from the full-query benchmark table. Extracted source arrays and their original member hashes are in <a href="source-manifest.json">the viewer source manifest</a>.</p>
+<p>The existing videos show the rendered clip and saved comparison panels:</p>
+<ul>
+<li>static scene: <a href="../textured64-pilot/videos/static_scene_fixed.mp4">fixed video</a><video controls preload="none" src="../textured64-pilot/videos/static_scene_fixed.mp4"></video>, <a href="../textured64-pilot/videos/static_scene_orbit.mp4">orbit video</a><video controls preload="none" src="../textured64-pilot/videos/static_scene_orbit.mp4"></video>.</li>
+<li>object translation: <a href="../textured64-pilot/videos/object_translation_fixed.mp4">fixed video</a><video controls preload="none" src="../textured64-pilot/videos/object_translation_fixed.mp4"></video>, <a href="../textured64-pilot/videos/object_translation_orbit.mp4">orbit video</a><video controls preload="none" src="../textured64-pilot/videos/object_translation_orbit.mp4"></video>.</li>
+<li>rigid rotation: <a href="../textured64-pilot/videos/rigid_rotation_fixed.mp4">fixed video</a><video controls preload="none" src="../textured64-pilot/videos/rigid_rotation_fixed.mp4"></video>, <a href="../textured64-pilot/videos/rigid_rotation_orbit.mp4">orbit video</a><video controls preload="none" src="../textured64-pilot/videos/rigid_rotation_orbit.mp4"></video>.</li>
+<li>articulated links: <a href="../textured64-pilot/videos/articulated_links_fixed.mp4">fixed video</a><video controls preload="none" src="../textured64-pilot/videos/articulated_links_fixed.mp4"></video>, <a href="../textured64-pilot/videos/articulated_links_orbit.mp4">orbit video</a><video controls preload="none" src="../textured64-pilot/videos/articulated_links_orbit.mp4"></video>.</li>
+<li>occlusion and return: <a href="../textured64-pilot/videos/occlusion_and_return_fixed.mp4">fixed video</a><video controls preload="none" src="../textured64-pilot/videos/occlusion_and_return_fixed.mp4"></video>, <a href="../textured64-pilot/videos/occlusion_and_return_orbit.mp4">orbit video</a><video controls preload="none" src="../textured64-pilot/videos/occlusion_and_return_orbit.mp4"></video>.</li>
+<li>depth speed out of view stress: <a href="../textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4">fixed video</a><video controls preload="none" src="../textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4"></video>, <a href="../textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4">orbit video</a><video controls preload="none" src="../textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4"></video>.</li>
+</ul>
+<h2>Paired query-density measurements</h2>
+<p>For this control, the 256-query run and the 4,096-query run use identical RGB, geometry, scene seed and model checkpoint. The dense predictions are rescored only at the exact 256 shared material IDs. GT visibility is shared. Model-specific additional support-query settings are held constant within each model. Each row below averages the same twelve paired test clips. The difference column is <code>(256-query EPE − 4,096-query EPE on those same points)</code>.</p>
+<table>
+<thead>
+<tr>
+  <th>Method</th>
+  <th>Mask</th>
+  <th>256-query EPE cm</th>
+  <th>4,096-query same-ID EPE cm</th>
+  <th>Difference cm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td>visible</td>
+  <td>1.644</td>
+  <td>1.736</td>
+  <td>-0.092</td>
+</tr>
+<tr>
+  <td>CoTracker3 + GT geometry</td>
+  <td>foreground_visible</td>
+  <td>2.363</td>
+  <td>2.279</td>
+  <td>0.083</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td>visible</td>
+  <td>2.919</td>
+  <td>3.011</td>
+  <td>-0.091</td>
+</tr>
+<tr>
+  <td>DELTA + GT geometry</td>
+  <td>foreground_visible</td>
+  <td>3.579</td>
+  <td>4.081</td>
+  <td>-0.502</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry (corrected float32 outer / SDPA)</td>
+  <td>visible</td>
+  <td>2.571</td>
+  <td>3.497</td>
+  <td>-0.926</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 + GT geometry (corrected float32 outer / SDPA)</td>
+  <td>foreground_visible</td>
+  <td>24.347</td>
+  <td>26.207</td>
+  <td>-1.860</td>
+</tr>
+</tbody>
+</table>
+<p>Source with per-clip coverage and PCK: <a href="../query-density-control/paired_query_density.csv">paired query-density measurements</a>. Dense full-query averages in the primary table and these dense subset averages use different eligible point sets.</p>
+<h2>Separate predicted-geometry measurement</h2>
+<p>This completed measurement uses the original twelve uniform-color debug16 clips, not the textured64 clips. <code>SpatialTrackerV2_Front</code> predicts depth, intrinsics and camera poses from RGB. Its unmodified frontend outputs are cached and shared between the CoTracker lifting run and the native SpaTracker pipeline; the latter also applies its native refinement. Frontend inference receives no GT geometry.</p>
+<p>The evaluation applies one scalar per clip, measured from initial-frame GT depth divided by predicted depth. That scalar is applied to points and camera translations throughout the whole clip. No per-frame or future-frame GT alignment is applied. These are <strong>initial-GT-scale diagnostic measurements</strong>, rather than scale-unassisted monocular metric scores.</p>
+<table>
+<thead>
+<tr>
+  <th>Method / initial-GT-scale diagnostic</th>
+  <th>Fixed visible EPE cm</th>
+  <th>Orbit visible EPE cm</th>
+  <th>PCK &lt;1 cm %</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CoTracker3 + shared predicted frontend</td>
+  <td>22.818</td>
+  <td>43.531</td>
+  <td>10.38</td>
+</tr>
+<tr>
+  <td>SpaTrackerV2 native frontend + refinement</td>
+  <td>5.232</td>
+  <td>16.180</td>
+  <td>14.28</td>
+</tr>
+</tbody>
+</table>
+<p>Source: <a href="../debug-pilot/per_clip.csv">debug and predicted-geometry per-clip measurements</a>. The separate original debug known-geometry matrix and BF16 precision diagnostic are retained in that CSV. The original debug CoTracker depth lift used its earlier zero-depth handling; the primary textured and matched-query runs use the strict positive-depth mask described above.</p>
+<h2>Recorded scope and validation exclusions</h2>
+<p>The measured primary suite contains primitive rigid box assets, scripted linked poses, two camera modes and one seed per scene condition. It does not contain native robot joint articulation, a multi-seed asset/domain evaluation, official TAPVid3D benchmark scoring, or downstream policy outcomes. No confidence intervals are reported for this single-seed pilot.</p>
+<p>An initial SpaTracker float32 attempt encountered an upstream attention exception that was swallowed by the implementation. Those twelve outputs were quarantined and excluded from these measured tables. The corrected patch enables supported SDPA fallback and raises remaining exceptions. Patch SHA256 is <code>35108abe01a6ff9ae9b34227f3e77730fa47c497bf4a0274515f52bb967131b8</code>. The old malformed <code>[T,Q,1]</code> zero-motion control was also excluded; the accepted <code>zero_motion_xyz</code> source is <code>[T,Q,3]</code>.</p>
+<p>Checkpoint hashes, upstream revisions, environment records, GT validations and scientific-file hashes are retained in the <a href="../textured64-pilot/artifact-ledger.json">artifact ledger</a>. The interactive source NPZs were copied directly from the locally saved textured incremental archive without rerunning inference.</p>
+<h2>Analysis of the measured pilot</h2>
+<h3>Scene-wide averages and moving-object errors answer different questions</h3>
+<p>CoTracker3 has the lowest primary scene-wide visible EPE (1.632 cm), followed by SpaTrackerV2 (2.857 cm) and DELTA (2.949 cm). The foreground-object macro ordering is CoTracker3 (3.893 cm), DELTA (6.401 cm), then SpaTrackerV2 (21.282 cm). These are distinct masks and weighting schemes. The zero-motion control has 95.96% PCK below 1 cm but 22.289 cm foreground-object macro error; a high scene-wide threshold score can coexist with substantial moving-object error. PCK and mean EPE also summarize different parts of the error distribution.</p>
+<h3>Camera motion and geometry</h3>
+<p>Orbit-camera visible EPE exceeds fixed-camera EPE for all three primary trackers: 2.637 versus 0.627 cm for CoTracker3, 5.189 versus 0.708 cm for DELTA, and 3.336 versus 2.379 cm for SpaTrackerV2. These are measurements on six paired scripted conditions, not a multi-seed estimate of general camera robustness.</p>
+<p>The supplied-GT-geometry experiment isolates tracking and lifting under privileged depth and camera information. It does not establish an RGB-only deployment ranking. In the separate uniform-color shared predicted-frontend study, CoTracker3 records 22.818/43.531 cm fixed/orbit error, versus SpaTrackerV2's 5.232/16.180 cm. That diagnostic still uses one initial GT-depth scale scalar and different appearance/query density, so it cannot be substituted into the primary textured table as an otherwise controlled comparison.</p>
+<h3>Query density and temporal derivatives</h3>
+<p>At identical material IDs, changing query count changes predictions: the visible sparse-minus-dense EPE differences are −0.092 cm, −0.091 cm and −0.926 cm for CoTracker3, DELTA and SpaTrackerV2. Full dense-grid averages and matched-subset averages must be kept separate. CoTracker3's lower primary displacement error coexists with higher measured acceleration error (4.5680 m/s² versus 1.2711 and 0.9202); derivative scores use a different mask and amplify temporal variation, so neither metric substitutes for the other.</p>
+<h3>What these results support</h3>
+<p>The pilot supports comparisons on these saved primitive scenes, cameras, geometry regimes and query configurations. It does not establish a universal tracker ranking, robot articulation accuracy, or downstream policy benefit. The linked-box condition uses prescribed link poses. One seed per condition and correlated points limit inference. The quarantined failed-attention SpaTracker outputs are excluded. A broader study should add scene/asset seeds, actual articulated robots, a common learned geometry frontend without GT-scale calibration, and paired downstream policy evaluations.</p>
+<h2>Complete saved media catalog</h2>
+<p>Every existing media file from this experiment is listed below. Galleries preserve the original debug/textured and geometry-regime names. Interactive point selection is available in the linked demo; the remaining clips are saved recordings or maps.</p>
+<h3>Videos</h3>
+<ul>
+<li><a href="../debug-pilot/videos/articulated_links_fixed.mp4">debug-pilot/videos/articulated_links_fixed.mp4</a><video controls preload="none" src="../debug-pilot/videos/articulated_links_fixed.mp4"></video></li>
+<li><a href="../debug-pilot/videos/articulated_links_orbit.mp4">debug-pilot/videos/articulated_links_orbit.mp4</a><video controls preload="none" src="../debug-pilot/videos/articulated_links_orbit.mp4"></video></li>
+<li><a href="../debug-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4">debug-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4</a><video controls preload="none" src="../debug-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4"></video></li>
+<li><a href="../debug-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4">debug-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4</a><video controls preload="none" src="../debug-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4"></video></li>
+<li><a href="../debug-pilot/videos/object_translation_fixed.mp4">debug-pilot/videos/object_translation_fixed.mp4</a><video controls preload="none" src="../debug-pilot/videos/object_translation_fixed.mp4"></video></li>
+<li><a href="../debug-pilot/videos/object_translation_orbit.mp4">debug-pilot/videos/object_translation_orbit.mp4</a><video controls preload="none" src="../debug-pilot/videos/object_translation_orbit.mp4"></video></li>
+<li><a href="../debug-pilot/videos/occlusion_and_return_fixed.mp4">debug-pilot/videos/occlusion_and_return_fixed.mp4</a><video controls preload="none" src="../debug-pilot/videos/occlusion_and_return_fixed.mp4"></video></li>
+<li><a href="../debug-pilot/videos/occlusion_and_return_orbit.mp4">debug-pilot/videos/occlusion_and_return_orbit.mp4</a><video controls preload="none" src="../debug-pilot/videos/occlusion_and_return_orbit.mp4"></video></li>
+<li><a href="../debug-pilot/videos/rigid_rotation_fixed.mp4">debug-pilot/videos/rigid_rotation_fixed.mp4</a><video controls preload="none" src="../debug-pilot/videos/rigid_rotation_fixed.mp4"></video></li>
+<li><a href="../debug-pilot/videos/rigid_rotation_orbit.mp4">debug-pilot/videos/rigid_rotation_orbit.mp4</a><video controls preload="none" src="../debug-pilot/videos/rigid_rotation_orbit.mp4"></video></li>
+<li><a href="../debug-pilot/videos/static_scene_fixed.mp4">debug-pilot/videos/static_scene_fixed.mp4</a><video controls preload="none" src="../debug-pilot/videos/static_scene_fixed.mp4"></video></li>
+<li><a href="../debug-pilot/videos/static_scene_orbit.mp4">debug-pilot/videos/static_scene_orbit.mp4</a><video controls preload="none" src="../debug-pilot/videos/static_scene_orbit.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/articulated_links_fixed.mp4">textured64-pilot/videos/articulated_links_fixed.mp4</a><video controls preload="none" src="../textured64-pilot/videos/articulated_links_fixed.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/articulated_links_orbit.mp4">textured64-pilot/videos/articulated_links_orbit.mp4</a><video controls preload="none" src="../textured64-pilot/videos/articulated_links_orbit.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4">textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4</a><video controls preload="none" src="../textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4">textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4</a><video controls preload="none" src="../textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/object_translation_fixed.mp4">textured64-pilot/videos/object_translation_fixed.mp4</a><video controls preload="none" src="../textured64-pilot/videos/object_translation_fixed.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/object_translation_orbit.mp4">textured64-pilot/videos/object_translation_orbit.mp4</a><video controls preload="none" src="../textured64-pilot/videos/object_translation_orbit.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/occlusion_and_return_fixed.mp4">textured64-pilot/videos/occlusion_and_return_fixed.mp4</a><video controls preload="none" src="../textured64-pilot/videos/occlusion_and_return_fixed.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/occlusion_and_return_orbit.mp4">textured64-pilot/videos/occlusion_and_return_orbit.mp4</a><video controls preload="none" src="../textured64-pilot/videos/occlusion_and_return_orbit.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/rigid_rotation_fixed.mp4">textured64-pilot/videos/rigid_rotation_fixed.mp4</a><video controls preload="none" src="../textured64-pilot/videos/rigid_rotation_fixed.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/rigid_rotation_orbit.mp4">textured64-pilot/videos/rigid_rotation_orbit.mp4</a><video controls preload="none" src="../textured64-pilot/videos/rigid_rotation_orbit.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/static_scene_fixed.mp4">textured64-pilot/videos/static_scene_fixed.mp4</a><video controls preload="none" src="../textured64-pilot/videos/static_scene_fixed.mp4"></video></li>
+<li><a href="../textured64-pilot/videos/static_scene_orbit.mp4">textured64-pilot/videos/static_scene_orbit.mp4</a><video controls preload="none" src="../textured64-pilot/videos/static_scene_orbit.mp4"></video></li>
+</ul>
+<h3>Saved figures and comparison maps</h3>
+<p><img loading="lazy" src="../debug-pilot/translation_orbit_time.png" alt=" debug-pilot/translation_orbit_time.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/articulated_links_fixed.png" alt=" debug-pilot/videos/articulated_links_fixed.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/articulated_links_orbit.png" alt=" debug-pilot/videos/articulated_links_orbit.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/depth_speed_out_of_view_stress_fixed.png" alt=" debug-pilot/videos/depth_speed_out_of_view_stress_fixed.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/depth_speed_out_of_view_stress_orbit.png" alt=" debug-pilot/videos/depth_speed_out_of_view_stress_orbit.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/object_translation_fixed.png" alt=" debug-pilot/videos/object_translation_fixed.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/object_translation_orbit.png" alt=" debug-pilot/videos/object_translation_orbit.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/occlusion_and_return_fixed.png" alt=" debug-pilot/videos/occlusion_and_return_fixed.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/occlusion_and_return_orbit.png" alt=" debug-pilot/videos/occlusion_and_return_orbit.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/rigid_rotation_fixed.png" alt=" debug-pilot/videos/rigid_rotation_fixed.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/rigid_rotation_orbit.png" alt=" debug-pilot/videos/rigid_rotation_orbit.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/static_scene_fixed.png" alt=" debug-pilot/videos/static_scene_fixed.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/videos/static_scene_orbit.png" alt=" debug-pilot/videos/static_scene_orbit.png " /></p>
+<p><img loading="lazy" src="../debug-pilot/visible_geometry.png" alt=" debug-pilot/visible_geometry.png " /></p>
+<p><img loading="lazy" src="../textured16-matched/translation_orbit_time.png" alt=" textured16-matched/translation_orbit_time.png " /></p>
+<p><img loading="lazy" src="../textured16-matched/visible_geometry.png" alt=" textured16-matched/visible_geometry.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/translation_orbit_time.png" alt=" textured64-pilot/translation_orbit_time.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/articulated_links_fixed.png" alt=" textured64-pilot/videos/articulated_links_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/articulated_links_orbit.png" alt=" textured64-pilot/videos/articulated_links_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.png" alt=" textured64-pilot/videos/depth_speed_out_of_view_stress_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.png" alt=" textured64-pilot/videos/depth_speed_out_of_view_stress_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/object_translation_fixed.png" alt=" textured64-pilot/videos/object_translation_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/object_translation_orbit.png" alt=" textured64-pilot/videos/object_translation_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/occlusion_and_return_fixed.png" alt=" textured64-pilot/videos/occlusion_and_return_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/occlusion_and_return_orbit.png" alt=" textured64-pilot/videos/occlusion_and_return_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/rigid_rotation_fixed.png" alt=" textured64-pilot/videos/rigid_rotation_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/rigid_rotation_orbit.png" alt=" textured64-pilot/videos/rigid_rotation_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/static_scene_fixed.png" alt=" textured64-pilot/videos/static_scene_fixed.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/videos/static_scene_orbit.png" alt=" textured64-pilot/videos/static_scene_orbit.png " /></p>
+<p><img loading="lazy" src="../textured64-pilot/visible_geometry.png" alt=" textured64-pilot/visible_geometry.png " /></p>
+<h2>Full measured tables</h2>
+<h3>debug-pilot/per_clip.csv</h3>
+<p><a href="../debug-pilot/per_clip.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>method</th>
+  <th>clip</th>
+  <th>camera</th>
+  <th>visible_epe_m</th>
+  <th>all_epe_m</th>
+  <th>visible_coverage</th>
+  <th>visible_pck_1cm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.07267899066209793</td>
+  <td>0.07834025472402573</td>
+  <td>1.0</td>
+  <td>0.2854696673189824</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.2795303761959076</td>
+  <td>0.2918393611907959</td>
+  <td>1.0</td>
+  <td>0.017687434002111934</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.08576620370149612</td>
+  <td>0.09738989174365997</td>
+  <td>1.0</td>
+  <td>0.3061422675406652</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.2957884967327118</td>
+  <td>0.3117455244064331</td>
+  <td>1.0</td>
+  <td>0.017576564580559253</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.0387042872607708</td>
+  <td>0.047471072524785995</td>
+  <td>1.0</td>
+  <td>0.457311320754717</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.27451473474502563</td>
+  <td>0.2897820472717285</td>
+  <td>1.0</td>
+  <td>0.03198959687906372</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.02831047587096691</td>
+  <td>0.06241466850042343</td>
+  <td>1.0</td>
+  <td>0.5496145237503108</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.1904894858598709</td>
+  <td>0.22847317159175873</td>
+  <td>1.0</td>
+  <td>0.08091853471842538</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.01602134481072426</td>
+  <td>0.023252379149198532</td>
+  <td>1.0</td>
+  <td>0.6084745762711864</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.24126660823822021</td>
+  <td>0.25760617852211</td>
+  <td>1.0</td>
+  <td>0.024751143395211193</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0061333198100328445</td>
+  <td>0.0061333198100328445</td>
+  <td>1.0</td>
+  <td>0.8035037878787878</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.22432516515254974</td>
+  <td>0.2535687983036041</td>
+  <td>1.0</td>
+  <td>0.03042433947157726</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.8148731589317322</td>
+  <td>0.8205356001853943</td>
+  <td>1.0</td>
+  <td>0.018835616438356163</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>1.4310895204544067</td>
+  <td>1.4857544898986816</td>
+  <td>1.0</td>
+  <td>0.014783526927138331</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.09615614265203476</td>
+  <td>0.12166634202003479</td>
+  <td>1.0</td>
+  <td>0.059237679048312696</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.20506197214126587</td>
+  <td>0.2227611094713211</td>
+  <td>1.0</td>
+  <td>0.008521970705725699</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.0784483328461647</td>
+  <td>0.0878778025507927</td>
+  <td>1.0</td>
+  <td>0.052122641509433965</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.18479131162166595</td>
+  <td>0.19838477671146393</td>
+  <td>1.0</td>
+  <td>0.025227568270481143</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.3481043875217438</td>
+  <td>0.3704780638217926</td>
+  <td>1.0</td>
+  <td>0.08480477493160905</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.40526607632637024</td>
+  <td>0.45442014932632446</td>
+  <td>1.0</td>
+  <td>0.02925095680699836</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.023340558633208275</td>
+  <td>0.030186576768755913</td>
+  <td>1.0</td>
+  <td>0.11501210653753027</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.19839826226234436</td>
+  <td>0.21256494522094727</td>
+  <td>1.0</td>
+  <td>0.0191014258810869</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.008136287331581116</td>
+  <td>0.008136287331581116</td>
+  <td>1.0</td>
+  <td>0.7956912878787878</td>
+</tr>
+<tr>
+  <td>cotracker3_shared_front_initial_GT_scale</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.18723367154598236</td>
+  <td>0.2037942260503769</td>
+  <td>1.0</td>
+  <td>0.02241793434747798</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.1112641990184784</td>
+  <td>0.11135722696781158</td>
+  <td>1.0</td>
+  <td>0.11081213307240705</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.394300639629364</td>
+  <td>0.3903181552886963</td>
+  <td>1.0</td>
+  <td>0.002375923970432946</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.09294049441814423</td>
+  <td>0.09295355528593063</td>
+  <td>1.0</td>
+  <td>0.4518086914299587</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.2200639396905899</td>
+  <td>0.2188524752855301</td>
+  <td>1.0</td>
+  <td>0.04553928095872171</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.0615396611392498</td>
+  <td>0.06267678737640381</td>
+  <td>1.0</td>
+  <td>0.26108490566037734</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.20620620250701904</td>
+  <td>0.21608977019786835</td>
+  <td>1.0</td>
+  <td>0.007022106631989597</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.007148107513785362</td>
+  <td>0.007570127956569195</td>
+  <td>1.0</td>
+  <td>0.8167122606316837</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.11989380419254303</td>
+  <td>0.1260896474123001</td>
+  <td>1.0</td>
+  <td>0.06205576817933297</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.01829090155661106</td>
+  <td>0.02104805037379265</td>
+  <td>1.0</td>
+  <td>0.6191283292978208</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.22629012167453766</td>
+  <td>0.23778463900089264</td>
+  <td>1.0</td>
+  <td>0.011299435028248588</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.007915763184428215</td>
+  <td>0.007915763184428215</td>
+  <td>1.0</td>
+  <td>0.7353219696969697</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.09253107011318207</td>
+  <td>0.09449377655982971</td>
+  <td>1.0</td>
+  <td>0.07552708833733654</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>6.981317992817145e-10</td>
+  <td>0.016166911201822072</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>1.4935480523540965e-09</td>
+  <td>0.022438331301133253</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>1.7870155511892456e-09</td>
+  <td>0.013641548596245695</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>1.8025331493881402e-09</td>
+  <td>0.014077435072830583</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>1.992247430656347e-09</td>
+  <td>0.00960913402117351</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>2.770625124865419e-09</td>
+  <td>0.028385781114413665</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>1.1066871764379232e-09</td>
+  <td>0.038103235480049236</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>1.919696356627607e-09</td>
+  <td>0.04116944429009323</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>2.9294350288628447e-10</td>
+  <td>0.004108112614313914</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>1.867160831070902e-09</td>
+  <td>0.028346413833901057</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>2.877827804987452e-10</td>
+  <td>0.03034979379787911</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.0023988268440481813</td>
+  <td>0.01980123395597753</td>
+  <td>1.0</td>
+  <td>0.9911937377690803</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.005292651985235083</td>
+  <td>0.02888392438802858</td>
+  <td>1.0</td>
+  <td>0.9076029567053854</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.00010383274032665986</td>
+  <td>0.013843685953839915</td>
+  <td>1.0</td>
+  <td>0.9953872299101724</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.005516192566024665</td>
+  <td>0.02023798332256697</td>
+  <td>1.0</td>
+  <td>0.9209054593874834</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.00020840575080072524</td>
+  <td>0.009814821137656403</td>
+  <td>1.0</td>
+  <td>0.9950471698113208</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.025643106842510012</td>
+  <td>0.05485143834197684</td>
+  <td>1.0</td>
+  <td>0.9214564369310794</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>3.094578393803777e-07</td>
+  <td>0.03798292848359766</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.0063778408645371884</td>
+  <td>0.050731602910916794</td>
+  <td>1.0</td>
+  <td>0.9371241115363587</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.0010431951056495815</td>
+  <td>0.005621704445599763</td>
+  <td>1.0</td>
+  <td>0.9946731234866828</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.006813709841014035</td>
+  <td>0.03665853743249281</td>
+  <td>1.0</td>
+  <td>0.9322033898305084</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.00555669113776807</td>
+  <td>0.037154437824596036</td>
+  <td>1.0</td>
+  <td>0.9359487590072058</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.1437576860189438</td>
+  <td>0.1492535024881363</td>
+  <td>1.0</td>
+  <td>0.04354207436399217</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.328253835439682</td>
+  <td>0.3399104177951813</td>
+  <td>1.0</td>
+  <td>0.0018479408658922914</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.07357942312955856</td>
+  <td>0.087666355073452</td>
+  <td>1.0</td>
+  <td>0.14882252974022822</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.4529309570789337</td>
+  <td>0.4854685962200165</td>
+  <td>1.0</td>
+  <td>0.0018641810918774966</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.11837142705917358</td>
+  <td>0.12021022289991379</td>
+  <td>1.0</td>
+  <td>0.11415094339622642</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.20352308452129364</td>
+  <td>0.20701871812343597</td>
+  <td>1.0</td>
+  <td>0.022886866059817945</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.03911362215876579</td>
+  <td>0.04981290176510811</td>
+  <td>1.0</td>
+  <td>0.8254165630440189</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.08068011701107025</td>
+  <td>0.09615539759397507</td>
+  <td>1.0</td>
+  <td>0.17960634226353198</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.014558586291968822</td>
+  <td>0.020508255809545517</td>
+  <td>1.0</td>
+  <td>0.5690072639225182</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.19759154319763184</td>
+  <td>0.20882634818553925</td>
+  <td>1.0</td>
+  <td>0.0325531342480495</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.003970548044890165</td>
+  <td>0.003970548044890165</td>
+  <td>1.0</td>
+  <td>0.9121685606060606</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.11556478589773178</td>
+  <td>0.12468039989471436</td>
+  <td>1.0</td>
+  <td>0.07606084867894315</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.14061257243156433</td>
+  <td>0.14641906321048737</td>
+  <td>1.0</td>
+  <td>0.03840508806262231</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.32566580176353455</td>
+  <td>0.33750811219215393</td>
+  <td>1.0</td>
+  <td>0.0015839493136219642</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.07508327066898346</td>
+  <td>0.08916309475898743</td>
+  <td>1.0</td>
+  <td>0.15756251517358583</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.453652024269104</td>
+  <td>0.4863017797470093</td>
+  <td>1.0</td>
+  <td>0.0034620505992010654</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.11684176325798035</td>
+  <td>0.11868361383676529</td>
+  <td>1.0</td>
+  <td>0.12193396226415094</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.20300666987895966</td>
+  <td>0.20646758377552032</td>
+  <td>1.0</td>
+  <td>0.02860858257477243</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.0386749766767025</td>
+  <td>0.04941089078783989</td>
+  <td>1.0</td>
+  <td>0.8448147227057946</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.0810372605919838</td>
+  <td>0.09636134654283524</td>
+  <td>1.0</td>
+  <td>0.1908146528157463</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.014289258979260921</td>
+  <td>0.020244354382157326</td>
+  <td>1.0</td>
+  <td>0.5837772397094431</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.19880329072475433</td>
+  <td>0.2101038098335266</td>
+  <td>1.0</td>
+  <td>0.0382028517621738</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.002908047055825591</td>
+  <td>0.002908047055825591</td>
+  <td>1.0</td>
+  <td>0.9595170454545454</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.11668610572814941</td>
+  <td>0.12578368186950684</td>
+  <td>1.0</td>
+  <td>0.07926341072858287</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.07467450201511383</td>
+  <td>0.0825604498386383</td>
+  <td>1.0</td>
+  <td>0.02054794520547945</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.1430562138557434</td>
+  <td>0.14747387170791626</td>
+  <td>1.0</td>
+  <td>0.0034318901795142554</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.08313482999801636</td>
+  <td>0.09656977653503418</td>
+  <td>1.0</td>
+  <td>0.03593105122602573</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.5502881407737732</td>
+  <td>0.5669553279876709</td>
+  <td>1.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.07729583978652954</td>
+  <td>0.07771612703800201</td>
+  <td>1.0</td>
+  <td>0.01839622641509434</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.10454587638378143</td>
+  <td>0.10477114468812943</td>
+  <td>1.0</td>
+  <td>0.015604681404421327</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.05122596397995949</td>
+  <td>0.06174825131893158</td>
+  <td>1.0</td>
+  <td>0.30340711265854264</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.09016112238168716</td>
+  <td>0.09675993770360947</td>
+  <td>1.0</td>
+  <td>0.028977583378895572</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.018965542316436768</td>
+  <td>0.024633705615997314</td>
+  <td>1.0</td>
+  <td>0.23268765133171912</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.046651195734739304</td>
+  <td>0.05165896564722061</td>
+  <td>1.0</td>
+  <td>0.06053268765133172</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.008636290207505226</td>
+  <td>0.008636290207505226</td>
+  <td>1.0</td>
+  <td>0.8555871212121212</td>
+</tr>
+<tr>
+  <td>spatrackerv2_shared_front_initial_GT_scale</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.03610555827617645</td>
+  <td>0.03824027255177498</td>
+  <td>1.0</td>
+  <td>0.13824392847611422</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.016884025186300278</td>
+  <td>0.028456009924411774</td>
+  <td>1.0</td>
+  <td>0.9596379647749511</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.02671659365296364</td>
+  <td>0.028456009924411774</td>
+  <td>1.0</td>
+  <td>0.939545934530095</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.029824957251548767</td>
+  <td>0.04412679374217987</td>
+  <td>1.0</td>
+  <td>0.9686817188638019</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.023954210802912712</td>
+  <td>0.04412679374217987</td>
+  <td>1.0</td>
+  <td>0.9707057256990679</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.01764201931655407</td>
+  <td>0.017444534227252007</td>
+  <td>1.0</td>
+  <td>0.9320754716981132</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.01945439726114273</td>
+  <td>0.017444534227252007</td>
+  <td>1.0</td>
+  <td>0.9250975292587776</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.03511875122785568</td>
+  <td>0.04570312798023224</td>
+  <td>1.0</td>
+  <td>0.948520268589903</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.04136908799409866</td>
+  <td>0.04570312798023224</td>
+  <td>1.0</td>
+  <td>0.941771459814106</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.004894196055829525</td>
+  <td>0.01106959581375122</td>
+  <td>1.0</td>
+  <td>0.9709443099273608</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.00876103900372982</td>
+  <td>0.01106959581375122</td>
+  <td>1.0</td>
+  <td>0.9580306698950767</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+</tbody>
+</table>
+<h3>query-density-control/paired_query_density.csv</h3>
+<p><a href="../query-density-control/paired_query_density.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>clip</th>
+  <th>method</th>
+  <th>mask</th>
+  <th>epe_16_m</th>
+  <th>epe_64_same_queries_m</th>
+  <th>difference_16_minus_64_m</th>
+  <th>coverage_16</th>
+  <th>coverage_64_same_queries</th>
+  <th>pck1cm_16</th>
+  <th>pck1cm_64</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.006704259198158979</td>
+  <td>0.010593047365546227</td>
+  <td>-0.003888788167387247</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8672609009877138</td>
+  <td>0.8614791616477957</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.01752435974776745</td>
+  <td>0.014965057373046875</td>
+  <td>0.0025593023747205734</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.4314516129032258</td>
+  <td>0.4637096774193548</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.03078930638730526</td>
+  <td>0.03706353157758713</td>
+  <td>-0.006274225190281868</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9101421344254397</td>
+  <td>0.866779089376054</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.3930836617946625</td>
+  <td>0.33418676257133484</td>
+  <td>0.05889689922332764</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.008291034959256649</td>
+  <td>0.008828697726130486</td>
+  <td>-0.0005376627668738365</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.824138761744158</td>
+  <td>0.891110575764876</td>
+</tr>
+<tr>
+  <td>articulated_links_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.05855279788374901</td>
+  <td>0.07830239832401276</td>
+  <td>-0.019749600440263748</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3346774193548387</td>
+  <td>0.3629032258064516</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.038001302629709244</td>
+  <td>0.03769078105688095</td>
+  <td>0.00031052157282829285</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.24194400422609613</td>
+  <td>0.25699947173798204</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.014974403195083141</td>
+  <td>0.014614982530474663</td>
+  <td>0.00035942066460847855</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.5346153846153846</td>
+  <td>0.5</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.05532684549689293</td>
+  <td>0.06023617833852768</td>
+  <td>-0.00490933284163475</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.6743264659270999</td>
+  <td>0.7356048600105652</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.44445550441741943</td>
+  <td>0.2803615629673004</td>
+  <td>0.16409394145011902</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.06153846153846154</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.04272288456559181</td>
+  <td>0.03894831985235214</td>
+  <td>0.00377456471323967</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.12731114632857898</td>
+  <td>0.17934495509772846</td>
+</tr>
+<tr>
+  <td>articulated_links_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.04424751549959183</td>
+  <td>0.06097090244293213</td>
+  <td>-0.0167233869433403</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.2153846153846154</td>
+  <td>0.3269230769230769</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.006273758597671986</td>
+  <td>0.010028415359556675</td>
+  <td>-0.0037546567618846893</td>
+  <td>0.99830220713073</td>
+  <td>0.9985447489691972</td>
+  <td>0.9172932330827067</td>
+  <td>0.9189910259519767</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.06932488828897476</td>
+  <td>0.07129011303186417</td>
+  <td>-0.0019652247428894043</td>
+  <td>0.9615384615384616</td>
+  <td>0.967032967032967</td>
+  <td>0.6098901098901099</td>
+  <td>0.6208791208791209</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.0422360897064209</td>
+  <td>0.04643535614013672</td>
+  <td>-0.00419926643371582</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9347562454523405</td>
+  <td>0.9347562454523405</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.6789510250091553</td>
+  <td>0.7385177612304688</td>
+  <td>-0.05956673622131348</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.27472527472527475</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.018479222431778908</td>
+  <td>0.006403714884072542</td>
+  <td>0.012075507547706366</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.6975503274314819</td>
+  <td>0.8481688091195732</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.03641245514154434</td>
+  <td>0.02740701660513878</td>
+  <td>0.009005438536405563</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3791208791208791</td>
+  <td>0.3901098901098901</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.033337950706481934</td>
+  <td>0.03495136648416519</td>
+  <td>-0.001613415777683258</td>
+  <td>0.996547144754316</td>
+  <td>0.9968127490039841</td>
+  <td>0.27596281540504647</td>
+  <td>0.2749003984063745</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.08555358648300171</td>
+  <td>0.07712412625551224</td>
+  <td>0.008429460227489471</td>
+  <td>0.9192546583850931</td>
+  <td>0.9254658385093167</td>
+  <td>0.639751552795031</td>
+  <td>0.639751552795031</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.049812451004981995</td>
+  <td>0.08537352830171585</td>
+  <td>-0.035561077296733856</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.801062416998672</td>
+  <td>0.8446215139442231</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.4332696795463562</td>
+  <td>0.8116540312767029</td>
+  <td>-0.3783843517303467</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3105590062111801</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.044514499604701996</td>
+  <td>0.043101806193590164</td>
+  <td>0.0014126934111118317</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.29057104913678616</td>
+  <td>0.22231075697211156</td>
+</tr>
+<tr>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.05483075976371765</td>
+  <td>0.05425586551427841</td>
+  <td>0.0005748942494392395</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.22981366459627328</td>
+  <td>0.2484472049689441</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.004344614688307047</td>
+  <td>0.005709637887775898</td>
+  <td>-0.001365023199468851</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9158096149246592</td>
+  <td>0.9043291078689308</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.011648660525679588</td>
+  <td>0.015505742281675339</td>
+  <td>-0.0038570817559957504</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8153409090909091</td>
+  <td>0.8238636363636364</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.02459062449634075</td>
+  <td>0.03331940621137619</td>
+  <td>-0.008728781715035439</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8875867017459937</td>
+  <td>0.8584070796460177</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.20523709058761597</td>
+  <td>0.21821807324886322</td>
+  <td>-0.012980982661247253</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.005681818181818182</td>
+  <td>0.09375</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.008085766807198524</td>
+  <td>0.008717449381947517</td>
+  <td>-0.0006316825747489929</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8495575221238938</td>
+  <td>0.8718010045443674</td>
+</tr>
+<tr>
+  <td>object_translation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.0379883348941803</td>
+  <td>0.049329712986946106</td>
+  <td>-0.011341378092765808</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3352272727272727</td>
+  <td>0.5454545454545454</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.02635372243821621</td>
+  <td>0.027811001986265182</td>
+  <td>-0.001457279548048973</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3046937151949085</td>
+  <td>0.311323256430655</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.02902306243777275</td>
+  <td>0.025454280897974968</td>
+  <td>0.003568781539797783</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.7926136363636364</td>
+  <td>0.8153409090909091</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.027556162327528</td>
+  <td>0.03600739687681198</td>
+  <td>-0.008451234549283981</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.7512596128347918</td>
+  <td>0.762132060461416</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.21007715165615082</td>
+  <td>0.21842817962169647</td>
+  <td>-0.008351027965545654</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.005681818181818182</td>
+  <td>0.09375</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.048378802835941315</td>
+  <td>0.05172181501984596</td>
+  <td>-0.003343012183904648</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.15725271811190666</td>
+  <td>0.2047202333598515</td>
+</tr>
+<tr>
+  <td>object_translation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.07025381922721863</td>
+  <td>0.06587770581245422</td>
+  <td>0.004376113414764404</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.1534090909090909</td>
+  <td>0.12215909090909091</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.005846639629453421</td>
+  <td>0.006685810163617134</td>
+  <td>-0.0008391705341637135</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9614534740977166</td>
+  <td>0.9592438006383501</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.0032622069120407104</td>
+  <td>0.003293980611488223</td>
+  <td>-3.177369944751263e-05</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.997093023255814</td>
+  <td>0.997093023255814</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.018804186955094337</td>
+  <td>0.036250852048397064</td>
+  <td>-0.017446665093302727</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.945003682789099</td>
+  <td>0.9130861772649153</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.1449454128742218</td>
+  <td>0.1280849128961563</td>
+  <td>0.01686049997806549</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.6075581395348837</td>
+  <td>0.6133720930232558</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.004834027029573917</td>
+  <td>0.0045965248718857765</td>
+  <td>0.00023750215768814087</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9160324085440708</td>
+  <td>0.9204517554628038</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.012201916426420212</td>
+  <td>0.009305883198976517</td>
+  <td>0.002896033227443695</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.7093023255813954</td>
+  <td>0.747093023255814</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.027754127979278564</td>
+  <td>0.02643859200179577</td>
+  <td>0.0013155359774827957</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.36968525676421865</td>
+  <td>0.3765875207067918</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.006071167066693306</td>
+  <td>0.006027604918926954</td>
+  <td>4.35621477663517e-05</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8265895953757225</td>
+  <td>0.815028901734104</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.026208754628896713</td>
+  <td>0.05066937208175659</td>
+  <td>-0.02446061745285988</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8260629486471562</td>
+  <td>0.8470458310325787</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.16225554049015045</td>
+  <td>0.15104049444198608</td>
+  <td>0.011215046048164368</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.4913294797687861</td>
+  <td>0.5606936416184971</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.05600909888744354</td>
+  <td>0.04941542446613312</td>
+  <td>0.006593674421310425</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.08586416344561015</td>
+  <td>0.11871893981225842</td>
+</tr>
+<tr>
+  <td>occlusion_and_return_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.042679477483034134</td>
+  <td>0.03549783676862717</td>
+  <td>0.007181640714406967</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.08959537572254335</td>
+  <td>0.0838150289017341</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.0033179582096636295</td>
+  <td>0.0033974177204072475</td>
+  <td>-7.945951074361801e-05</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9427812650893288</td>
+  <td>0.9437469821342347</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.013142300769686699</td>
+  <td>0.012650351040065289</td>
+  <td>0.0004919497296214104</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.6805555555555556</td>
+  <td>0.6805555555555556</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.0063340794295072556</td>
+  <td>0.006458580493927002</td>
+  <td>-0.0001245010644197464</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.960164171897634</td>
+  <td>0.9521970062771608</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.09488412737846375</td>
+  <td>0.0973569005727768</td>
+  <td>-0.0024727731943130493</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.4444444444444444</td>
+  <td>0.2175925925925926</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.00563225569203496</td>
+  <td>0.005366332363337278</td>
+  <td>0.0002659233286976814</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8561081603090295</td>
+  <td>0.8681796233703525</td>
+</tr>
+<tr>
+  <td>rigid_rotation_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.013694439083337784</td>
+  <td>0.008810588158667088</td>
+  <td>0.004883850924670696</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.5462962962962963</td>
+  <td>0.6666666666666666</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.02303771674633026</td>
+  <td>0.023219136521220207</td>
+  <td>-0.00018141977488994598</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3243679397525551</td>
+  <td>0.33162990855298546</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.02010234445333481</td>
+  <td>0.02020357921719551</td>
+  <td>-0.00010123476386070251</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.5765765765765766</td>
+  <td>0.5540540540540541</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.020368492230772972</td>
+  <td>0.01673245057463646</td>
+  <td>0.0036360416561365128</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.7947821409359871</td>
+  <td>0.8539537385691232</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.1494685709476471</td>
+  <td>0.16308923065662384</td>
+  <td>-0.013620659708976746</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.2972972972972973</td>
+  <td>0.15315315315315314</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.05028534680604935</td>
+  <td>0.08477949351072311</td>
+  <td>-0.03449414670467377</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.1589564281871974</td>
+  <td>0.0884884346422808</td>
+</tr>
+<tr>
+  <td>rigid_rotation_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.029293615370988846</td>
+  <td>0.06376845389604568</td>
+  <td>-0.03447483852505684</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.25225225225225223</td>
+  <td>0.19369369369369369</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.0014587239129468799</td>
+  <td>0.0013865218497812748</td>
+  <td>7.220206316560507e-05</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.000963481783401221</td>
+  <td>0.0008991307695396245</td>
+  <td>6.435101386159658e-05</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.0010333287063986063</td>
+  <td>0.0010861108312383294</td>
+  <td>-5.278212483972311e-05</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9988162878787878</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.0013648729072883725</td>
+  <td>0.0010125348344445229</td>
+  <td>0.00035233807284384966</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.007442804519087076</td>
+  <td>0.005039492156356573</td>
+  <td>0.002403312362730503</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.7163825757575758</td>
+  <td>0.8695549242424242</td>
+</tr>
+<tr>
+  <td>static_scene_fixed</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.004894904792308807</td>
+  <td>0.003687212010845542</td>
+  <td>0.0012076927814632654</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8993055555555556</td>
+  <td>0.9479166666666666</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>visible</td>
+  <td>0.02088158018887043</td>
+  <td>0.020412929356098175</td>
+  <td>0.00046865083277225494</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.3339483394833948</td>
+  <td>0.34185556141275697</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>cotracker3_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.01192237064242363</td>
+  <td>0.011469162069261074</td>
+  <td>0.0004532085731625557</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.7451737451737451</td>
+  <td>0.7722007722007722</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>visible</td>
+  <td>0.005489723291248083</td>
+  <td>0.010055060498416424</td>
+  <td>-0.004565337207168341</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.8919346336320506</td>
+  <td>0.8956246705324196</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>foreground_visible</td>
+  <td>0.003672014456242323</td>
+  <td>0.002855171449482441</td>
+  <td>0.000816843006759882</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.9845559845559846</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>visible</td>
+  <td>0.055664099752902985</td>
+  <td>0.054343145340681076</td>
+  <td>0.0013209544122219086</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.12045334739061676</td>
+  <td>0.11017395888244597</td>
+</tr>
+<tr>
+  <td>static_scene_orbit</td>
+  <td>delta_gt_geometry</td>
+  <td>foreground_visible</td>
+  <td>0.024404259398579597</td>
+  <td>0.03246011584997177</td>
+  <td>-0.008055856451392174</td>
+  <td>1.0</td>
+  <td>1.0</td>
+  <td>0.23166023166023167</td>
+  <td>0.3667953667953668</td>
+</tr>
+</tbody>
+</table>
+<h3>textured16-matched/foreground_and_physical_metrics.csv</h3>
+<p><a href="../textured16-matched/foreground_and_physical_metrics.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>method</th>
+  <th>clip</th>
+  <th>visible_epe_m</th>
+  <th>visible_coverage</th>
+  <th>foreground_visible_epe_m</th>
+  <th>foreground_object_macro_visible_epe_m</th>
+  <th>velocity_epe_m_per_s</th>
+  <th>acceleration_epe_m_per_s2</th>
+  <th>dx_mae_m</th>
+  <th>dy_mae_m</th>
+  <th>dz_mae_m</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>0.006704259198158979</td>
+  <td>1.0</td>
+  <td>0.01752435974776745</td>
+  <td>0.01752435974776745</td>
+  <td>0.061244025347335584</td>
+  <td>1.7589130286683725</td>
+  <td>0.004896759055554867</td>
+  <td>0.0026141665875911713</td>
+  <td>0.015004437416791916</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>0.038001302629709244</td>
+  <td>1.0</td>
+  <td>0.014974403195083141</td>
+  <td>0.014974403195083141</td>
+  <td>0.20093460238405367</td>
+  <td>5.489674952121919</td>
+  <td>0.03231222927570343</td>
+  <td>0.010756702162325382</td>
+  <td>0.04085779935121536</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.006273758597671986</td>
+  <td>0.99830220713073</td>
+  <td>0.06932488828897476</td>
+  <td>0.048816152673680335</td>
+  <td>0.10857349547681608</td>
+  <td>3.703049582936923</td>
+  <td>0.005663137882947922</td>
+  <td>0.0018523685866966844</td>
+  <td>0.01671595312654972</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.033337950706481934</td>
+  <td>0.996547144754316</td>
+  <td>0.08555358648300171</td>
+  <td>0.06557010067626834</td>
+  <td>0.23769746777090747</td>
+  <td>7.213701291541498</td>
+  <td>0.0355338416993618</td>
+  <td>0.008580386638641357</td>
+  <td>0.03480008617043495</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>0.004344614688307047</td>
+  <td>1.0</td>
+  <td>0.011648660525679588</td>
+  <td>0.007678908761590719</td>
+  <td>0.061644286264745954</td>
+  <td>2.2485569220174493</td>
+  <td>0.0024082104209810495</td>
+  <td>0.0019063816871494055</td>
+  <td>0.009908988140523434</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>0.02635372243821621</td>
+  <td>1.0</td>
+  <td>0.02902306243777275</td>
+  <td>0.019298292230814695</td>
+  <td>0.23743211960784788</td>
+  <td>7.728023775939637</td>
+  <td>0.02777922712266445</td>
+  <td>0.008103732019662857</td>
+  <td>0.03511673957109451</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.005846639629453421</td>
+  <td>1.0</td>
+  <td>0.0032622069120407104</td>
+  <td>0.0035924000258091837</td>
+  <td>0.13771804319142256</td>
+  <td>5.126774571150614</td>
+  <td>0.009420610032975674</td>
+  <td>0.002490442944690585</td>
+  <td>0.036164820194244385</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.027754127979278564</td>
+  <td>1.0</td>
+  <td>0.006071167066693306</td>
+  <td>0.006073027616366744</td>
+  <td>0.27386869039803646</td>
+  <td>8.562312632353173</td>
+  <td>0.03791080042719841</td>
+  <td>0.008187072351574898</td>
+  <td>0.059391334652900696</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.0033179582096636295</td>
+  <td>1.0</td>
+  <td>0.013142300769686699</td>
+  <td>0.011932627414353192</td>
+  <td>0.025906423377079286</td>
+  <td>0.6627726967092801</td>
+  <td>0.002622792264446616</td>
+  <td>0.001927438541315496</td>
+  <td>0.004697974771261215</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.02303771674633026</td>
+  <td>1.0</td>
+  <td>0.02010234445333481</td>
+  <td>0.01635034242644906</td>
+  <td>0.23597459102990162</td>
+  <td>7.6632974298082095</td>
+  <td>0.02355002425611019</td>
+  <td>0.00559408962726593</td>
+  <td>0.026340758427977562</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>0.0014587239129468799</td>
+  <td>1.0</td>
+  <td>0.000963481783401221</td>
+  <td>0.0010154333722312003</td>
+  <td>0.003340275588116583</td>
+  <td>0.07692540413385461</td>
+  <td>0.001203669118694961</td>
+  <td>0.0005931084742769599</td>
+  <td>9.478640801676973e-17</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>0.02088158018887043</td>
+  <td>1.0</td>
+  <td>0.01192237064242363</td>
+  <td>0.015111067797988653</td>
+  <td>0.259379063978116</td>
+  <td>8.965188072931381</td>
+  <td>0.023877816274762154</td>
+  <td>0.006386728957295418</td>
+  <td>0.03432106971740723</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>0.008291034959256649</td>
+  <td>1.0</td>
+  <td>0.05855279788374901</td>
+  <td>0.05855279788374901</td>
+  <td>0.03649975267200327</td>
+  <td>0.9602763336063782</td>
+  <td>0.0035040818620473146</td>
+  <td>0.0026403621304780245</td>
+  <td>0.006006043404340744</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>0.04272288456559181</td>
+  <td>1.0</td>
+  <td>0.04424751549959183</td>
+  <td>0.04424751549959183</td>
+  <td>0.09483614713293945</td>
+  <td>2.2368392206146464</td>
+  <td>0.018203480169177055</td>
+  <td>0.008662191219627857</td>
+  <td>0.03454437479376793</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.018479222431778908</td>
+  <td>1.0</td>
+  <td>0.03641245514154434</td>
+  <td>0.02722125849686563</td>
+  <td>0.04243123663786572</td>
+  <td>0.8289757462468604</td>
+  <td>0.012660948559641838</td>
+  <td>0.003428247757256031</td>
+  <td>0.00985413696616888</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.044514499604701996</td>
+  <td>1.0</td>
+  <td>0.05483075976371765</td>
+  <td>0.05255684442818165</td>
+  <td>0.11821002390703404</td>
+  <td>2.2983858679041407</td>
+  <td>0.022520946338772774</td>
+  <td>0.01102304458618164</td>
+  <td>0.03935901075601578</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>0.008085766807198524</td>
+  <td>1.0</td>
+  <td>0.0379883348941803</td>
+  <td>0.023966451233718544</td>
+  <td>0.029400844460314986</td>
+  <td>0.7990088847576938</td>
+  <td>0.0016028211684897542</td>
+  <td>0.0014993299264460802</td>
+  <td>0.007596857845783234</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>0.048378802835941315</td>
+  <td>1.0</td>
+  <td>0.07025381922721863</td>
+  <td>0.0535897072404623</td>
+  <td>0.09907126812817922</td>
+  <td>2.154967034470013</td>
+  <td>0.018631063401699066</td>
+  <td>0.011783324182033539</td>
+  <td>0.039507441222667694</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.004834027029573917</td>
+  <td>1.0</td>
+  <td>0.012201916426420212</td>
+  <td>0.013520724256522954</td>
+  <td>0.023237784522769655</td>
+  <td>0.6595881416959698</td>
+  <td>0.0010289228521287441</td>
+  <td>0.0009208941482938826</td>
+  <td>0.004678537603467703</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.05600909888744354</td>
+  <td>1.0</td>
+  <td>0.042679477483034134</td>
+  <td>0.04189888946712017</td>
+  <td>0.10775179399600925</td>
+  <td>2.3805354288518914</td>
+  <td>0.026957185938954353</td>
+  <td>0.012232939712703228</td>
+  <td>0.04937043413519859</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.00563225569203496</td>
+  <td>1.0</td>
+  <td>0.013694439083337784</td>
+  <td>0.01279993006028235</td>
+  <td>0.026766515952256313</td>
+  <td>0.704942879360344</td>
+  <td>0.0020756961312144995</td>
+  <td>0.0016214223578572273</td>
+  <td>0.006065649911761284</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.05028534680604935</td>
+  <td>1.0</td>
+  <td>0.029293615370988846</td>
+  <td>0.028307288885116577</td>
+  <td>0.11505679977403538</td>
+  <td>2.555250855707223</td>
+  <td>0.020714495331048965</td>
+  <td>0.009469459764659405</td>
+  <td>0.040495652705430984</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>0.007442804519087076</td>
+  <td>1.0</td>
+  <td>0.004894904792308807</td>
+  <td>0.005132740829139948</td>
+  <td>0.01845382111494666</td>
+  <td>0.44932347334252737</td>
+  <td>0.001904351869598031</td>
+  <td>0.0015877503901720047</td>
+  <td>0.006841280963271856</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>0.055664099752902985</td>
+  <td>1.0</td>
+  <td>0.024404259398579597</td>
+  <td>0.02673626970499754</td>
+  <td>0.10019233921618038</td>
+  <td>2.0495551769953555</td>
+  <td>0.02827787771821022</td>
+  <td>0.012767734937369823</td>
+  <td>0.04473203793168068</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_fixed</td>
+  <td>8.035014320562084e-10</td>
+  <td>1.0</td>
+  <td>1.3448929081505412e-08</td>
+  <td>1.3448929081505412e-08</td>
+  <td>0.03430105729305546</td>
+  <td>1.0791812005941437</td>
+  <td>0.0006052954122424126</td>
+  <td>0.00047855745651759207</td>
+  <td>0.012139718979597092</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_orbit</td>
+  <td>1.1687614209776598e-09</td>
+  <td>1.0</td>
+  <td>1.4382580459937344e-08</td>
+  <td>1.4382580459937344e-08</td>
+  <td>0.0498285312319959</td>
+  <td>1.573171412739985</td>
+  <td>0.009909715503454208</td>
+  <td>0.0007487859111279249</td>
+  <td>0.019982565194368362</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>1.7026786647278414e-09</td>
+  <td>1.0</td>
+  <td>3.85722209728101e-08</td>
+  <td>2.6591454371782675e-08</td>
+  <td>0.08188015005886165</td>
+  <td>3.017022421671516</td>
+  <td>0.0028024506755173206</td>
+  <td>0.000567370094358921</td>
+  <td>0.013240772299468517</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>1.7005165053873839e-09</td>
+  <td>1.0</td>
+  <td>3.532005266038141e-08</td>
+  <td>2.6234710515105064e-08</td>
+  <td>0.0744934288444472</td>
+  <td>2.805323274796237</td>
+  <td>0.0008934866636991501</td>
+  <td>0.0005104540032334626</td>
+  <td>0.013060490600764751</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_fixed</td>
+  <td>2.0306305525963353e-09</td>
+  <td>1.0</td>
+  <td>2.4119509944853235e-08</td>
+  <td>1.473969923893037e-08</td>
+  <td>0.030278778624401176</td>
+  <td>1.1316877619943813</td>
+  <td>0.0003751509066205472</td>
+  <td>0.0006285305717028677</td>
+  <td>0.008147361688315868</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_orbit</td>
+  <td>2.6955435661335514e-09</td>
+  <td>1.0</td>
+  <td>2.7030244709180806e-08</td>
+  <td>1.7161729981562956e-08</td>
+  <td>0.07383493209889308</td>
+  <td>2.59920142754342</td>
+  <td>0.012348374351859093</td>
+  <td>0.0018056714907288551</td>
+  <td>0.027443913742899895</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>6.548754871715801e-10</td>
+  <td>1.0</td>
+  <td>7.753802044874192e-09</td>
+  <td>8.77403927290743e-09</td>
+  <td>0.11982693476794126</td>
+  <td>4.6685498607811935</td>
+  <td>0.004551829304546118</td>
+  <td>0.0015406757593154907</td>
+  <td>0.035954881459474564</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>1.2908020208257653e-09</td>
+  <td>1.0</td>
+  <td>1.1748600314831492e-08</td>
+  <td>1.2360268364375315e-08</td>
+  <td>0.10186590983323798</td>
+  <td>3.2110723344095797</td>
+  <td>0.0166556965559721</td>
+  <td>0.003998062573373318</td>
+  <td>0.05001666396856308</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_fixed</td>
+  <td>3.4674088600361586e-10</td>
+  <td>1.0</td>
+  <td>6.649077288756189e-09</td>
+  <td>5.984170048378701e-09</td>
+  <td>0.010313209084072048</td>
+  <td>0.3550730568820378</td>
+  <td>0.0002158441348001361</td>
+  <td>0.00010735409159678966</td>
+  <td>0.002891374286264181</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_orbit</td>
+  <td>1.7627326265312604e-09</td>
+  <td>1.0</td>
+  <td>2.652423525262293e-08</td>
+  <td>2.0090706875919295e-08</td>
+  <td>0.04539056657066381</td>
+  <td>1.6206775221051541</td>
+  <td>0.008881479501724243</td>
+  <td>0.0008346154354512691</td>
+  <td>0.01798071712255478</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_fixed</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_orbit</td>
+  <td>1.3264187526118576e-09</td>
+  <td>1.0</td>
+  <td>1.6799603486106207e-08</td>
+  <td>2.4524295039185517e-08</td>
+  <td>0.028656935188759756</td>
+  <td>1.002598496722627</td>
+  <td>0.009722596034407616</td>
+  <td>0.0006703186663798988</td>
+  <td>0.018564948812127113</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_fixed</td>
+  <td>0.0013686544261872768</td>
+  <td>0.9990363767766803</td>
+  <td>0.02326151542365551</td>
+  <td>0.02326151542365551</td>
+  <td>0.07561712563562946</td>
+  <td>2.700761230368864</td>
+  <td>0.0006989935063757002</td>
+  <td>0.0005387357086874545</td>
+  <td>0.013526363298296928</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_orbit</td>
+  <td>0.0044716596603393555</td>
+  <td>1.0</td>
+  <td>0.004278196953237057</td>
+  <td>0.004278196953237057</td>
+  <td>0.17902698261150257</td>
+  <td>5.730081203414042</td>
+  <td>0.011934887617826462</td>
+  <td>0.0016654084902256727</td>
+  <td>0.02506336010992527</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.0010392231633886695</td>
+  <td>0.9997574581615328</td>
+  <td>0.023666732013225555</td>
+  <td>0.01634991727769375</td>
+  <td>0.104286246059993</td>
+  <td>3.8403733911273066</td>
+  <td>0.002963381353765726</td>
+  <td>0.0006313610938377678</td>
+  <td>0.014335457235574722</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.005495115183293819</td>
+  <td>0.9989375830013281</td>
+  <td>0.02095547690987587</td>
+  <td>0.01577103411545977</td>
+  <td>0.2260950470473202</td>
+  <td>7.424406094316987</td>
+  <td>0.0026084952987730503</td>
+  <td>0.0015098690055310726</td>
+  <td>0.01922457106411457</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_fixed</td>
+  <td>0.0017211595550179482</td>
+  <td>1.0</td>
+  <td>0.020443659275770187</td>
+  <td>0.012493346817791462</td>
+  <td>0.09236512286530893</td>
+  <td>3.5862891703730546</td>
+  <td>0.0005058636888861656</td>
+  <td>0.0008469061576761305</td>
+  <td>0.009827539324760437</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_orbit</td>
+  <td>0.006907612085342407</td>
+  <td>1.0</td>
+  <td>0.026655787602066994</td>
+  <td>0.01682439271826297</td>
+  <td>0.27464602623939144</td>
+  <td>9.650861460835454</td>
+  <td>0.01525548193603754</td>
+  <td>0.0031211376190185547</td>
+  <td>0.03491160273551941</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.0001181653278763406</td>
+  <td>1.0</td>
+  <td>0.001399091212078929</td>
+  <td>0.0015831822529435158</td>
+  <td>0.11986266540080544</td>
+  <td>4.668322443376681</td>
+  <td>0.004564519971609116</td>
+  <td>0.0015454256208613515</td>
+  <td>0.036065734922885895</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.0050201392732560635</td>
+  <td>1.0</td>
+  <td>0.0033247957471758127</td>
+  <td>0.003455824451521039</td>
+  <td>0.2404112617376418</td>
+  <td>7.641445335016426</td>
+  <td>0.01968415267765522</td>
+  <td>0.00526277394965291</td>
+  <td>0.05850309506058693</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.0003823759616352618</td>
+  <td>1.0</td>
+  <td>0.007332413457334042</td>
+  <td>0.006599171552807093</td>
+  <td>0.05829631494832981</td>
+  <td>2.2627264924074604</td>
+  <td>0.00028252697666175663</td>
+  <td>0.00018623407231643796</td>
+  <td>0.004823131952434778</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.006652818527072668</td>
+  <td>0.9994620763851533</td>
+  <td>0.022877655923366547</td>
+  <td>0.017695185029879212</td>
+  <td>0.3067521788993973</td>
+  <td>11.042338538006678</td>
+  <td>0.011796380393207073</td>
+  <td>0.0018780333921313286</td>
+  <td>0.026778241619467735</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_fixed</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_orbit</td>
+  <td>0.004718406591564417</td>
+  <td>1.0</td>
+  <td>0.00882816407829523</td>
+  <td>0.01263166288845241</td>
+  <td>0.1721513674726874</td>
+  <td>5.715358417275675</td>
+  <td>0.011938421986997128</td>
+  <td>0.0016136955237016082</td>
+  <td>0.024255728349089622</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_fixed</td>
+  <td>0.03078930638730526</td>
+  <td>1.0</td>
+  <td>0.3930836617946625</td>
+  <td>0.3930836617946625</td>
+  <td>0.0644849330263209</td>
+  <td>0.5848925974644937</td>
+  <td>0.016756802797317505</td>
+  <td>0.010434464551508427</td>
+  <td>0.02682068757712841</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_orbit</td>
+  <td>0.05532684549689293</td>
+  <td>1.0</td>
+  <td>0.44445550441741943</td>
+  <td>0.44445550441741943</td>
+  <td>0.11658713568146988</td>
+  <td>1.3055929730660445</td>
+  <td>0.03206942230463028</td>
+  <td>0.01944112405180931</td>
+  <td>0.044877003878355026</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.0422360897064209</td>
+  <td>1.0</td>
+  <td>0.6789510250091553</td>
+  <td>0.46907327976077795</td>
+  <td>0.0857443619590403</td>
+  <td>0.9036609379849158</td>
+  <td>0.052645400166511536</td>
+  <td>0.007234646938741207</td>
+  <td>0.013248317874968052</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.049812451004981995</td>
+  <td>1.0</td>
+  <td>0.4332696795463562</td>
+  <td>0.3151978364912793</td>
+  <td>0.13214074405103515</td>
+  <td>2.039539328838129</td>
+  <td>0.06363625824451447</td>
+  <td>0.01024839747697115</td>
+  <td>0.01701866090297699</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_fixed</td>
+  <td>0.02459062449634075</td>
+  <td>1.0</td>
+  <td>0.20523709058761597</td>
+  <td>0.22240421175956726</td>
+  <td>0.039452321838467364</td>
+  <td>0.4085020464234759</td>
+  <td>0.012502538040280342</td>
+  <td>0.004697202704846859</td>
+  <td>0.02022957243025303</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_orbit</td>
+  <td>0.027556162327528</td>
+  <td>1.0</td>
+  <td>0.21007715165615082</td>
+  <td>0.2249777615070343</td>
+  <td>0.0645470560096292</td>
+  <td>1.2307570206861465</td>
+  <td>0.01531524583697319</td>
+  <td>0.005844522267580032</td>
+  <td>0.02245289646089077</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.018804186955094337</td>
+  <td>1.0</td>
+  <td>0.1449454128742218</td>
+  <td>0.1638165733893402</td>
+  <td>0.04186498200134414</td>
+  <td>0.5185767493215412</td>
+  <td>0.025235719978809357</td>
+  <td>0.0006164229125715792</td>
+  <td>0.0006521488539874554</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.026208754628896713</td>
+  <td>1.0</td>
+  <td>0.16225554049015045</td>
+  <td>0.18131145276129246</td>
+  <td>0.08167009812077752</td>
+  <td>1.4912038575589737</td>
+  <td>0.038518235087394714</td>
+  <td>0.002961006946861744</td>
+  <td>0.00468826899304986</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.0063340794295072556</td>
+  <td>1.0</td>
+  <td>0.09488412737846375</td>
+  <td>0.08565675315912813</td>
+  <td>0.024363835353254454</td>
+  <td>0.25396755397708776</td>
+  <td>0.007727664429694414</td>
+  <td>0.0030128932558000088</td>
+  <td>0.007024476304650307</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.020368492230772972</td>
+  <td>1.0</td>
+  <td>0.1494685709476471</td>
+  <td>0.10732603480573744</td>
+  <td>0.05920285448704121</td>
+  <td>1.2141810598166736</td>
+  <td>0.016211235895752907</td>
+  <td>0.0057615372352302074</td>
+  <td>0.011982971802353859</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_fixed</td>
+  <td>0.0010333287063986063</td>
+  <td>1.0</td>
+  <td>0.0013648729072883725</td>
+  <td>0.0012943628244102001</td>
+  <td>0.006352813847390823</td>
+  <td>0.170201688737057</td>
+  <td>0.0005515089142136276</td>
+  <td>0.00040504010394215584</td>
+  <td>0.0005931493942625821</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_orbit</td>
+  <td>0.005489723291248083</td>
+  <td>1.0</td>
+  <td>0.003672014456242323</td>
+  <td>0.003459299332462251</td>
+  <td>0.03524372141570355</td>
+  <td>1.0547443412327506</td>
+  <td>0.004020244814455509</td>
+  <td>0.0018400049302726984</td>
+  <td>0.0030759067740291357</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_fixed</td>
+  <td>0.025883905589580536</td>
+  <td>1.0</td>
+  <td>0.43324223160743713</td>
+  <td>0.43324223160743713</td>
+  <td>0.048175535058311125</td>
+  <td>0.09455446104984537</td>
+  <td>0.015613570809364319</td>
+  <td>0.009735578671097755</td>
+  <td>0.023365387693047523</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_orbit</td>
+  <td>0.030527299270033836</td>
+  <td>1.0</td>
+  <td>0.4445244371891022</td>
+  <td>0.4445244371891022</td>
+  <td>0.048175535058311125</td>
+  <td>0.09455446104984537</td>
+  <td>0.015613570809364319</td>
+  <td>0.009735578671097755</td>
+  <td>0.023365387693047523</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.03118308074772358</td>
+  <td>1.0</td>
+  <td>0.7064166069030762</td>
+  <td>0.48699939250946045</td>
+  <td>0.05348702584778635</td>
+  <td>8.366227110458692e-07</td>
+  <td>0.0429687462747097</td>
+  <td>0.005919472314417362</td>
+  <td>0.008112984709441662</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.02428438887000084</td>
+  <td>1.0</td>
+  <td>0.5678926706314087</td>
+  <td>0.4118500351905823</td>
+  <td>0.05348702584778635</td>
+  <td>8.366227110458692e-07</td>
+  <td>0.0429687462747097</td>
+  <td>0.005919472314417362</td>
+  <td>0.008112984709441662</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_fixed</td>
+  <td>0.017890973016619682</td>
+  <td>1.0</td>
+  <td>0.21250614523887634</td>
+  <td>0.1298648715019226</td>
+  <td>0.022142523854221212</td>
+  <td>0.013797148547132454</td>
+  <td>0.0087890625</td>
+  <td>0.0029498443473130465</td>
+  <td>0.01496430765837431</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_orbit</td>
+  <td>0.01983615942299366</td>
+  <td>1.0</td>
+  <td>0.21250614523887634</td>
+  <td>0.1298648715019226</td>
+  <td>0.022142523854221212</td>
+  <td>0.013797148547132454</td>
+  <td>0.0087890625</td>
+  <td>0.0029498443473130465</td>
+  <td>0.01496430765837431</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.025504082441329956</td>
+  <td>1.0</td>
+  <td>0.30197131633758545</td>
+  <td>0.3417043685913086</td>
+  <td>0.03693181682716717</td>
+  <td>5.637096175315851e-07</td>
+  <td>0.03046875260770321</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.029879899695515633</td>
+  <td>1.0</td>
+  <td>0.31278902292251587</td>
+  <td>0.3513798713684082</td>
+  <td>0.03693181682716717</td>
+  <td>5.637096175315851e-07</td>
+  <td>0.03046875260770321</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.004822514019906521</td>
+  <td>1.0</td>
+  <td>0.09247617423534393</td>
+  <td>0.08322855830192566</td>
+  <td>0.015211708470770984</td>
+  <td>0.023888356892251966</td>
+  <td>0.006981727201491594</td>
+  <td>0.0025390845257788897</td>
+  <td>0.006093800533562899</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.00865547638386488</td>
+  <td>1.0</td>
+  <td>0.1449597328901291</td>
+  <td>0.10314442217350006</td>
+  <td>0.015211708470770984</td>
+  <td>0.023888356892251966</td>
+  <td>0.006981727201491594</td>
+  <td>0.0025390845257788897</td>
+  <td>0.006093800533562899</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_fixed</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_orbit</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+</tbody>
+</table>
+<h3>textured16-matched/per_clip.csv</h3>
+<p><a href="../textured16-matched/per_clip.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>method</th>
+  <th>clip</th>
+  <th>camera</th>
+  <th>visible_epe_m</th>
+  <th>all_epe_m</th>
+  <th>visible_coverage</th>
+  <th>visible_pck_1cm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.006704259198158979</td>
+  <td>0.01881546899676323</td>
+  <td>1.0</td>
+  <td>0.8672609009877138</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.038001302629709244</td>
+  <td>0.05929360166192055</td>
+  <td>1.0</td>
+  <td>0.24194400422609613</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.006273758597671986</td>
+  <td>0.019710643216967583</td>
+  <td>0.99830220713073</td>
+  <td>0.9172932330827067</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.033337950706481934</td>
+  <td>0.059913270175457</td>
+  <td>0.996547144754316</td>
+  <td>0.27596281540504647</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.004344614688307047</td>
+  <td>0.012000491842627525</td>
+  <td>1.0</td>
+  <td>0.9158096149246592</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.02635372243821621</td>
+  <td>0.05064425244927406</td>
+  <td>1.0</td>
+  <td>0.3046937151949085</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.005846639629453421</td>
+  <td>0.04176231473684311</td>
+  <td>1.0</td>
+  <td>0.9614534740977166</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.027754127979278564</td>
+  <td>0.08075367659330368</td>
+  <td>1.0</td>
+  <td>0.36968525676421865</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.0033179582096636295</td>
+  <td>0.006963443011045456</td>
+  <td>1.0</td>
+  <td>0.9427812650893288</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.02303771674633026</td>
+  <td>0.040836285799741745</td>
+  <td>1.0</td>
+  <td>0.3243679397525551</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0014587239129468799</td>
+  <td>0.0014587239129468799</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.02088158018887043</td>
+  <td>0.047606147825717926</td>
+  <td>1.0</td>
+  <td>0.3339483394833948</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.008291034959256649</td>
+  <td>0.008503721095621586</td>
+  <td>1.0</td>
+  <td>0.824138761744158</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.04272288456559181</td>
+  <td>0.04255468770861626</td>
+  <td>1.0</td>
+  <td>0.12731114632857898</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.018479222431778908</td>
+  <td>0.01974746584892273</td>
+  <td>1.0</td>
+  <td>0.6975503274314819</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.044514499604701996</td>
+  <td>0.05203048884868622</td>
+  <td>1.0</td>
+  <td>0.29057104913678616</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.008085766807198524</td>
+  <td>0.008110564202070236</td>
+  <td>1.0</td>
+  <td>0.8495575221238938</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.048378802835941315</td>
+  <td>0.04958336427807808</td>
+  <td>1.0</td>
+  <td>0.15725271811190666</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.004834027029573917</td>
+  <td>0.005023038014769554</td>
+  <td>1.0</td>
+  <td>0.9160324085440708</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.05600909888744354</td>
+  <td>0.060189925134181976</td>
+  <td>1.0</td>
+  <td>0.08586416344561015</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.00563225569203496</td>
+  <td>0.0068926140666007996</td>
+  <td>1.0</td>
+  <td>0.8561081603090295</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.05028534680604935</td>
+  <td>0.049555983394384384</td>
+  <td>1.0</td>
+  <td>0.1589564281871974</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.007442804519087076</td>
+  <td>0.007442804519087076</td>
+  <td>1.0</td>
+  <td>0.7163825757575758</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.055664099752902985</td>
+  <td>0.05686564743518829</td>
+  <td>1.0</td>
+  <td>0.12045334739061676</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>9.451615890634654e-10</td>
+  <td>0.012168012203906295</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>1.3345164236506703e-09</td>
+  <td>0.022514081845396362</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>1.8092912160866467e-09</td>
+  <td>0.013601319899199701</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>1.7522145352196147e-09</td>
+  <td>0.013113492110070237</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>1.989046134627602e-09</td>
+  <td>0.008191789015841413</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>2.609001689394598e-09</td>
+  <td>0.03074305773416558</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>9.072280855877364e-10</td>
+  <td>0.036382760241810155</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>1.4542650159474674e-09</td>
+  <td>0.05343423831991483</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>3.378303335321928e-10</td>
+  <td>0.0029053954837316596</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>1.76463140010861e-09</td>
+  <td>0.020219504282605955</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>1.326418871656076e-09</td>
+  <td>0.02110494407168968</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.0013686543630087053</td>
+  <td>0.013560187379978002</td>
+  <td>0.9990363767766803</td>
+  <td>0.9898819561551433</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.004471659676121093</td>
+  <td>0.028265517817477836</td>
+  <td>1.0</td>
+  <td>0.910459587955626</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.001039223253833879</td>
+  <td>0.014715817334004443</td>
+  <td>0.9997574581615328</td>
+  <td>0.9912684938151831</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.005495115116440127</td>
+  <td>0.01983952951141194</td>
+  <td>0.9989375830013281</td>
+  <td>0.9123505976095617</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.0017211595863555061</td>
+  <td>0.009895084145320875</td>
+  <td>1.0</td>
+  <td>0.9906720880172207</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.0069076119148815856</td>
+  <td>0.039109955829291145</td>
+  <td>1.0</td>
+  <td>0.9217714134181915</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.0001181653646964359</td>
+  <td>0.03649462545311117</td>
+  <td>1.0</td>
+  <td>0.999754480726737</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.005020139492786887</td>
+  <td>0.06278797239631757</td>
+  <td>1.0</td>
+  <td>0.9246272777471011</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.0003823759376583387</td>
+  <td>0.0048401946165396465</td>
+  <td>1.0</td>
+  <td>0.9951714147754708</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.006652818643660281</td>
+  <td>0.02987456385688913</td>
+  <td>0.9994620763851533</td>
+  <td>0.9206562668101129</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.004718406257993507</td>
+  <td>0.027514796217158185</td>
+  <td>1.0</td>
+  <td>0.9206642066420664</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.03078930638730526</td>
+  <td>0.036838091909885406</td>
+  <td>1.0</td>
+  <td>0.9101421344254397</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.05532684549689293</td>
+  <td>0.06312231719493866</td>
+  <td>1.0</td>
+  <td>0.6743264659270999</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.0422360897064209</td>
+  <td>0.05633297190070152</td>
+  <td>1.0</td>
+  <td>0.9347562454523405</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.049812451004981995</td>
+  <td>0.0686052143573761</td>
+  <td>1.0</td>
+  <td>0.801062416998672</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.02459062449634075</td>
+  <td>0.024867195636034012</td>
+  <td>1.0</td>
+  <td>0.8875867017459937</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.027556162327528</td>
+  <td>0.029088696464896202</td>
+  <td>1.0</td>
+  <td>0.7512596128347918</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.018804186955094337</td>
+  <td>0.025620995089411736</td>
+  <td>1.0</td>
+  <td>0.945003682789099</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.026208754628896713</td>
+  <td>0.041583385318517685</td>
+  <td>1.0</td>
+  <td>0.8260629486471562</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.0063340794295072556</td>
+  <td>0.012407167814671993</td>
+  <td>1.0</td>
+  <td>0.960164171897634</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.020368492230772972</td>
+  <td>0.02398678846657276</td>
+  <td>1.0</td>
+  <td>0.7947821409359871</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0010333287063986063</td>
+  <td>0.0010333287063986063</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.005489723291248083</td>
+  <td>0.006147820968180895</td>
+  <td>1.0</td>
+  <td>0.8919346336320506</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.025883905589580536</td>
+  <td>0.03201301023364067</td>
+  <td>1.0</td>
+  <td>0.9402553601541798</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.030527299270033836</td>
+  <td>0.03201301023364067</td>
+  <td>1.0</td>
+  <td>0.9313259376650819</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.03118308074772358</td>
+  <td>0.04412679374217987</td>
+  <td>1.0</td>
+  <td>0.967984477322338</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.02428438887000084</td>
+  <td>0.04412679374217987</td>
+  <td>1.0</td>
+  <td>0.9705179282868526</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.017890973016619682</td>
+  <td>0.01770884543657303</td>
+  <td>1.0</td>
+  <td>0.9311169576656302</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.01983615942299366</td>
+  <td>0.01770884543657303</td>
+  <td>1.0</td>
+  <td>0.9236276849642004</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.025504082441329956</td>
+  <td>0.03046874888241291</td>
+  <td>1.0</td>
+  <td>0.9626810704640314</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.029879899695515633</td>
+  <td>0.03046874888241291</td>
+  <td>1.0</td>
+  <td>0.9574820541137493</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.004822514019906521</td>
+  <td>0.010939160361886024</td>
+  <td>1.0</td>
+  <td>0.9710284886528248</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.00865547638386488</td>
+  <td>0.010939160361886024</td>
+  <td>1.0</td>
+  <td>0.958041958041958</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+</tbody>
+</table>
+<h3>textured64-pilot/foreground_and_physical_metrics.csv</h3>
+<p><a href="../textured64-pilot/foreground_and_physical_metrics.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>method</th>
+  <th>clip</th>
+  <th>visible_epe_m</th>
+  <th>visible_coverage</th>
+  <th>foreground_visible_epe_m</th>
+  <th>foreground_object_macro_visible_epe_m</th>
+  <th>velocity_epe_m_per_s</th>
+  <th>acceleration_epe_m_per_s2</th>
+  <th>dx_mae_m</th>
+  <th>dy_mae_m</th>
+  <th>dz_mae_m</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>0.013246559537947178</td>
+  <td>0.9985059836877811</td>
+  <td>0.03552399203181267</td>
+  <td>0.1290750950574875</td>
+  <td>0.09576666589435938</td>
+  <td>2.652024452230689</td>
+  <td>0.007295125629752874</td>
+  <td>0.004778212867677212</td>
+  <td>0.0276752021163702</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>0.035460490733385086</td>
+  <td>0.9989745561750946</td>
+  <td>0.036478228867053986</td>
+  <td>0.20040700305253267</td>
+  <td>0.2058140460149144</td>
+  <td>5.820712793271299</td>
+  <td>0.027515586465597153</td>
+  <td>0.009829583577811718</td>
+  <td>0.03752705082297325</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.007216678000986576</td>
+  <td>0.9993053877748248</td>
+  <td>0.025182170793414116</td>
+  <td>0.019783252791967243</td>
+  <td>0.10622270599963891</td>
+  <td>3.436769943069818</td>
+  <td>0.009236305952072144</td>
+  <td>0.0021296024788171053</td>
+  <td>0.014069030061364174</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.02845742180943489</td>
+  <td>0.9990357108418244</td>
+  <td>0.024388862773776054</td>
+  <td>0.02142817876301706</td>
+  <td>0.2425386118542394</td>
+  <td>7.472761251417453</td>
+  <td>0.03237485885620117</td>
+  <td>0.007033464033156633</td>
+  <td>0.027912456542253494</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>0.006591287441551685</td>
+  <td>1.0</td>
+  <td>0.005790343042463064</td>
+  <td>0.004811981518287212</td>
+  <td>0.061326923079890086</td>
+  <td>2.0421483084801797</td>
+  <td>0.003755828831344843</td>
+  <td>0.0034358848351985216</td>
+  <td>0.02227841131389141</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>0.02838478982448578</td>
+  <td>0.9996453500556156</td>
+  <td>0.010234910063445568</td>
+  <td>0.009373283013701439</td>
+  <td>0.21501308500141794</td>
+  <td>6.794327373561583</td>
+  <td>0.028653297573328018</td>
+  <td>0.007897809147834778</td>
+  <td>0.04029768705368042</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.004979312885552645</td>
+  <td>1.0</td>
+  <td>0.004099836573004723</td>
+  <td>0.005261411773972213</td>
+  <td>0.13307175069886623</td>
+  <td>4.864827990836835</td>
+  <td>0.0074915289878845215</td>
+  <td>0.0022580435033887625</td>
+  <td>0.03320581465959549</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.026409901678562164</td>
+  <td>0.9999005403971754</td>
+  <td>0.007203725166618824</td>
+  <td>0.007682067574933171</td>
+  <td>0.24866347743491804</td>
+  <td>7.742642252916138</td>
+  <td>0.03100716881453991</td>
+  <td>0.005946666933596134</td>
+  <td>0.04607993736863136</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.004310513846576214</td>
+  <td>0.9999850507526946</td>
+  <td>0.024993591010570526</td>
+  <td>0.02447412456967868</td>
+  <td>0.04377462539757001</td>
+  <td>1.349918489751293</td>
+  <td>0.0025998742785304785</td>
+  <td>0.0020891146268695593</td>
+  <td>0.008072216995060444</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.02103429101407528</td>
+  <td>0.9989636314354502</td>
+  <td>0.034119199961423874</td>
+  <td>0.030837224330753088</td>
+  <td>0.20959900679381463</td>
+  <td>6.705819698126045</td>
+  <td>0.02210887148976326</td>
+  <td>0.004965696018189192</td>
+  <td>0.023816382512450218</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>0.0012733773328363895</td>
+  <td>1.0</td>
+  <td>0.0009294308256357908</td>
+  <td>0.000941152306040749</td>
+  <td>0.0032543625647437494</td>
+  <td>0.07525247118372404</td>
+  <td>0.0009499526931904256</td>
+  <td>0.0006287587457336485</td>
+  <td>2.9510334570659325e-05</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>0.018489833921194077</td>
+  <td>0.9992715410074905</td>
+  <td>0.014449620619416237</td>
+  <td>0.01306970277801156</td>
+  <td>0.1810037493789912</td>
+  <td>5.858743037084985</td>
+  <td>0.02063492126762867</td>
+  <td>0.004535648971796036</td>
+  <td>0.027202321216464043</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>0.006770865060389042</td>
+  <td>1.0</td>
+  <td>0.04228143393993378</td>
+  <td>0.15089754667133093</td>
+  <td>0.030027526894157223</td>
+  <td>0.7815470218752304</td>
+  <td>0.002009073505178094</td>
+  <td>0.0015846012393012643</td>
+  <td>0.006137036718428135</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>0.03640943765640259</td>
+  <td>1.0</td>
+  <td>0.0440477654337883</td>
+  <td>0.16029439307749271</td>
+  <td>0.08696176880045958</td>
+  <td>1.8854229943462038</td>
+  <td>0.014851490966975689</td>
+  <td>0.007829833775758743</td>
+  <td>0.030580122023820877</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.013902919366955757</td>
+  <td>1.0</td>
+  <td>0.11920687556266785</td>
+  <td>0.09325352683663368</td>
+  <td>0.04223291317334911</td>
+  <td>0.8110943778410229</td>
+  <td>0.01256502978503704</td>
+  <td>0.0026383709628134966</td>
+  <td>0.008302250877022743</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.045648425817489624</td>
+  <td>1.0</td>
+  <td>0.10677437484264374</td>
+  <td>0.09485204517841339</td>
+  <td>0.11346159117843858</td>
+  <td>2.027847034422235</td>
+  <td>0.024272937327623367</td>
+  <td>0.008992645889520645</td>
+  <td>0.04206429049372673</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>0.005822375882416964</td>
+  <td>1.0</td>
+  <td>0.01530199870467186</td>
+  <td>0.012843160540796816</td>
+  <td>0.021300715602763705</td>
+  <td>0.5750884385413291</td>
+  <td>0.0016014057910069823</td>
+  <td>0.0012707144487649202</td>
+  <td>0.005408898927271366</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>0.047287508845329285</td>
+  <td>1.0</td>
+  <td>0.03678029775619507</td>
+  <td>0.034490423277020454</td>
+  <td>0.09421899692926228</td>
+  <td>1.9298620246130789</td>
+  <td>0.017456965520977974</td>
+  <td>0.008535363711416721</td>
+  <td>0.039628803730010986</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.004520053043961525</td>
+  <td>1.0</td>
+  <td>0.008040839806199074</td>
+  <td>0.009820099221542478</td>
+  <td>0.022085386204364756</td>
+  <td>0.626364619305985</td>
+  <td>0.0015950294909998775</td>
+  <td>0.0009531531832180917</td>
+  <td>0.004456933122128248</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.045878153294324875</td>
+  <td>1.0</td>
+  <td>0.03720657899975777</td>
+  <td>0.03639855608344078</td>
+  <td>0.0909396196006487</td>
+  <td>1.897105402723427</td>
+  <td>0.01794341206550598</td>
+  <td>0.009196807630360126</td>
+  <td>0.039910562336444855</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.006290578283369541</td>
+  <td>1.0</td>
+  <td>0.01955844834446907</td>
+  <td>0.019243047572672367</td>
+  <td>0.024825832944252155</td>
+  <td>0.6420552835000328</td>
+  <td>0.0025907985400408506</td>
+  <td>0.0016401322791352868</td>
+  <td>0.005979290697723627</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.08263515681028366</td>
+  <td>1.0</td>
+  <td>0.08775599300861359</td>
+  <td>0.09453235194087029</td>
+  <td>0.12826574872747437</td>
+  <td>1.9598521138965679</td>
+  <td>0.028265636414289474</td>
+  <td>0.016827775165438652</td>
+  <td>0.07271099835634232</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>0.005194561555981636</td>
+  <td>1.0</td>
+  <td>0.004235138185322285</td>
+  <td>0.004387969383969903</td>
+  <td>0.016679306296511837</td>
+  <td>0.395269435841587</td>
+  <td>0.0013528584968298674</td>
+  <td>0.0011368108680471778</td>
+  <td>0.004742232616990805</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>0.053505562245845795</td>
+  <td>1.0</td>
+  <td>0.05083073303103447</td>
+  <td>0.05707269348204136</td>
+  <td>0.08900271930290918</td>
+  <td>1.7213960597291245</td>
+  <td>0.023242050781846046</td>
+  <td>0.011315480805933475</td>
+  <td>0.044213250279426575</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_fixed</td>
+  <td>6.998357449106152e-10</td>
+  <td>1.0</td>
+  <td>1.1849697223453859e-08</td>
+  <td>1.3803710174897788e-08</td>
+  <td>0.058578252811069986</td>
+  <td>1.8087643851473572</td>
+  <td>0.0007863134960643947</td>
+  <td>0.0006041094893589616</td>
+  <td>0.019809680059552193</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_orbit</td>
+  <td>1.0913732140238608e-09</td>
+  <td>1.0</td>
+  <td>1.4124100999879374e-08</td>
+  <td>1.8949362079467846e-08</td>
+  <td>0.058432039079900785</td>
+  <td>1.8182006281917262</td>
+  <td>0.00733928382396698</td>
+  <td>0.0005945128505118191</td>
+  <td>0.019346043467521667</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>1.8713299798633898e-09</td>
+  <td>1.0</td>
+  <td>2.6958222321127323e-08</td>
+  <td>2.0765238417652654e-08</td>
+  <td>0.07287346715948266</td>
+  <td>2.6122798472651554</td>
+  <td>0.002268862212076783</td>
+  <td>0.00034297959064133465</td>
+  <td>0.011324973776936531</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>1.752866407578324e-09</td>
+  <td>1.0</td>
+  <td>2.3698692785956155e-08</td>
+  <td>2.0079801821282217e-08</td>
+  <td>0.06856805104658663</td>
+  <td>2.4704240800140735</td>
+  <td>0.0012956048594787717</td>
+  <td>0.0003966322692576796</td>
+  <td>0.013751830905675888</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_fixed</td>
+  <td>1.301489249705412e-09</td>
+  <td>1.0</td>
+  <td>1.5641276718270092e-08</td>
+  <td>1.2343065236564144e-08</td>
+  <td>0.03828510084712296</td>
+  <td>1.2539973493552592</td>
+  <td>0.0005641921306960285</td>
+  <td>0.0011949501931667328</td>
+  <td>0.020745551213622093</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_orbit</td>
+  <td>1.8245034372199598e-09</td>
+  <td>1.0</td>
+  <td>1.8499784815162457e-08</td>
+  <td>1.5199978165014727e-08</td>
+  <td>0.07547504334031943</td>
+  <td>2.4658980947631046</td>
+  <td>0.01590828411281109</td>
+  <td>0.0021901840809732676</td>
+  <td>0.03109249286353588</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>6.85163481506379e-10</td>
+  <td>1.0</td>
+  <td>6.556768905596755e-09</td>
+  <td>8.842022225508117e-09</td>
+  <td>0.10721067337298101</td>
+  <td>4.062032609210718</td>
+  <td>0.004069427959620953</td>
+  <td>0.0011484869755804539</td>
+  <td>0.03197481483221054</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>1.525819692815844e-09</td>
+  <td>1.0</td>
+  <td>1.1779738073869339e-08</td>
+  <td>1.3352046357439917e-08</td>
+  <td>0.09073869423612337</td>
+  <td>2.8047564968809984</td>
+  <td>0.01289245393127203</td>
+  <td>0.002767133992165327</td>
+  <td>0.03929430618882179</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_fixed</td>
+  <td>3.929936653879196e-10</td>
+  <td>1.0</td>
+  <td>5.579058992566388e-09</td>
+  <td>5.458580698558535e-09</td>
+  <td>0.019808457821434793</td>
+  <td>0.6967825305169536</td>
+  <td>0.0003775973164010793</td>
+  <td>0.00018237694166600704</td>
+  <td>0.005618383642286062</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_orbit</td>
+  <td>2.3317974218173276e-09</td>
+  <td>1.0</td>
+  <td>2.6330731373036542e-08</td>
+  <td>2.3421469430573438e-08</td>
+  <td>0.03756543031371187</td>
+  <td>1.222035395760534</td>
+  <td>0.009582655504345894</td>
+  <td>0.0006887423223815858</td>
+  <td>0.02100144512951374</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_fixed</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_orbit</td>
+  <td>9.125796229803029e-10</td>
+  <td>1.0</td>
+  <td>8.143032026453056e-09</td>
+  <td>8.980554522253215e-09</td>
+  <td>0.031878883445672294</td>
+  <td>1.0647515859351846</td>
+  <td>0.01042602676898241</td>
+  <td>0.0007417817250825465</td>
+  <td>0.021445205435156822</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_fixed</td>
+  <td>0.0007642070995643735</td>
+  <td>0.9996950987117921</td>
+  <td>0.013002823106944561</td>
+  <td>0.01085776835680008</td>
+  <td>0.08210121624834603</td>
+  <td>2.724311584181651</td>
+  <td>0.0008390787406824529</td>
+  <td>0.0006371843046508729</td>
+  <td>0.020565221086144447</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_orbit</td>
+  <td>0.004609785042703152</td>
+  <td>0.9998718195218869</td>
+  <td>0.004138471558690071</td>
+  <td>0.00645110011100769</td>
+  <td>0.18239292761483628</td>
+  <td>5.719833472805934</td>
+  <td>0.009137267246842384</td>
+  <td>0.0014817494666203856</td>
+  <td>0.024081910029053688</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.0003429618664085865</td>
+  <td>0.9983993718289442</td>
+  <td>0.005049198865890503</td>
+  <td>0.003939533140510321</td>
+  <td>0.08408034101360912</td>
+  <td>3.0079880411568114</td>
+  <td>0.002350697759538889</td>
+  <td>0.00036924908636137843</td>
+  <td>0.011775344610214233</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.004623368848115206</td>
+  <td>0.9986821381504934</td>
+  <td>0.006328918971121311</td>
+  <td>0.005746936425566673</td>
+  <td>0.19600899915147307</td>
+  <td>6.489647454328795</td>
+  <td>0.002877047983929515</td>
+  <td>0.0013038782635703683</td>
+  <td>0.018648037686944008</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_fixed</td>
+  <td>0.000476574816275388</td>
+  <td>1.0</td>
+  <td>0.005727468524128199</td>
+  <td>0.004519741516560316</td>
+  <td>0.053728315413771724</td>
+  <td>1.8511611086686977</td>
+  <td>0.0006057745777070522</td>
+  <td>0.0012509137159213424</td>
+  <td>0.021203666925430298</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_orbit</td>
+  <td>0.004961270838975906</td>
+  <td>0.9998871568358777</td>
+  <td>0.006960323080420494</td>
+  <td>0.006070075090974569</td>
+  <td>0.20660534049706925</td>
+  <td>6.788702895612059</td>
+  <td>0.018186109140515327</td>
+  <td>0.0031897148583084345</td>
+  <td>0.0364825576543808</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>8.886957220965996e-05</td>
+  <td>1.0</td>
+  <td>0.0008504498400725424</td>
+  <td>0.0011468601878732443</td>
+  <td>0.11216897266833824</td>
+  <td>4.263689827303493</td>
+  <td>0.0040790848433971405</td>
+  <td>0.0011505812872201204</td>
+  <td>0.03209099546074867</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.00529495719820261</td>
+  <td>0.9998839637967045</td>
+  <td>0.004188990220427513</td>
+  <td>0.004693777882494032</td>
+  <td>0.2177709716189373</td>
+  <td>6.927576797278812</td>
+  <td>0.015009279362857342</td>
+  <td>0.003758710576221347</td>
+  <td>0.04565739631652832</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.00048553087981417775</td>
+  <td>0.9997608120431136</td>
+  <td>0.006914576515555382</td>
+  <td>0.006787384860217571</td>
+  <td>0.04223370877375152</td>
+  <td>1.5331058390768917</td>
+  <td>0.0004119779623579234</td>
+  <td>0.00021012801153119653</td>
+  <td>0.00633042398840189</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.006413742899894714</td>
+  <td>0.9993622347295078</td>
+  <td>0.024521101266145706</td>
+  <td>0.023073925636708736</td>
+  <td>0.2294485489855105</td>
+  <td>7.946180132839642</td>
+  <td>0.0121786342933774</td>
+  <td>0.0016334275715053082</td>
+  <td>0.027688009664416313</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_fixed</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_orbit</td>
+  <td>0.0047879936173558235</td>
+  <td>0.9996040983736362</td>
+  <td>0.0073363808915019035</td>
+  <td>0.006729676621034741</td>
+  <td>0.15702585318136866</td>
+  <td>5.0778687329082395</td>
+  <td>0.012541515752673149</td>
+  <td>0.0016422137850895524</td>
+  <td>0.026532355695962906</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_fixed</td>
+  <td>0.03072497621178627</td>
+  <td>1.0</td>
+  <td>0.3591436743736267</td>
+  <td>0.3104395717382431</td>
+  <td>0.06754358593015812</td>
+  <td>0.8205622089845616</td>
+  <td>0.017389334738254547</td>
+  <td>0.010898125357925892</td>
+  <td>0.025980936363339424</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_orbit</td>
+  <td>0.04707709699869156</td>
+  <td>1.0</td>
+  <td>0.353350430727005</td>
+  <td>0.3935683071613312</td>
+  <td>0.10125412776019466</td>
+  <td>1.2873228846173976</td>
+  <td>0.02665640413761139</td>
+  <td>0.015329282730817795</td>
+  <td>0.03709709644317627</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.049968425184488297</td>
+  <td>1.0</td>
+  <td>0.5319316387176514</td>
+  <td>0.4393133372068405</td>
+  <td>0.10976236554614695</td>
+  <td>1.4433514688246118</td>
+  <td>0.0626007691025734</td>
+  <td>0.009140552952885628</td>
+  <td>0.01310107484459877</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.0659315288066864</td>
+  <td>1.0</td>
+  <td>0.53855299949646</td>
+  <td>0.508714109659195</td>
+  <td>0.1463527276969007</td>
+  <td>1.6434631599312133</td>
+  <td>0.08812568336725235</td>
+  <td>0.013124384917318821</td>
+  <td>0.02022860012948513</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_fixed</td>
+  <td>0.021624835208058357</td>
+  <td>1.0</td>
+  <td>0.14285069704055786</td>
+  <td>0.11720149964094162</td>
+  <td>0.03635024053877615</td>
+  <td>0.43048388439899615</td>
+  <td>0.010854687541723251</td>
+  <td>0.004003874026238918</td>
+  <td>0.017986241728067398</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_orbit</td>
+  <td>0.025405017659068108</td>
+  <td>1.0</td>
+  <td>0.14371250569820404</td>
+  <td>0.11876401677727699</td>
+  <td>0.0572985956343586</td>
+  <td>1.0346326871669511</td>
+  <td>0.013789516873657703</td>
+  <td>0.005170479416847229</td>
+  <td>0.02038087323307991</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.03206024691462517</td>
+  <td>1.0</td>
+  <td>0.17085731029510498</td>
+  <td>0.22991834016283974</td>
+  <td>0.06231182564889402</td>
+  <td>0.5868397128454271</td>
+  <td>0.04301971197128296</td>
+  <td>0.001013179193250835</td>
+  <td>0.000905409047845751</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.03913413733243942</td>
+  <td>1.0</td>
+  <td>0.18182258307933807</td>
+  <td>0.2299531390890479</td>
+  <td>0.08827487011570473</td>
+  <td>1.126406854956928</td>
+  <td>0.049330759793519974</td>
+  <td>0.002649288857355714</td>
+  <td>0.003632812760770321</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.00727647403255105</td>
+  <td>1.0</td>
+  <td>0.08420474827289581</td>
+  <td>0.08251573098823428</td>
+  <td>0.026722196378467813</td>
+  <td>0.35207791320752063</td>
+  <td>0.0074954768642783165</td>
+  <td>0.0033166951034218073</td>
+  <td>0.007499676197767258</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.01734139770269394</td>
+  <td>1.0</td>
+  <td>0.12848594784736633</td>
+  <td>0.11840053834021091</td>
+  <td>0.05372326127660769</td>
+  <td>1.1159730624262219</td>
+  <td>0.013636691495776176</td>
+  <td>0.005300853401422501</td>
+  <td>0.011609922163188457</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_fixed</td>
+  <td>0.0010624593123793602</td>
+  <td>1.0</td>
+  <td>0.001355431042611599</td>
+  <td>0.0013694504741579294</td>
+  <td>0.008479158863925876</td>
+  <td>0.2547220731444544</td>
+  <td>0.0006077986909076571</td>
+  <td>0.00040102581260725856</td>
+  <td>0.0005621395539492369</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_orbit</td>
+  <td>0.005273544229567051</td>
+  <td>1.0</td>
+  <td>0.003710055723786354</td>
+  <td>0.0037405811017379165</td>
+  <td>0.031547351753377695</td>
+  <td>0.9462310682691693</td>
+  <td>0.0031626971904188395</td>
+  <td>0.0016146493144333363</td>
+  <td>0.0029429709538817406</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_fixed</td>
+  <td>0.024655019864439964</td>
+  <td>1.0</td>
+  <td>0.4174615442752838</td>
+  <td>0.3262413740158081</td>
+  <td>0.045403316455366674</td>
+  <td>0.08911340801496265</td>
+  <td>0.014844863675534725</td>
+  <td>0.009122127667069435</td>
+  <td>0.021892698481678963</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_orbit</td>
+  <td>0.02734694443643093</td>
+  <td>1.0</td>
+  <td>0.42594894766807556</td>
+  <td>0.33052879571914673</td>
+  <td>0.045403316455366674</td>
+  <td>0.08911340801496265</td>
+  <td>0.014844863675534725</td>
+  <td>0.009122127667069435</td>
+  <td>0.021892698481678963</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>0.043914634734392166</td>
+  <td>1.0</td>
+  <td>0.6326305866241455</td>
+  <td>0.487299382686615</td>
+  <td>0.07498237570917117</td>
+  <td>1.1728443945451304e-06</td>
+  <td>0.06023694574832916</td>
+  <td>0.008298388682305813</td>
+  <td>0.011373414658010006</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>0.032959431409835815</td>
+  <td>1.0</td>
+  <td>0.4981301426887512</td>
+  <td>0.4104887545108795</td>
+  <td>0.07498237570917117</td>
+  <td>1.1728443945451304e-06</td>
+  <td>0.06023694574832916</td>
+  <td>0.008298388682305813</td>
+  <td>0.011373414658010006</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_fixed</td>
+  <td>0.013693333603441715</td>
+  <td>1.0</td>
+  <td>0.1645662635564804</td>
+  <td>0.1298648566007614</td>
+  <td>0.01672107454020547</td>
+  <td>0.010419008728081759</td>
+  <td>0.006637119222432375</td>
+  <td>0.0022275904193520546</td>
+  <td>0.011300413869321346</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_orbit</td>
+  <td>0.014604117721319199</td>
+  <td>1.0</td>
+  <td>0.1636447310447693</td>
+  <td>0.1298648566007614</td>
+  <td>0.01672107454020547</td>
+  <td>0.010419008728081759</td>
+  <td>0.006637119222432375</td>
+  <td>0.0022275904193520546</td>
+  <td>0.011300413869321346</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>0.02583036758005619</td>
+  <td>1.0</td>
+  <td>0.24718734622001648</td>
+  <td>0.33334046602249146</td>
+  <td>0.04306948266090841</td>
+  <td>6.573920181528801e-07</td>
+  <td>0.035532258450984955</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>0.03211359307169914</td>
+  <td>1.0</td>
+  <td>0.27822554111480713</td>
+  <td>0.3536481261253357</td>
+  <td>0.04306948266090841</td>
+  <td>6.573920181528801e-07</td>
+  <td>0.035532258450984955</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_fixed</td>
+  <td>0.0056999786756932735</td>
+  <td>1.0</td>
+  <td>0.08091864734888077</td>
+  <td>0.07917124032974243</td>
+  <td>0.015416972824238961</td>
+  <td>0.024210701403485708</td>
+  <td>0.006700160913169384</td>
+  <td>0.0027347393333911896</td>
+  <td>0.006563371513038874</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_orbit</td>
+  <td>0.008856899105012417</td>
+  <td>1.0</td>
+  <td>0.10824159532785416</td>
+  <td>0.09421571344137192</td>
+  <td>0.015416972824238961</td>
+  <td>0.024210701403485708</td>
+  <td>0.006700160913169384</td>
+  <td>0.0027347393333911896</td>
+  <td>0.006563371513038874</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_fixed</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_orbit</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>0.0</td>
+</tr>
+</tbody>
+</table>
+<h3>textured64-pilot/per_clip.csv</h3>
+<p><a href="../textured64-pilot/per_clip.csv">Original CSV</a></p>
+<table>
+<thead>
+<tr>
+  <th>method</th>
+  <th>clip</th>
+  <th>camera</th>
+  <th>visible_epe_m</th>
+  <th>all_epe_m</th>
+  <th>visible_coverage</th>
+  <th>visible_pck_1cm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.013246559537947178</td>
+  <td>0.0323902927339077</td>
+  <td>0.9985059836877811</td>
+  <td>0.8734812104581142</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.035460490733385086</td>
+  <td>0.05335952714085579</td>
+  <td>0.9989745561750946</td>
+  <td>0.29023264756777545</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.007216678000986576</td>
+  <td>0.020443003624677658</td>
+  <td>0.9993053877748248</td>
+  <td>0.9378171055810582</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.02845742180943489</td>
+  <td>0.05219303444027901</td>
+  <td>0.9990357108418244</td>
+  <td>0.3384976374915625</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.006591287441551685</td>
+  <td>0.024914773181080818</td>
+  <td>1.0</td>
+  <td>0.8928641605828384</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.02838478982448578</td>
+  <td>0.05552197992801666</td>
+  <td>0.9996453500556156</td>
+  <td>0.3459932616510567</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.004979312885552645</td>
+  <td>0.037031471729278564</td>
+  <td>1.0</td>
+  <td>0.9673417288024782</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.026409901678562164</td>
+  <td>0.06409858912229538</td>
+  <td>0.9999005403971754</td>
+  <td>0.41305573053078276</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.004310513846576214</td>
+  <td>0.010186254978179932</td>
+  <td>0.9999850507526946</td>
+  <td>0.947513192710747</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.02103429101407528</td>
+  <td>0.03756516054272652</td>
+  <td>0.9989636314354502</td>
+  <td>0.3696009183819895</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0012733773328363895</td>
+  <td>0.0012733773328363895</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>cotracker3_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.018489833921194077</td>
+  <td>0.03858496621251106</td>
+  <td>0.9992715410074905</td>
+  <td>0.38887041347965856</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.006770865060389042</td>
+  <td>0.006966833956539631</td>
+  <td>1.0</td>
+  <td>0.8835734430977971</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.03640943765640259</td>
+  <td>0.03730582445859909</td>
+  <td>1.0</td>
+  <td>0.1823847977952958</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.013902919366955757</td>
+  <td>0.017890721559524536</td>
+  <td>1.0</td>
+  <td>0.8247010147378594</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.045648425817489624</td>
+  <td>0.05603921413421631</td>
+  <td>1.0</td>
+  <td>0.21845970878467424</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.005822375882416964</td>
+  <td>0.005945651791989803</td>
+  <td>1.0</td>
+  <td>0.8869088105926631</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.047287508845329285</td>
+  <td>0.047509897500276566</td>
+  <td>1.0</td>
+  <td>0.21735205455160964</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.004520053043961525</td>
+  <td>0.005150387994945049</td>
+  <td>1.0</td>
+  <td>0.925779486620694</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.045878153294324875</td>
+  <td>0.04724780470132828</td>
+  <td>1.0</td>
+  <td>0.13788416271591022</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.006290578283369541</td>
+  <td>0.007293143775314093</td>
+  <td>1.0</td>
+  <td>0.8524210306011092</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.08263515681028366</td>
+  <td>0.08484954386949539</td>
+  <td>1.0</td>
+  <td>0.09654171782075607</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.005194561555981636</td>
+  <td>0.005194561555981636</td>
+  <td>1.0</td>
+  <td>0.8558628578132332</td>
+</tr>
+<tr>
+  <td>delta_gt_geometry</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.053505562245845795</td>
+  <td>0.05415717512369156</td>
+  <td>1.0</td>
+  <td>0.12417058609276767</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>8.787543348529071e-10</td>
+  <td>0.01985003557208162</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>1.2573894427928022e-09</td>
+  <td>0.021147037351042144</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>1.9706084855642433e-09</td>
+  <td>0.011625648707344961</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>1.851744410179145e-09</td>
+  <td>0.013864107984732608</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>1.2724139181897895e-09</td>
+  <td>0.02081936834673629</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>1.7597635765638977e-09</td>
+  <td>0.035434899669545966</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>9.496213973072288e-10</td>
+  <td>0.032366760920099255</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>1.7825587117330374e-09</td>
+  <td>0.04186914660802647</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>3.8975569008519137e-10</td>
+  <td>0.005645012235646666</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>2.327835086032571e-09</td>
+  <td>0.023297800090821465</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_exact_front_ray</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>9.125796290411623e-10</td>
+  <td>0.024097350577516552</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.0007642070807273803</td>
+  <td>0.020609220099061125</td>
+  <td>0.9996950987117921</td>
+  <td>0.9919658510557207</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.0046097854240206865</td>
+  <td>0.026489247127892086</td>
+  <td>0.9998718195218869</td>
+  <td>0.9186855091969494</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.00034296188054375436</td>
+  <td>0.012089117878100367</td>
+  <td>0.9983993718289442</td>
+  <td>0.9929179753563663</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.0046233688357384855</td>
+  <td>0.019300350230819028</td>
+  <td>0.9986821381504934</td>
+  <td>0.922101507505384</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.000476574836370765</td>
+  <td>0.02128401712122995</td>
+  <td>1.0</td>
+  <td>0.9969316343959249</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.004961271233736262</td>
+  <td>0.04156938809503126</td>
+  <td>0.9998871568358777</td>
+  <td>0.9327132332790612</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>8.886961080779481e-05</td>
+  <td>0.03248408003995109</td>
+  <td>1.0</td>
+  <td>0.9991749817095001</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.005294957229318755</td>
+  <td>0.04886976049908776</td>
+  <td>0.9998839637967045</td>
+  <td>0.9344063919371415</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.0004855309137650244</td>
+  <td>0.006358944397441703</td>
+  <td>0.9997608120431136</td>
+  <td>0.9912696395736474</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.006413742798006847</td>
+  <td>0.030756343008358705</td>
+  <td>0.9993622347295078</td>
+  <td>0.9192110843604011</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>gt_uv_gt_front_depth</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.004787993403084752</td>
+  <td>0.02987938983717368</td>
+  <td>0.9996040983736362</td>
+  <td>0.9278667236765009</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.03072497621178627</td>
+  <td>0.03644891083240509</td>
+  <td>1.0</td>
+  <td>0.9015778641664761</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.04707709699869156</td>
+  <td>0.05206663906574249</td>
+  <td>1.0</td>
+  <td>0.7746747420367878</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.049968425184488297</td>
+  <td>0.06540918350219727</td>
+  <td>1.0</td>
+  <td>0.928983450108722</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.0659315288066864</td>
+  <td>0.09288645535707474</td>
+  <td>1.0</td>
+  <td>0.8447012310758253</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.021624835208058357</td>
+  <td>0.021811192855238914</td>
+  <td>1.0</td>
+  <td>0.9049108964766699</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.025405017659068108</td>
+  <td>0.026213552802801132</td>
+  <td>1.0</td>
+  <td>0.8057163122853965</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.03206024691462517</td>
+  <td>0.04348721355199814</td>
+  <td>1.0</td>
+  <td>0.9323173674133342</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.03913413733243942</td>
+  <td>0.051305659115314484</td>
+  <td>1.0</td>
+  <td>0.8711335079401916</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.00727647403255105</td>
+  <td>0.012659171596169472</td>
+  <td>1.0</td>
+  <td>0.9494117471185326</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.01734139770269394</td>
+  <td>0.0211125947535038</td>
+  <td>1.0</td>
+  <td>0.8413558889650664</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0010624593123793602</td>
+  <td>0.0010624593123793602</td>
+  <td>1.0</td>
+  <td>0.9999266776161426</td>
+</tr>
+<tr>
+  <td>spatrackerv2_gt_geometry_fp32_math</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.005273544229567051</td>
+  <td>0.0051858979277312756</td>
+  <td>1.0</td>
+  <td>0.9102095111406717</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_fixed</td>
+  <td>fixed</td>
+  <td>0.024655019864439964</td>
+  <td>0.030170854181051254</td>
+  <td>1.0</td>
+  <td>0.9409406204741215</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>articulated_links_orbit</td>
+  <td>orbit</td>
+  <td>0.02734694443643093</td>
+  <td>0.030170854181051254</td>
+  <td>1.0</td>
+  <td>0.9357976030250593</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_fixed</td>
+  <td>fixed</td>
+  <td>0.043914634734392166</td>
+  <td>0.06186045706272125</td>
+  <td>1.0</td>
+  <td>0.9549408069582025</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>depth_speed_out_of_view_stress_orbit</td>
+  <td>orbit</td>
+  <td>0.032959431409835815</td>
+  <td>0.06186045706272125</td>
+  <td>1.0</td>
+  <td>0.9598534280479574</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_fixed</td>
+  <td>fixed</td>
+  <td>0.013693333603441715</td>
+  <td>0.013372952118515968</td>
+  <td>1.0</td>
+  <td>0.9472785259753019</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>object_translation_orbit</td>
+  <td>orbit</td>
+  <td>0.014604117721319199</td>
+  <td>0.013372952118515968</td>
+  <td>1.0</td>
+  <td>0.9437718633630487</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_fixed</td>
+  <td>fixed</td>
+  <td>0.02583036758005619</td>
+  <td>0.03553232550621033</td>
+  <td>1.0</td>
+  <td>0.961255273112187</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>occlusion_and_return_orbit</td>
+  <td>orbit</td>
+  <td>0.03211359307169914</td>
+  <td>0.03553232550621033</td>
+  <td>1.0</td>
+  <td>0.954596691310546</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_fixed</td>
+  <td>fixed</td>
+  <td>0.0056999786756932735</td>
+  <td>0.011086772195994854</td>
+  <td>1.0</td>
+  <td>0.9641666542089605</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>rigid_rotation_orbit</td>
+  <td>orbit</td>
+  <td>0.008856899105012417</td>
+  <td>0.011086772195994854</td>
+  <td>1.0</td>
+  <td>0.9531720850141105</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_fixed</td>
+  <td>fixed</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>zero_motion_xyz</td>
+  <td>static_scene_orbit</td>
+  <td>orbit</td>
+  <td>0.0</td>
+  <td>0.0</td>
+  <td>1.0</td>
+  <td>1.0</td>
+</tr>
+</tbody>
+</table>

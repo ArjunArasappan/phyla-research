@@ -1,0 +1,22 @@
+{
+  "data/exp01/textured64/pilot/object_translation_orbit/gt.npz": {
+    "file": "gt.npz",
+    "sha256": "7d7ccbc74453a835f9b678db36318605ac472626f76824fb8d54a4e621eaaf17",
+    "bytes": 1787648
+  },
+  "data/exp01/textured64/predictions/cotracker3_gt_geometry/object_translation_orbit/tracks.npz": {
+    "file": "cotracker3_gt_geometry.npz",
+    "sha256": "7f887e1b466b61c27fb5336f00bcb2aa00cd24b19a6ed01388031e04b63b0fe8",
+    "bytes": 773180
+  },
+  "data/exp01/textured64/predictions/delta_gt_geometry/object_translation_orbit/tracks.npz": {
+    "file": "delta_gt_geometry.npz",
+    "sha256": "91d07a7b53aafb222e83672220bcf4ba83c92aad1dd637615ead6e8d133224a3",
+    "bytes": 780396
+  },
+  "data/exp01/textured64/predictions/spatrackerv2_gt_geometry_fp32_math/object_translation_orbit/tracks.npz": {
+    "file": "spatrackerv2_gt_geometry_fp32_math.npz",
+    "sha256": "13b4248d43e516e4a5af80202e138fbff062f50be5fc3e4429199cc1c7cc017c",
+    "bytes": 617720
+  }
+}
