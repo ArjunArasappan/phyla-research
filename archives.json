@@ -83,6 +83,58 @@
           "sha256": "eb8859b82ff2316da5c93552b738754e6876a6e60f7c7405d747a6c9f82607a2"
         }
       ]
+    },
+    {
+      "name": "exp01-textured-incremental.tar.gz",
+      "bytes": 419485346,
+      "sha256": "42b1790f455ca8edacceddba0d7d6e457ba168af5ff6b19263f03bcf4f70a219",
+      "chunks": [
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0000.part",
+          "bytes": 47185920,
+          "sha256": "be6548271cffdefa81096aefce9d0356dc580ad01c1e6fca32429efc4b5ddb93"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0001.part",
+          "bytes": 47185920,
+          "sha256": "ca455121a5cf99bb9c233762c48073a1298912171f91e222c8c5256d9a660976"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0002.part",
+          "bytes": 47185920,
+          "sha256": "73a8d154bc11f792f821627b75129d927865a439ac9d8294c5943f41b9362bee"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0003.part",
+          "bytes": 47185920,
+          "sha256": "ad3dda0c42a2bcb89ee702fa01e76fc5b82322c35a68d80d172c967cb92f20eb"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0004.part",
+          "bytes": 47185920,
+          "sha256": "eb0903314f0ddfe443f8d0efa272e1455db634274a27adfa7fbc85978f251dcd"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0005.part",
+          "bytes": 47185920,
+          "sha256": "8e93d34d1c08db935822801b46c8bdd3555b547c425d6fd0eb5c9bccd0636a71"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0006.part",
+          "bytes": 47185920,
+          "sha256": "a54a9e74707e20c642af5c8b1d26a706358e4522d5676b94aad76dbedf590520"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0007.part",
+          "bytes": 47185920,
+          "sha256": "085fd5176c3af26ab113e93088a2a7a1228c9d111093c6d1d34ec096455c0632"
+        },
+        {
+          "path": "chunks/exp01-textured-incremental.tar.gz/0008.part",
+          "bytes": 41997986,
+          "sha256": "494f2bb940afe66f36e9266f749b0299996f120776d35f9849a41829521e1164"
+        }
+      ]
     }
   ]
 }
