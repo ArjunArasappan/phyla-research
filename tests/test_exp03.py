@@ -60,3 +60,14 @@ def test_flow_rgb_ltx_layout_and_attention_identical():
  for index in range(4):assert torch.equal(pf[index],pr[index])
  assert [(s.start,s.stop,s.grid) for s in pf[4]]==[(s.start,s.stop,s.grid) for s in pr[4]]
  assert torch.allclose(f(b,noisy_f,t)["action"],r(b,noisy_r,t)["action"],atol=1e-6)
+
+
+def test_bf16_decoder_has_numpy_safe_public_boundary():
+ from flomo.model import FrozenEncoders
+ class StubVAE(torch.nn.Module):
+  def __init__(self):
+   super().__init__();self.weight=torch.nn.Parameter(torch.zeros(1,dtype=torch.bfloat16));self.config=SimpleNamespace(timestep_conditioning=False)
+  def decode(self,value,timestep):return SimpleNamespace(sample=torch.zeros(1,3,17,32,32,dtype=torch.bfloat16))
+ encoder=FrozenEncoders.__new__(FrozenEncoders);encoder.config=SimpleNamespace(backend="ltx");encoder.device=torch.device("cpu");encoder.vae=StubVAE();encoder._ltx_scale=lambda x,inverse=False:x
+ result=encoder.decode_video(torch.zeros(4,3,1,1,dtype=torch.bfloat16),16)
+ assert result.dtype==torch.float32 and result.numpy().shape==(16,3,32,32)

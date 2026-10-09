@@ -250,7 +250,7 @@ class FrozenEncoders:
             x=torch.cat([x[:1],x[1:].repeat_interleave(4,0)],0)
             result=(F.interpolate(x,size=(self.config.image_size,)*2,mode="bilinear",align_corners=False)+1)/2
         if len(result)<frames: raise ValueError("Decoded sequence shorter than requested")
-        return result[:frames].clamp(0,1)
+        return result[:frames].clamp(0,1).float()
 
     def _ltx_scale(self, latents, inverse=False):
         mean = self.vae.latents_mean.reshape(1,-1,1,1,1).to(latents)
