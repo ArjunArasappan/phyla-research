@@ -1,0 +1,28 @@
+{
+  "wan": {
+    "archive": "outputs/gpu-experiment-archive/exp02-scientific-artifacts.tar.gz",
+    "member": "runs/exp02/simulator-pilot-v2/static_scene_fixed/gt/wan/metrics.json",
+    "latent_shape": [
+      48,
+      5,
+      16,
+      16
+    ],
+    "latent_bytes": 245760,
+    "source_kind": "simulator_gt",
+    "frames": 17
+  },
+  "ltx": {
+    "archive": "outputs/gpu-experiment-archive/exp02-scientific-artifacts.tar.gz",
+    "member": "runs/exp02/simulator-pilot-v2/static_scene_fixed/gt/ltx/metrics.json",
+    "latent_shape": [
+      128,
+      3,
+      8,
+      8
+    ],
+    "latent_bytes": 49152,
+    "source_kind": "simulator_gt",
+    "frames": 17
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "source_metadata_sha256": "8b995a4379bc073df28592dbc300e57458515dfd790f814b4b47d555f6f1fdaf",
+  "verified_core_archive_sha256": "d659cc979a08041553b8f354364933e956789f44eae56aa6f6ce51f746909bb2",
+  "policies": 12,
+  "logged_updates": 12000,
+  "trailing_mean_updates": 50,
+  "shared_axes": {
+    "updates": [
+      0,
+      1000
+    ],
+    "action_velocity_training_mse": [
+      0,
+      1.5624857783317567
+    ]
+  },
+  "raw_loss_range": [
+    0.057229623198509216,
+    1.488081693649292
+  ],
+  "raw_points_clipped": 0,
+  "metric_scope": "training only; no task success or efficiency claim"
+}
