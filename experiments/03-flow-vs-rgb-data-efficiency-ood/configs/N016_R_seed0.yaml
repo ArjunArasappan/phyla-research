@@ -1,0 +1,99 @@
+model:
+  backend: ltx
+  architecture: joint
+  checkpoint: /mnt/nvme/scratch/phyla-ubuntu/cache/checkpoints/ltx096-full/8984fa25007f376c1a299016d0957a37a2f797bb
+  upstream: ''
+  upstream_commit: ''
+  checkpoint_revision: 8984fa25007f376c1a299016d0957a37a2f797bb
+  image_size: 256
+  latent_channels: 128
+  spatial_stride: 32
+  text_dim: 4096
+  text_length: 128
+  width: 2048
+  layers: 28
+  heads: 32
+  horizon: 16
+  action_dim: 8
+  views: 1
+  targets:
+  - video
+  - action
+  lora_rank: 16
+  lora_alpha: 32
+  gradient_checkpointing: true
+  video_fps: 20.0
+  future_only: true
+  auxiliary_null: false
+data:
+  raw: /mnt/nvme/scratch/phyla-ubuntu/data/exp03/pushcube/subsets/N016_subset0
+  prepared: /mnt/nvme/scratch/phyla-ubuntu/data/exp03/pushcube/pilot_N016_prepared_v2
+  stride: 16
+  grid_size: 32
+  val_fraction: 0
+  test_fraction: 0
+  provider: oracle
+  tracker_upstream: ''
+  tracker_revision: ''
+  tracker_front: Yuxihenry/SpatialTrackerV2_Front
+  tracker_weights: Yuxihenry/SpatialTrackerV2-Offline
+  tracker_mode: monocular
+  min_valid_fraction: 0.5
+  max_stat_points: 200000
+  source_weights: {}
+  sources: []
+  pixel_center_offset: 0.5
+train:
+  stage: sft
+  output: /mnt/nvme/scratch/phyla-ubuntu/runs/exp03/pilot/N016_R_seed0
+  device: cuda
+  precision: bf16
+  seed: 0
+  steps: 1000
+  batch_size: 2
+  accumulation: 2
+  lr: 5.6e-05
+  betas:
+  - 0.95
+  - 0.999
+  weight_decay: 1.0e-06
+  grad_clip: 1.0
+  losses:
+    action: 1.0
+    flow: 0.0
+    video: 1.0
+  save_every: 250
+  validate_every: 250
+  validation_batches: 4
+  init: ''
+  resume: ''
+  probe: ''
+  label_fraction: 1.0
+  workers: 0
+eval:
+  backend: maniskill
+  env_id: PushCube-v1
+  robot: panda
+  control_mode: pd_joint_pos
+  control_hz: 20
+  camera_names:
+  - base_camera
+  embodiment: panda_native_joint_position
+  episodes: 5
+  num_envs: 1
+  horizon: 150
+  execute_steps: 4
+  sampler: euler
+  sampling_steps: 8
+  shift: 5.0
+  device: cuda
+  seed: 20000
+  output: /mnt/nvme/scratch/phyla-ubuntu/runs/exp03/pilot/N016_R_seed0/eval_id
+  instruction: push the cube to the target
+  record: true
+  ledger: ''
+  action_space: native
+  flow_source: ''
+  sim_backend: physx_cpu
+  ood_condition: id
+  motion_diagnostics: false

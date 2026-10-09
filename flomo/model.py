@@ -305,7 +305,13 @@ def rotary(x, positions, frequencies):
 
 
 def attention(q,k,v,valid):
-    mask=valid[:,None,None,:]
+    mask=None if bool(valid.all()) else valid[:,None,None,:]
+    # B300/Torch2.12 cuDNN SDPA no-grad dispatch currently fails at execution.
+    # Keep training/inference on the same explicit supported backend set.
+    if q.is_cuda and hasattr(torch.nn,"attention"):
+        from torch.nn.attention import sdpa_kernel, SDPBackend
+        with sdpa_kernel([SDPBackend.FLASH_ATTENTION,SDPBackend.EFFICIENT_ATTENTION,SDPBackend.MATH]):
+            return F.scaled_dot_product_attention(q.transpose(1,2),k.transpose(1,2),v.transpose(1,2),attn_mask=mask,dropout_p=0.).transpose(1,2)
     return F.scaled_dot_product_attention(q.transpose(1,2),k.transpose(1,2),v.transpose(1,2),attn_mask=mask,dropout_p=0.).transpose(1,2)
 
 
@@ -390,7 +396,7 @@ class JointModel(nn.Module):
                 length=x.shape[1]; tokens.append(seq); masks.append(batch["has_action"][:,None].expand(b,length))
                 coords.append(torch.stack([torch.arange(length,device=device)+len(spans)*32,torch.zeros(length,device=device),torch.zeros(length,device=device)],-1).long())
                 times.append(t[:,None].expand(b,length)); spans.append(Span(name,cursor,cursor+length,None)); cursor+=length
-            else: add_visual(name,x,torch.ones(b,dtype=torch.bool,device=device),name in known)
+            else: add_visual(name,x,torch.full((b,),not self.config.auxiliary_null,dtype=torch.bool,device=device),name in known)
         return torch.cat(tokens,1),torch.cat(masks,1),torch.cat(coords,0),torch.cat(times,1),spans
 
     def forward(self,batch,noisy,t,known=None):
@@ -513,7 +519,7 @@ class LTXJointModel(nn.Module):
                 frame=(xyz[:,0]*c.temporal_stride+1-c.temporal_stride).clamp_min(0)
                 # RGB targets start at observation frame 1; cumulative flow
                 # targets include frame 0. Keep both aligned to action time.
-                xyz[:,0]=(frame+(1 if name=="video" else 0)+stream*32)/c.video_fps
+                xyz[:,0]=(frame+(1 if name=="video" or (name=="flow" and c.future_only) else 0)+stream*32)/c.video_fps
                 xyz[:,1:]*=c.spatial_stride
             n=seq.shape[1]; tokens.append(seq); masks.append(valid[:,None].expand(b,n)); coords.append(xyz)
             times.append((torch.zeros_like(t) if clean else t)[:,None].expand(b,n))
@@ -524,7 +530,7 @@ class LTXJointModel(nn.Module):
         for name in enabled:
             value=known.get(name,noisy.get(name))
             if value is None: raise ValueError(f"Missing LTX target {name}")
-            valid=batch["has_action"] if name=="action" else torch.ones(b,dtype=torch.bool,device=t.device)
+            valid=batch["has_action"] if name=="action" else torch.full((b,),not c.auxiliary_null,dtype=torch.bool,device=t.device)
             add(name,value,valid,name in known)
         return torch.cat(tokens,1),torch.cat(masks,1),torch.cat(coords,0),torch.cat(times,1),spans
 
